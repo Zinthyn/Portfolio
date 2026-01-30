@@ -6,6 +6,7 @@
     <title>ZINTHYN // DEV_TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Fira+Code:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --neon: #00f2ff; --bg: #020202; }
         body { 
@@ -18,7 +19,6 @@
         }
         .orbitron { font-family: 'Orbitron', sans-serif; }
 
-        /* CRT Filter Overlay */
         .crt::before {
             content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
@@ -32,10 +32,9 @@
             box-shadow: 0 0 50px rgba(0, 0, 0, 1);
         }
 
-        /* Console Log Styles */
         #console-log {
             font-size: 10px;
-            color: #4ade80; /* Terminal Green */
+            color: #4ade80;
             font-family: 'Fira Code', monospace;
             overflow: hidden;
         }
@@ -43,8 +42,11 @@
         .resmon-graph { display: flex; align-items: flex-end; gap: 2px; height: 30px; }
         .bar { width: 3px; background: var(--neon); transition: height 0.3s ease; }
 
+        html { scroll-behavior: smooth; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        
+        .nav-link:hover { color: var(--neon); text-shadow: 0 0 10px var(--neon); transform: translateX(5px); }
     </style>
 </head>
 <body class="crt flex items-center justify-center p-2 md:p-6">
@@ -63,10 +65,19 @@
 
         <div class="flex flex-1 overflow-hidden">
             <div class="w-14 md:w-48 bg-[#080808] border-r border-white/5 p-4 flex flex-col gap-8">
-                <nav class="space-y-6 text-center md:text-left">
-                    <div class="text-cyan-400"><i class="fas fa-terminal"></i> <span class="hidden md:inline ml-2 orbitron text-[10px]">DASHBOARD</span></div>
-                    <div class="text-slate-600 hover:text-white transition cursor-pointer"><i class="fas fa-folder"></i> <span class="hidden md:inline ml-2 orbitron text-[10px]">RESOURCES</span></div>
-                    <div class="text-slate-600 hover:text-white transition cursor-pointer"><i class="fas fa-user-secret"></i> <span class="hidden md:inline ml-2 orbitron text-[10px]">VOUCHES</span></div>
+                <nav class="space-y-6 flex flex-col items-center md:items-start">
+                    <a href="#home" class="nav-link text-cyan-400 transition-all cursor-pointer flex items-center">
+                        <i class="fas fa-terminal w-5"></i> <span class="hidden md:inline ml-2 orbitron text-[10px]">DASHBOARD</span>
+                    </a>
+                    <a href="https://github.com/zinthyn?tab=repositories" target="_blank" class="nav-link text-slate-600 transition-all cursor-pointer flex items-center">
+                        <i class="fas fa-folder w-5"></i> <span class="hidden md:inline ml-2 orbitron text-[10px]">RESOURCES</span>
+                    </a>
+                    <a href="#vouches" class="nav-link text-slate-600 transition-all cursor-pointer flex items-center">
+                        <i class="fas fa-user-secret w-5"></i> <span class="hidden md:inline ml-2 orbitron text-[10px]">VOUCHES</span>
+                    </a>
+                    <button onclick="copyDiscord()" class="nav-link text-slate-600 transition-all cursor-pointer flex items-center">
+                        <i class="fab fa-discord w-5"></i> <span id="discord-text" class="hidden md:inline ml-2 orbitron text-[10px]">HIRE_ME</span>
+                    </button>
                 </nav>
                 
                 <div class="mt-auto hidden md:block border-t border-white/5 pt-4">
@@ -83,67 +94,73 @@
 
             <div class="flex-1 flex flex-col">
                 <div class="flex-1 p-8 md:p-16 overflow-y-auto">
-                    <h1 class="text-6xl md:text-9xl font-black orbitron italic leading-none mb-4">ZIN<span class="text-cyan-400">THYN</span></h1>
-                    <p class="text-cyan-500/50 orbitron text-xs mb-8 tracking-[.5em]">LUA // NUI // OPTIMIZATION</p>
                     
-                    <div class="max-w-2xl text-slate-400 text-sm leading-relaxed mb-12">
-                        Expert developer specializing in modular FiveM systems. I build high-concurrency backends and seamless React-based NUIs for servers that demand perfection.
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <a href="https://github.com/zinthyn" class="border border-cyan-500 text-cyan-500 p-4 orbitron text-xs text-center hover:bg-cyan-500 hover:text-black transition uppercase font-black">Open_Git_Source</a>
-                        <div class="border border-white/10 p-4 text-center">
-                            <span class="orbitron text-[10px] text-slate-500">RESMON:</span>
-                            <span class="orbitron text-[10px] text-emerald-400 ml-2">0.01ms (STABLE)</span>
+                    <section id="home" class="mb-20">
+                        <h1 class="text-6xl md:text-9xl font-black orbitron italic leading-none mb-4">ZIN<span class="text-cyan-400">THYN</span></h1>
+                        <p class="text-cyan-500/50 orbitron text-xs mb-8 tracking-[.5em]">LUA // NUI // OPTIMIZATION</p>
+                        <div class="max-w-2xl text-slate-400 text-sm leading-relaxed mb-12">
+                            Expert developer specializing in modular FiveM systems. I build high-concurrency backends and seamless React-based NUIs for servers that demand perfection.
                         </div>
-                    </div>
+                    </section>
+
+                    <section id="vouches" class="mt-20 border-t border-white/5 pt-10">
+                        <h2 class="orbitron text-xl mb-8 text-cyan-500 tracking-tighter">// CLIENT_FEEDBACK</h2>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-white/[0.02] p-6 border border-white/5 rounded-lg">
+                                <p class="text-sm text-slate-400 italic mb-4">"Zinthyn optimized our entire framework. Resmon went from 1.2ms to 0.04ms. Highly recommend."</p>
+                                <div class="text-[10px] orbitron text-cyan-400">- Server Owner, Los Santos RP</div>
+                            </div>
+                            <div class="bg-white/[0.02] p-6 border border-white/5 rounded-lg">
+                                <p class="text-sm text-slate-400 italic mb-4">"The custom multicharacter UI is the cleanest I've seen. No bugs, perfectly synced."</p>
+                                <div class="text-[10px] orbitron text-cyan-400">- Lead Developer, Project X</div>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
 
                 <div class="h-32 bg-black/80 border-t border-white/5 p-4 relative overflow-hidden">
                     <div class="absolute top-0 left-4 text-[8px] orbitron text-slate-700">CONSOLE_OUTPUT</div>
-                    <div id="console-log" class="mt-2 space-y-1">
-                        </div>
+                    <div id="console-log" class="mt-2 space-y-1"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Copy Discord Username (Replace 'Zinthyn' with your actual tag)
+        function copyDiscord() {
+            navigator.clipboard.writeText("Zinthyn"); 
+            const text = document.getElementById('discord-text');
+            text.innerText = "COPIED!";
+            setTimeout(() => { text.innerText = "HIRE_ME"; }, 2000);
+        }
+
         // Console Log Logic
         const logEntries = [
             "[ZIN-BASE] Initializing Core Bridge...",
             "[ZIN-HUD] Loading SVG Assets... Success",
             "[ZIN-MULTICHARACTER] Fetching SQL Data...",
             "[SYSTEM] Memory optimization complete.",
-            "[ZIN-SPAWN] Camera transition sequence set.",
             "[INFO] Checking OxLib compatibility... OK",
-            "[ZIN-PAWNSHOP] Sycned items with database.",
             "[SUCCESS] All Zinthyn resources started (0.01ms)"
         ];
 
         const consoleBox = document.getElementById('console-log');
-        
         function addLog() {
             const entry = logEntries[Math.floor(Math.random() * logEntries.length)];
             const div = document.createElement('div');
             div.innerHTML = `<span class="text-cyan-900 font-bold">[${new Date().toLocaleTimeString()}]</span> ${entry}`;
             consoleBox.appendChild(div);
-            
-            if (consoleBox.childNodes.length > 5) {
-                consoleBox.removeChild(consoleBox.childNodes[0]);
-            }
+            if (consoleBox.childNodes.length > 5) consoleBox.removeChild(consoleBox.childNodes[0]);
         }
-
         setInterval(addLog, 2000);
 
-        // Sidebar Bars Logic
+        // Sidebar Bars Animation
         const bars = document.querySelectorAll('.bar');
         setInterval(() => {
-            bars.forEach(bar => {
-                bar.style.height = (Math.random() * 80 + 20) + '%';
-            });
+            bars.forEach(bar => { bar.style.height = (Math.random() * 80 + 20) + '%'; });
         }, 1000);
     </script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
