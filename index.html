@@ -3,240 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // ARCHITECT_V4</title>
+    <title>ZINTHYN // DATA_ARCHITECT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@300;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00f2ff; --bg: #010101; --danger: #ff0055; }
+        :root { --neon: #00f2ff; --bg: #010101; --accent: #7000ff; }
         body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
         
-        /* Boot Animation */
-        #boot-screen {
-            position: fixed; inset: 0; background: black; z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; padding: 10%;
-        }
-
-        /* CRT Scanned Grid */
-        .grid-overlay {
-            position: fixed; inset: 0; pointer-events: none; z-index: 50;
+        /* CRT & Scanline Effects */
+        .crt::before {
+            content: " "; display: block; position: fixed; inset: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
                         linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
+            z-index: 100; background-size: 100% 3px, 3px 100%; pointer-events: none;
         }
 
-        /* Cyber UI Elements */
-        .panel { 
-            background: rgba(10, 10, 15, 0.8); 
-            border: 1px solid rgba(0, 242, 255, 0.15);
-            position: relative; overflow: hidden;
+        /* Animated Glowing Borders */
+        .glow-border {
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.05);
+            position: relative;
         }
-        .panel::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon), transparent);
-            animation: move-light 3s linear infinite;
-        }
-        @keyframes move-light { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .glow-border:hover { border-color: var(--neon); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); }
 
-        .stat-bar { height: 4px; background: #111; border-radius: 2px; overflow: hidden; }
-        .stat-progress { height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+        /* Experimental Tags */
+        .tag-exp { background: linear-gradient(45deg, #7000ff, #00f2ff); font-size: 8px; padding: 2px 6px; border-radius: 2px; }
 
-        /* Detail Scrollbar */
-        .content-scroll::-webkit-scrollbar { width: 4px; }
-        .content-scroll::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
+        /* Custom Scrollbar */
+        .scroll::-webkit-scrollbar { width: 3px; }
+        .scroll::-webkit-scrollbar-thumb { background: var(--neon); }
 
-        .glitch-text:hover { animation: glitch 0.2s infinite; }
-        @keyframes glitch {
-            0% { transform: translate(0); text-shadow: -2px 0 red, 2px 0 blue; }
-            50% { transform: translate(-1px, 1px); }
-            100% { transform: translate(1px, -1px); }
-        }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+        .live-pulse { animation: pulse 2s infinite; }
     </style>
 </head>
-<body class="p-2 md:p-6 flex items-center justify-center">
+<body class="crt flex items-center justify-center p-2">
 
-    <div class="grid-overlay"></div>
-
-    <div id="boot-screen" class="orbitron">
-        <div id="boot-logs" class="text-emerald-500 text-xs md:text-sm space-y-1"></div>
-    </div>
-
-    <div class="panel w-full max-w-7xl h-[95vh] rounded-sm flex flex-col shadow-2xl">
+    <div class="w-full h-full max-w-[1600px] max-h-[900px] flex flex-col glow-border bg-black/90 rounded-sm overflow-hidden border-cyan-500/30">
         
-        <header class="bg-[#0a0a0a] border-b border-white/5 p-3 flex justify-between items-center z-20">
-            <div class="flex items-center gap-4">
-                <div class="text-cyan-500 orbitron font-black text-xl tracking-tighter glitch-text">ZIN_THYN.OS</div>
-                <div class="hidden md:flex gap-2 text-[10px] text-slate-500 orbitron">
-                    <span>V.4.0.0</span> | <span>CPU_CORE: STABLE</span>
+        <header class="h-12 border-b border-white/10 flex items-center justify-between px-6 bg-[#050505]">
+            <div class="flex items-center gap-8">
+                <div class="orbitron font-black text-xl tracking-tighter text-cyan-400">ZIN_TERMINAL_v5</div>
+                <div class="hidden lg:flex gap-4 text-[9px] orbitron text-slate-500">
+                    <span>SYS_CORE: <span class="text-emerald-500">OPTIMAL</span></span>
+                    <span>NET_SYNC: <span class="text-cyan-500">ACTIVE</span></span>
+                    <span>ENCRYPTION: <span class="text-amber-500">AES-256</span></span>
                 </div>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="hidden lg:block">
-                    <div class="text-[8px] text-slate-600 orbitron mb-1">NETWORK_STRENGTH</div>
-                    <div class="flex gap-1">
-                        <div class="w-1 h-3 bg-cyan-500"></div><div class="w-1 h-3 bg-cyan-500"></div>
-                        <div class="w-1 h-3 bg-cyan-500"></div><div class="w-1 h-3 bg-cyan-900"></div>
-                    </div>
-                </div>
-                <div id="clock" class="orbitron text-xs text-cyan-400">00:00:00</div>
+            <div class="flex items-center gap-4">
+                <div class="text-[10px] orbitron text-cyan-800">UPLINK_STABLE // 127.0.0.1</div>
+                <div id="clock" class="orbitron text-xs text-white bg-white/5 px-3 py-1">00:00:00</div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-16 md:w-60 bg-black/40 border-r border-white/5 p-4 flex flex-col gap-8">
-                <div class="space-y-4">
-                    <p class="hidden md:block text-[9px] text-slate-600 orbitron tracking-[0.3em]">DIRECTORY</p>
-                    <a href="#bio" class="flex items-center gap-3 text-cyan-500 group"><i class="fas fa-id-badge"></i><span class="hidden md:block text-xs orbitron group-hover:translate-x-1 transition">IDENTITY</span></a>
-                    <a href="#projects" class="flex items-center gap-3 text-slate-400 group hover:text-cyan-400"><i class="fas fa-project-diagram"></i><span class="hidden md:block text-xs orbitron group-hover:translate-x-1 transition">CORE_FILES</span></a>
-                    <a href="#hardware" class="flex items-center gap-3 text-slate-400 group hover:text-cyan-400"><i class="fas fa-microchip"></i><span class="hidden md:block text-xs orbitron group-hover:translate-x-1 transition">HARDWARE</span></a>
-                    <button onclick="copyDiscord()" class="flex items-center gap-3 text-slate-400 group hover:text-cyan-400 w-full text-left"><i class="fab fa-discord"></i><span class="hidden md:block text-xs orbitron group-hover:translate-x-1 transition" id="discord-label">UPLINK</span></button>
-                </div>
-
-                <div class="mt-auto border-t border-white/5 pt-6 hidden md:block">
-                    <p class="text-[9px] text-slate-600 orbitron mb-3 italic">RESMON_LIVE</p>
-                    <div class="space-y-3">
-                        <div><div class="flex justify-between text-[8px] mb-1"><span>SCRIPTS</span><span>0.01ms</span></div><div class="stat-bar"><div class="stat-progress w-[10%]"></div></div></div>
-                        <div><div class="flex justify-between text-[8px] mb-1"><span>NETWORK</span><span>12kb/s</span></div><div class="stat-bar"><div class="stat-progress w-[25%]"></div></div></div>
-                    </div>
-                </div>
+            
+            <aside class="w-16 border-r border-white/5 flex flex-col items-center py-8 gap-10 bg-black/40">
+                <a href="#home" title="Root"><i class="fas fa-microchip text-cyan-500 hover:scale-125 transition"></i></a>
+                <a href="#lab" title="Experimental Lab"><i class="fas fa-flask text-slate-600 hover:text-purple-500 transition"></i></a>
+                <a href="#network" title="Network Stats"><i class="fas fa-satellite-dish text-slate-600 hover:text-cyan-500 transition"></i></a>
+                <button onclick="copyDiscord()" class="mt-auto"><i class="fab fa-discord text-slate-600 hover:text-indigo-400 transition"></i></button>
             </aside>
 
-            <main class="flex-1 overflow-y-auto content-scroll p-6 md:p-12 space-y-24 scroll-smooth">
+            <div class="flex-1 flex overflow-hidden">
                 
-                <section id="bio" class="relative">
-                    <div class="absolute -top-10 -left-10 text-cyan-500/5 text-9xl font-black orbitron">ZIN</div>
-                    <h2 class="text-cyan-500 text-[10px] orbitron tracking-[1em] mb-4">SYSTEM_IDENTITY</h2>
-                    <h1 class="text-5xl md:text-8xl font-black orbitron uppercase leading-none mb-6">ARCHITECT OF <br><span class="text-cyan-400">VIRTUALITY.</span></h1>
-                    <p class="max-w-2xl text-slate-400 text-sm md:text-base leading-relaxed">
-                        Zinthyn is a specialized FiveM Developer bridging the gap between hardware limitations and immersive roleplay. 
-                        By leveraging <span class="text-cyan-400">high-frequency Lua logic</span> and <span class="text-cyan-400">optimized NUI rendering</span>, 
-                        I create environments that scale beyond standard framework limitations.
-                    </p>
-                </section>
+                <main class="flex-1 overflow-y-auto scroll p-8 space-y-20 border-r border-white/5">
+                    
+                    <section id="home">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="live-pulse w-2 h-2 bg-emerald-500 rounded-full"></span>
+                            <span class="text-[9px] orbitron text-emerald-500">ZINTHYN_IDENTITY_VERIFIED</span>
+                        </div>
+                        <h1 class="text-7xl font-black orbitron mb-6 leading-none">VIRTUAL <br><span class="text-cyan-400">ENGINEER.</span></h1>
+                        <p class="text-slate-500 text-sm max-w-xl leading-relaxed">
+                            Breaking the limits of the GTA V engine through high-frequency scripting and predictive data syncing.
+                        </p>
+                    </section>
 
-                <section id="projects">
-                    <h2 class="text-cyan-500 text-[10px] orbitron tracking-[1em] mb-10">CLASSIFIED_RESOURCES</h2>
-                    <div class="grid lg:grid-cols-2 gap-8">
+                    <section id="lab">
+                        <div class="flex justify-between items-end mb-8 border-b border-cyan-500/20 pb-2">
+                            <h2 class="orbitron text-xs text-cyan-500 tracking-[0.4em]">EXPERIMENTAL_LAB</h2>
+                            <span class="text-[8px] text-slate-700 orbitron">UNSTABLE_BUILDS_v0.9</span>
+                        </div>
                         
-                        <div class="panel p-6 border-l-4 border-l-cyan-500 hover:bg-white/5 transition group cursor-crosshair">
-                            <div class="flex justify-between mb-6">
-                                <span class="text-xs orbitron text-cyan-400">[01] ZIN_BASE</span>
-                                <span class="text-[9px] text-slate-600">STABILITY: 100%</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="glow-border p-5 bg-white/[0.02] group">
+                                <div class="flex justify-between mb-4">
+                                    <span class="tag-exp">QUANTUM_SYNC</span>
+                                    <span class="text-[8px] orbitron text-slate-500">ID: #001</span>
+                                </div>
+                                <h3 class="orbitron text-sm mb-2 group-hover:text-cyan-400 transition">NEURAL_TRAFFIC_GEN</h3>
+                                <p class="text-[10px] text-slate-600 leading-relaxed mb-4">A custom C# engine that replaces standard GTA AI with neural-pathed entities for zero-latency traffic sync.</p>
+                                <div class="text-[9px] text-cyan-900 font-bold">LUA / C# / ASYNC</div>
                             </div>
-                            <h3 class="text-xl orbitron mb-4">MODULAR_BRIDGE_V2</h3>
-                            <p class="text-xs text-slate-500 mb-6 font-light">Advanced framework abstraction layer allowing zero-latency interaction between ESX/QB and OxLib systems.</p>
-                            <div class="grid grid-cols-2 gap-4 text-[9px] orbitron text-slate-400">
-                                <div class="bg-black p-2 border border-white/5">COMPLEXITY: MEDIUM</div>
-                                <div class="bg-black p-2 border border-white/5">DB_QUERIES: OPTIMIZED</div>
+                            <div class="glow-border p-5 bg-white/[0.02] group">
+                                <div class="flex justify-between mb-4 text-purple-500">
+                                    <span class="tag-exp" style="background: #7000ff">VOXEL_RENDER</span>
+                                    <span class="text-[8px] orbitron">ID: #002</span>
+                                </div>
+                                <h3 class="orbitron text-sm mb-2 group-hover:text-purple-400 transition">DYNAMIC_INTERIORS</h3>
+                                <p class="text-[10px] text-slate-600 leading-relaxed mb-4">Real-time procedural MLO generation based on player metadata. No world-object limits.</p>
+                                <div class="text-[9px] text-purple-900 font-bold">VERTEX_SHADER / JS</div>
                             </div>
                         </div>
+                    </section>
 
-                        <div class="panel p-6 border-l-4 border-l-danger hover:bg-white/5 transition group cursor-crosshair">
-                            <div class="flex justify-between mb-6 text-danger">
-                                <span class="text-xs orbitron">[02] NEURAL_SCAN</span>
-                                <span class="text-[9px]">EXPERIMENTAL</span>
+                    <section>
+                        <h2 class="orbitron text-xs text-slate-600 mb-6 uppercase tracking-widest">// REPUTATION_LOGS</h2>
+                        <div class="space-y-4 border-l border-white/5 pl-4 text-[10px] text-slate-500 italic">
+                            <p>"Zinthyn solved the entity-leak issue that 4 other devs couldn't touch." - <span class="text-cyan-700">Project_NoLimit</span></p>
+                            <p>"Most optimized NUI bridge I've ever deployed." - <span class="text-cyan-700">Vanguard_RP</span></p>
+                        </div>
+                    </section>
+                </main>
+
+                <aside class="hidden xl:flex w-80 flex-col p-6 bg-black/20 gap-8">
+                    <div>
+                        <p class="text-[10px] orbitron text-slate-600 mb-4 tracking-widest">SYSTEM_HEALTH</p>
+                        <div class="space-y-4">
+                            <div class="text-[9px]">
+                                <div class="flex justify-between mb-1"><span>CPU_OPTIMIZATION</span><span class="text-cyan-400">99%</span></div>
+                                <div class="h-1 bg-white/5"><div class="h-full bg-cyan-500" style="width: 99%"></div></div>
                             </div>
-                            <h3 class="text-xl orbitron mb-4">AI_ANTIPROP_SYSTEM</h3>
-                            <p class="text-xs text-slate-500 mb-6 font-light">Custom entity-throttle logic that identifies and removes injected props before they reach the game client.</p>
-                            <div class="grid grid-cols-2 gap-4 text-[9px] orbitron text-slate-400">
-                                <div class="bg-black p-2 border border-white/5">LATENCY: 0.00ms</div>
-                                <div class="bg-black p-2 border border-white/5">LANGUAGE: C# / LUA</div>
+                            <div class="text-[9px]">
+                                <div class="flex justify-between mb-1"><span>DATABASE_LATENCY</span><span class="text-emerald-400">0.2ms</span></div>
+                                <div class="h-1 bg-white/5"><div class="h-full bg-emerald-500" style="width: 15%"></div></div>
                             </div>
                         </div>
                     </div>
-                </section>
 
-                <section id="hardware">
-                    <h2 class="text-cyan-500 text-[10px] orbitron tracking-[1em] mb-10">HARDWARE_SPECIFICATIONS</h2>
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="p-4 border border-white/5 bg-black/20">
-                            <div class="text-[10px] orbitron text-slate-600 mb-4">LUA_PROCESSOR</div>
-                            <div class="text-2xl orbitron text-cyan-400 mb-2">98%</div>
-                            <div class="stat-bar"><div class="stat-progress w-[98%]"></div></div>
-                        </div>
-                        <div class="p-4 border border-white/5 bg-black/20">
-                            <div class="text-[10px] orbitron text-slate-600 mb-4">NUI_INTERFACE</div>
-                            <div class="text-2xl orbitron text-cyan-400 mb-2">85%</div>
-                            <div class="stat-bar"><div class="stat-progress w-[85%]"></div></div>
-                        </div>
-                        <div class="p-4 border border-white/5 bg-black/20">
-                            <div class="text-[10px] orbitron text-slate-600 mb-4">SQL_OPTIMIZER</div>
-                            <div class="text-2xl orbitron text-cyan-400 mb-2">92%</div>
-                            <div class="stat-bar"><div class="stat-progress w-[92%]"></div></div>
+                    <div class="flex-1 border border-white/5 rounded p-4 relative overflow-hidden">
+                        <p class="text-[9px] orbitron text-cyan-900 absolute top-2 right-2 tracking-tighter">SATELLITE_LINK</p>
+                        <div class="w-full h-full flex items-center justify-center">
+                            <div class="grid grid-cols-8 gap-2 opacity-20">
+                                <div class="w-2 h-2 bg-cyan-500 rounded-full"></div><div class="w-2 h-2 bg-slate-800 rounded-full"></div>
+                                <div class="w-2 h-2 bg-slate-800 rounded-full"></div><div class="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-slate-800 rounded-full animate-pulse"></div><div class="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-slate-800 rounded-full"></div><div class="w-2 h-2 bg-slate-800 rounded-full"></div>
+                            </div>
                         </div>
                     </div>
-                </section>
-
-            </main>
+                </aside>
+            </div>
         </div>
 
-        <footer class="bg-black p-4 border-t border-white/10 h-32 overflow-hidden">
-            <div id="live-console" class="text-[10px] text-emerald-500 font-mono space-y-1"></div>
+        <footer class="h-20 bg-black border-t border-white/10 flex items-center px-6 gap-6">
+            <div class="text-[10px] orbitron text-cyan-900 shrink-0">TERMINAL_LOGS:</div>
+            <div id="logs" class="text-[9px] text-emerald-500/80 font-mono truncate"></div>
         </footer>
     </div>
 
     <script>
-        // BOOT SEQUENCE LOGIC
-        const logs = [
-            "INITIALIZING ZINTHYN_OS...",
-            "LOADING KERNEL MODULES...",
-            "CONNECTING TO GITHUB_API... OK",
-            "MAPPING VIRTUAL MEMORY...",
-            "OPTIMIZING LUA JIT... SUCCESS",
-            "STARTING NUI_SUBSYSTEM...",
-            "ACCESS GRANTED."
-        ];
-        
-        const bootContainer = document.getElementById('boot-logs');
-        let logIndex = 0;
-
-        function showLogs() {
-            if (logIndex < logs.length) {
-                const log = document.createElement('div');
-                log.innerHTML = `> ${logs[logIndex]}`;
-                bootContainer.appendChild(log);
-                logIndex++;
-                setTimeout(showLogs, 400);
-            } else {
-                setTimeout(() => {
-                    document.getElementById('boot-screen').style.display = 'none';
-                }, 1000);
-            }
+        // Copy Discord
+        function copyDiscord() {
+            navigator.clipboard.writeText("Zinthyn");
+            alert("Discord ID Copied to Clipboard");
         }
-        showLogs();
 
-        // LIVE CONSOLE
-        const consoleFeed = document.getElementById('live-console');
-        const cmdList = [
-            "GET /api/zin-base/stats - 200 OK",
-            "SCANNING FOR UNOPTIMIZED ENTITIES...",
-            "MEMORY_CLEANUP (0.002s)",
-            "PACKET_LOSS: 0.00%",
-            "NEW_VOUCH DETECTED: 'Zinthyn is the goat'",
-            "SYNCING DB_COORDINATES..."
-        ];
-
-        setInterval(() => {
-            const cmd = cmdList[Math.floor(Math.random() * cmdList.length)];
-            const log = document.createElement('div');
-            log.innerHTML = `<span class="text-emerald-900">[${new Date().toLocaleTimeString()}]</span> ${cmd}`;
-            consoleFeed.appendChild(log);
-            if (consoleFeed.childNodes.length > 5) consoleFeed.removeChild(consoleFeed.childNodes[0]);
-        }, 2000);
-
-        // CLOCK
+        // Live Clock
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString();
         }, 1000);
 
-        // DISCORD COPY
-        function copyDiscord() {
-            navigator.clipboard.writeText("Zinthyn");
-            const btn = document.getElementById('discord-label');
-            btn.innerText = "COPIED_ID";
-            setTimeout(() => btn.innerText = "UPLINK", 2000);
-        }
+        // Terminal Logs
+        const logBox = document.getElementById('logs');
+        const lines = [
+            "SHADOW_MAPS_STABILIZED...", "RECRUITING_SQL_NODES...", "OX_LIB_HANDSHAKE_SUCCESS",
+            "ENTITY_THROTTLE_ACTIVE", "CLEANING_LEAKED_VECTORS...", "ZIN_OS_READY."
+        ];
+        setInterval(() => {
+            logBox.innerText = `> [${new Date().toLocaleTimeString()}] ${lines[Math.floor(Math.random() * lines.length)]}`;
+        }, 2500);
     </script>
 </body>
 </html>
