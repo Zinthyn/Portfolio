@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN</title>
+    <title>ZINTHYN // OMEGA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00f2ff; --bg: #010203; }
+        :root { --neon: #00f2ff; --bg: #010203; --card: rgba(255, 255, 255, 0.03); }
         * { cursor: none !important; margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+
+        /* CRT SCANLINE EFFECT */
+        body::before {
+            content: " "; position: fixed; inset: 0; 
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10000; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
 
         #cursor {
             position: fixed; width: 30px; height: 30px; border: 2px solid var(--neon);
@@ -21,33 +28,37 @@
 
         #main-shell {
             position: relative; width: 94vw; height: 90vh;
-            background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 242, 255, 0.2);
+            background: rgba(2, 4, 6, 0.95); border: 1px solid rgba(0, 242, 255, 0.15);
             display: none; flex-direction: column; opacity: 0;
-            box-shadow: 0 0 100px rgba(0,0,0,1); z-index: 1000;
+            box-shadow: 0 0 100px rgba(0,0,0,1); z-index: 1000; backdrop-filter: blur(10px);
         }
 
         .view { display: none; animation: fadeIn 0.4s ease-out; height: 100%; }
         .view.active-view { display: flex; flex-direction: column; }
-        @keyframes fadeIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+        @keyframes fadeIn { from { opacity: 0; filter: blur(15px) brightness(2); } to { opacity: 1; filter: blur(0) brightness(1); } }
 
-        /* GRID SCROLLING */
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: var(--neon); }
-
-        /* PROJECT & FRAMEWORK CARDS */
+        /* ADVANCED PROJECT CARDS */
         .holo-card {
-            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.05);
-            padding: 20px; transition: all 0.3s ease; position: relative;
+            background: var(--card); border: 1px solid rgba(255,255,255,0.05);
+            padding: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .holo-card:hover { border-color: var(--neon); background: rgba(0, 242, 255, 0.06); transform: translateY(-3px); }
+        .holo-card:hover { border-color: var(--neon); background: rgba(0, 242, 255, 0.05); transform: scale(1.02); }
         
-        .logo-box {
-            width: 100%; height: 100px; margin-bottom: 12px; display: flex; 
-            align-items: center; justify-content: center; background: rgba(0,0,0,0.4);
-            border-radius: 2px;
+        .card-image-wrapper {
+            width: 100%; height: 120px; background: #000; position: relative; overflow: hidden;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
         }
-        
-        .project-img { max-width: 85%; max-height: 70px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.3)); }
+        .card-image-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: 0.5s; }
+        .holo-card:hover .card-image-wrapper img { opacity: 1; transform: scale(1.1); filter: contrast(1.2); }
+
+        .status-tag { 
+            position: absolute; top: 10px; right: 10px; font-size: 7px; padding: 2px 6px;
+            background: rgba(0,0,0,0.8); border: 1px solid var(--neon); color: var(--neon);
+            border-radius: 2px; text-shadow: 0 0 5px var(--neon);
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 3px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--neon); }
 
         #stars { position: fixed; inset: 0; z-index: 1; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
@@ -59,124 +70,185 @@
     <canvas id="stars"></canvas>
 
     <div id="boot-screen" class="fixed inset-0 bg-black z-[90000] flex flex-col items-center justify-center">
-        <div class="orbitron text-cyan-900 text-[10px] mb-8 tracking-[2em] animate-pulse">SYSTEM_IDLE</div>
-        <button class="border-2 border-cyan-500 py-4 px-12 orbitron text-cyan-500 font-black hover:bg-cyan-500 hover:text-black transition-all" onclick="launchSystem()">INITIALIZE_OMEGA</button>
+        <div class="orbitron text-cyan-900 text-[10px] mb-8 tracking-[2em] animate-pulse">TERMINAL_IDLE</div>
+        <button class="border-2 border-cyan-500/30 py-4 px-12 orbitron text-cyan-500 font-black hover:bg-cyan-500 hover:text-black hover:shadow-[0_0_30px_#00f2ff] transition-all" onclick="launchSystem()">INITIALIZE_OMEGA</button>
     </div>
 
     <div id="main-shell" class="mx-auto my-auto">
-        <header class="h-14 border-b border-white/10 flex items-center justify-between px-8 bg-black">
-            <div class="orbitron text-lg font-black text-cyan-400">ZINTHYN<span class="text-white/20">_OS</span></div>
-            <div class="orbitron text-[10px] text-slate-500" id="clock">00:00:00</div>
+        <header class="h-14 border-b border-white/10 flex items-center justify-between px-8 bg-black/80 backdrop-blur-md">
+            <div class="flex items-center gap-4">
+                <div class="w-3 h-3 bg-cyan-500 rounded-full animate-ping"></div>
+                <div class="orbitron text-lg font-black text-cyan-400 tracking-widest">ZINTHYN_SYS</div>
+            </div>
+            <div class="flex gap-6 items-center">
+                <div class="text-[9px] orbitron text-slate-500 hidden md:block">SECURE_TUNNEL: <span class="text-cyan-600">ENCRYPTED</span></div>
+                <div class="orbitron text-[10px] text-slate-300 bg-white/5 px-3 py-1 border border-white/10" id="clock">00:00:00</div>
+            </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-20 lg:w-64 border-r border-white/5 p-6 flex flex-col bg-black/40">
-                <nav class="space-y-6 mb-auto">
-                    <button onclick="tab('home')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 transition-all">
-                        <i class="fas fa-home w-4"></i> <span class="hidden lg:block uppercase">Home</span>
+            <aside class="w-20 lg:w-64 border-r border-white/5 p-6 flex flex-col bg-black/20">
+                <nav class="space-y-4 mb-auto">
+                    <button onclick="tab('home')" class="group w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex items-center gap-4 p-2 transition-all">
+                        <i class="fas fa-terminal transition-transform group-hover:rotate-12"></i> <span class="hidden lg:block">ROOT_PATH</span>
                     </button>
-                    <button onclick="tab('about')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 transition-all">
-                        <i class="fas fa-user-circle w-4"></i> <span class="hidden lg:block uppercase">About Me</span>
+                    <button onclick="tab('about')" class="group w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex items-center gap-4 p-2 transition-all">
+                        <i class="fas fa-user-ninja transition-transform group-hover:scale-125"></i> <span class="hidden lg:block">BIOMETRICS</span>
                     </button>
-                    <button onclick="tab('projects')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 transition-all">
-                        <i class="fas fa-code w-4"></i> <span class="hidden lg:block uppercase">Projects</span>
+                    <button onclick="tab('projects')" class="group w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex items-center gap-4 p-2 transition-all">
+                        <i class="fas fa-project-diagram transition-transform group-hover:translate-x-1"></i> <span class="hidden lg:block">LAB_MODULES</span>
                     </button>
-                    <button onclick="tab('frameworks')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 transition-all">
-                        <i class="fas fa-cubes w-4"></i> <span class="hidden lg:block uppercase">Frameworks</span>
+                    <button onclick="tab('frameworks')" class="group w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex items-center gap-4 p-2 transition-all">
+                        <i class="fas fa-microchip transition-transform group-hover:scale-110"></i> <span class="hidden lg:block">FRAMEWORKS</span>
                     </button>
                 </nav>
 
-                <div class="mt-6 border-t border-white/5 pt-4">
-                    <div class="flex justify-between text-[7px] orbitron text-slate-600 mb-1"><span>RESMON</span><span id="resmon-val">0.01ms</span></div>
-                    <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div id="resmon-bar" class="h-full bg-cyan-500" style="width: 10%"></div></div>
+                <div class="mt-6 border-t border-white/5 pt-6 space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-[7px] orbitron text-cyan-800 uppercase">Res_Usage</div>
+                        <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div id="resmon-bar" class="h-full bg-cyan-500 shadow-[0_0_10px_#00f2ff]" style="width: 10%"></div></div>
+                        <div class="flex justify-between text-[8px] orbitron text-slate-500"><span>KERNEL_STABILITY</span><span id="resmon-val">0.01ms</span></div>
+                    </div>
                 </div>
             </aside>
 
-            <main class="flex-1 p-10 overflow-hidden">
+            <main class="flex-1 p-8 lg:p-12 overflow-hidden">
                 
-                <div id="view-home" class="view active-view justify-center">
-                    <h1 class="text-6xl lg:text-9xl font-black orbitron italic mb-4 leading-none">OMEGA.</h1>
-                    <div id="kernel-log" class="text-cyan-600 font-mono text-xs leading-loose"></div>
+                <div id="view-home" class="view active-view justify-center items-start">
+                    <h1 class="text-7xl lg:text-9xl font-black orbitron italic mb-6 leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 via-white to-cyan-950">OMEGA.</h1>
+                    <div id="kernel-log" class="text-cyan-600/60 font-mono text-[10px] leading-relaxed max-w-md"></div>
                 </div>
 
                 <div id="view-about" class="view">
-                    <h2 class="orbitron text-2xl mb-8 text-cyan-500 underline underline-offset-8">BIOMETRIC_PROFILE</h2>
-                    <div class="grid lg:grid-cols-2 gap-10">
-                        <div class="space-y-6">
-                            <p class="text-slate-400 leading-relaxed border-l-2 border-cyan-900 pl-6 italic">
-                                A Passionate Developer || FiveM Developer || Zinthyn From Serbia
-                                Email Me 👉 ✉️ zinthyn@gmail.com For Collaboration/Project or Anything Else 😊
-                            </p>
+                    <div class="flex justify-between items-end mb-8">
+                        <h2 class="orbitron text-3xl font-black text-white">SUBJECT_<span class="text-cyan-500">ZINTHYN</span></h2>
+                        <span class="text-[10px] text-slate-600 orbitron">ORIGIN: SERBIA // LOC: 44.7866° N</span>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-12 h-full">
+                        <div class="space-y-8">
+                            <div class="relative p-6 bg-white/5 border border-white/10 rounded-sm">
+                                <div class="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-cyan-500"></div>
+                                <p class="text-slate-300 leading-relaxed italic text-sm">
+                                    "Architecture is not just code; it's a digital ecosystem. My mission is to build FiveM infrastructures that remain invisible to the user while providing absolute power to the operator."
+                                </p>
+                                <div class="mt-6 flex gap-4">
+                                    <a href="mailto:zinthyn@gmail.com" class="px-4 py-2 border border-cyan-500/20 text-[10px] orbitron hover:bg-cyan-500 hover:text-black transition">EMAIL_LINK</a>
+                                </div>
+                            </div>
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="bg-white/5 p-4 border border-white/5"><div class="text-[8px] orbitron text-cyan-700">EXPERIENCE</div><div class="text-xl font-bold italic">2+ YRS</div></div>
-                                <div class="bg-white/5 p-4 border border-white/5"><div class="text-[8px] orbitron text-cyan-700">STATUS</div><div class="text-xl font-bold text-emerald-500">ACTIVE</div></div>
+                                <div class="p-4 bg-black/40 border border-white/5">
+                                    <div class="text-[8px] orbitron text-cyan-700">EXPERIENCE</div>
+                                    <div class="text-2xl font-black">2.4 <span class="text-[10px] text-slate-500">YEARS</span></div>
+                                </div>
+                                <div class="p-4 bg-black/40 border border-white/5">
+                                    <div class="text-[8px] orbitron text-cyan-700">DEPLOYMENTS</div>
+                                    <div class="text-2xl font-black">42 <span class="text-[10px] text-slate-500">UNITS</span></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="space-y-4">
-                            <div class="orbitron text-[10px] text-slate-500">SKILL_TREE</div>
-                            <div>
-                                <div class="flex justify-between text-[9px] mb-1"><span>LUA ENGINE</span><span>98%</span></div>
-                                <div class="h-1 bg-white/5"><div class="h-full bg-cyan-500" style="width: 98%"></div></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[9px] mb-1"><span>NUI / REACT</span><span>92%</span></div>
-                                <div class="h-1 bg-white/5"><div class="h-full bg-cyan-500" style="width: 92%"></div></div>
+                        <div class="space-y-6">
+                            <h3 class="orbitron text-xs text-slate-500 tracking-widest uppercase">Expertise_Nodes</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-[9px] mb-2 orbitron"><span>LUA_SCRIPTING</span><span>98%</span></div>
+                                    <div class="h-[2px] bg-white/10"><div class="h-full bg-cyan-500 shadow-[0_0_10px_#00f2ff]" style="width: 98%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[9px] mb-2 orbitron"><span>UI_DYNAMICS</span><span>92%</span></div>
+                                    <div class="h-[2px] bg-white/10"><div class="h-full bg-cyan-500 shadow-[0_0_10px_#00f2ff]" style="width: 92%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[9px] mb-2 orbitron"><span>DATABASE_SCALING</span><span>85%</span></div>
+                                    <div class="h-[2px] bg-white/10"><div class="h-full bg-cyan-500 shadow-[0_0_10px_#00f2ff]" style="width: 85%"></div></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="view-projects" class="view">
-                    <h2 class="orbitron text-2xl mb-8 text-cyan-500 underline underline-offset-8">PROJECT_LABS</h2>
-                    <div class="grid lg:grid-cols-4 gap-4 custom-scroll overflow-y-auto pr-2">
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">ZIN_ID_V3</h3><p class="text-[8px] text-slate-500 uppercase mt-2">Identity System</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">ZIN_SHIELD</h3><p class="text-[8px] text-slate-500 uppercase mt-2">Anti-Cheat</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">ZIN_SYNC</h3><p class="text-[8px] text-slate-500 uppercase mt-2">MySQL Wrapper</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">ZIN_UI</h3><p class="text-[8px] text-slate-500 uppercase mt-2">UI Library</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">GHOST_AC</h3><p class="text-[8px] text-slate-500 uppercase mt-2">Security</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">ZIN_GARAGE</h3><p class="text-[8px] text-slate-500 uppercase mt-2">Vehicle Logic</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">RADAR_X</h3><p class="text-[8px] text-slate-500 uppercase mt-2">Navigation</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">ZIN_BRIDGE</h3><p class="text-[8px] text-slate-500 uppercase mt-2">Webhook API</p></div>
-                        <div class="holo-card"><h3 class="orbitron text-[10px] text-white">ZIN_MULTI</h3><p class="text-[8px] text-slate-500 uppercase mt-2">Character Selection Screen</p></div>
-                    </div>
+                    <h2 class="orbitron text-2xl mb-8 text-cyan-500 underline underline-offset-8">DATA_EXPANSIONS</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 custom-scroll overflow-y-auto pr-4 pb-12">
+                        
+                        <div class="holo-card">
+                            <div class="card-image-wrapper">
+                                <span class="status-tag">STABLE</span>
+                                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=400&q=80" alt="Identity">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="orbitron text-xs text-white">ZIN_ID_V3</h3>
+                                <p class="text-[9px] text-slate-500 mt-1 uppercase">Dynamic Identity Kernel</p>
+                            </div>
+                        </div>
+
+                        <div class="holo-card">
+                            <div class="card-image-wrapper">
+                                <span class="status-tag">ACTIVE</span>
+                                <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=400&q=80" alt="UI">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="orbitron text-xs text-white">ZIN_UI_PREMIUM</h3>
+                                <p class="text-[9px] text-slate-500 mt-1 uppercase">Glassmorphic NUI Suite</p>
+                            </div>
+                        </div>
+
+                        <div class="holo-card">
+                            <div class="card-image-wrapper">
+                                <span class="status-tag">ENCRYPTED</span>
+                                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=400&q=80" alt="Security">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="orbitron text-xs text-white">ZIN_SHIELD</h3>
+                                <p class="text-[9px] text-slate-500 mt-1 uppercase">Heuristic Anti-Cheat</p>
+                            </div>
+                        </div>
+
+                        </div>
                 </div>
 
                 <div id="view-frameworks" class="view">
-                    <h2 class="orbitron text-2xl mb-8 text-cyan-500 underline underline-offset-8">CORE_FRAMEWORKS</h2>
-                    <div class="grid lg:grid-cols-4 gap-6">
-                        
-                        <div class="holo-card">
-                            <div class="logo-box"><img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/Zinc_Logo.jpg" class="project-img"></div>
-                            <h3 class="orbitron text-[11px] text-white text-center">ZINC-CORE</h3>
+                    <h2 class="orbitron text-2xl mb-12 text-cyan-500 text-center">CORE_INTEGRATIONS</h2>
+                    <div class="grid lg:grid-cols-4 gap-8">
+                        <div class="holo-card p-6 flex flex-col items-center">
+                            <div class="w-full aspect-square bg-black/40 p-4 mb-4 border border-cyan-500/20">
+                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/Zinc_Logo.jpg" class="w-full h-full object-contain">
+                            </div>
+                            <h3 class="orbitron text-[10px] tracking-widest text-cyan-400">ZINC_ENGINE</h3>
                         </div>
-
-                        <div class="holo-card">
-                            <div class="logo-box"><img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/qbcore-logo-full.8dd52965.png" class="project-img"></div>
-                            <h3 class="orbitron text-[11px] text-white text-center">QB-CORE</h3>
+                        <div class="holo-card p-6 flex flex-col items-center">
+                            <div class="w-full aspect-square bg-black/40 p-4 mb-4 border border-cyan-500/20">
+                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/qbcore-logo-full.8dd52965.png" class="w-full h-full object-contain">
+                            </div>
+                            <h3 class="orbitron text-[10px] tracking-widest text-slate-300">QB_CORE_V2</h3>
                         </div>
-
-                        <div class="holo-card">
-                            <div class="logo-box"><img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/qbox-banner.png" class="project-img"></div>
-                            <h3 class="orbitron text-[11px] text-white text-center">QBOX</h3>
+                        <div class="holo-card p-6 flex flex-col items-center">
+                            <div class="w-full aspect-square bg-black/40 p-4 mb-4 border border-cyan-500/20">
+                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/qbox-banner.png" class="w-full h-full object-contain">
+                            </div>
+                            <h3 class="orbitron text-[10px] tracking-widest text-slate-300">QBOX_LOGIC</h3>
                         </div>
-
-                        <div class="holo-card">
-                            <div class="logo-box"><img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/DtGao.png" class="project-img"></div>
-                            <h3 class="orbitron text-[11px] text-white text-center">TMC</h3>
+                        <div class="holo-card p-6 flex flex-col items-center">
+                            <div class="w-full aspect-square bg-black/40 p-4 mb-4 border border-cyan-500/20">
+                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/DtGao.png" class="w-full h-full object-contain">
+                            </div>
+                            <h3 class="orbitron text-[10px] tracking-widest text-amber-600">TMC_FRAMEWORK</h3>
                         </div>
-
                     </div>
                 </div>
 
             </main>
         </div>
 
-        <footer class="h-10 border-t border-white/10 flex items-center px-8 justify-between bg-black text-[8px] orbitron text-cyan-900 uppercase">
-            <span>© 2026 ZINTHYN_OFFICIAL</span>
-            <span class="flex gap-4">
-                <span onclick="copyDiscord()" class="cursor-pointer hover:text-cyan-400">[ DISCORD ]</span>
-                <span onclick="location.reload()" class="cursor-pointer hover:text-red-500">[ REBOOT ]</span>
-            </span>
+        <footer class="h-10 border-t border-white/5 flex items-center px-8 justify-between bg-black/40 text-[8px] orbitron text-cyan-900">
+            <div class="flex items-center gap-4">
+                <span>© 2026 ARCHITECT_ID: ZIN-01</span>
+                <span class="text-slate-800">|</span>
+                <span class="animate-pulse">SYSTEM_STABLE</span>
+            </div>
+            <div class="flex gap-6">
+                <span onclick="copyDiscord()" class="cursor-pointer hover:text-cyan-400 transition">[ UPLINK_DISCORD ]</span>
+                <span onclick="location.reload()" class="cursor-pointer hover:text-red-500 transition text-red-900">[ HARD_REBOOT ]</span>
+            </div>
         </footer>
     </div>
 
@@ -209,35 +281,46 @@
         }
         function startTyping() {
             const log = document.getElementById('kernel-log');
-            const lines = ["> STATUS: ONLINE", "> AUTH: ZINTHYN_01", "> LOADING TRINITY_OS..."];
+            const lines = [
+                "> INITIALIZING OMEGA_PROTOCOL...",
+                "> BYPASSING FIREWALL... SUCCESS",
+                "> LOADING BIOMETRICS: ZINTHYN",
+                "> SYSTEM STATUS: NOMINAL",
+                "> UPLINK ESTABLISHED VIA BELGRADE_NODE"
+            ];
             let i = 0; const int = setInterval(() => {
                 log.innerHTML += lines[i] + "<br>"; playSound(800, 0.02, 0.01);
                 i++; if(i >= lines.length) clearInterval(int);
-            }, 300);
+            }, 400);
         }
+        // REAL-TIME RESOURCE SIMULATOR
         setInterval(() => {
-            const res = (Math.random() * 0.03 + 0.01).toFixed(2);
-            document.getElementById('resmon-val').innerText = `${res}ms`;
-            document.getElementById('resmon-bar').style.width = `${res * 500}%`;
-        }, 2000);
+            const res = (Math.random() * 0.04 + 0.01).toFixed(2);
+            const resVal = document.getElementById('resmon-val');
+            const resBar = document.getElementById('resmon-bar');
+            if(resVal) resVal.innerText = `${res}ms`;
+            if(resBar) resBar.style.width = `${res * 1200}%`;
+        }, 1500);
+
+        // STARFIELD ANIMATION
         const canvas = document.getElementById('stars'); const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const stars = Array(200).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*canvas.width }));
+        const stars = Array(150).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*canvas.width }));
         function draw() {
             ctx.fillStyle = "#010203"; ctx.fillRect(0,0,canvas.width,canvas.height);
             stars.forEach(s => {
                 const px = (s.x - canvas.width/2) * (canvas.width/s.z) + canvas.width/2;
                 const py = (s.y - canvas.height/2) * (canvas.width/s.z) + canvas.height/2;
-                const sz = (1 - s.z/canvas.width) * 2;
+                const sz = (1 - s.z/canvas.width) * 1.5;
                 ctx.fillStyle = `rgba(0, 242, 255, ${1 - s.z/canvas.width})`;
                 ctx.beginPath(); ctx.arc(px,py,sz,0,Math.PI*2); ctx.fill();
-                s.z -= 2; if(s.z <= 0) s.z = canvas.width;
+                s.z -= 0.5; if(s.z <= 0) s.z = canvas.width;
             });
             requestAnimationFrame(draw);
         }
         draw();
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        function copyDiscord() { navigator.clipboard.writeText("Zinthyn"); alert("UPLINK_ESTABLISHED"); }
+        function copyDiscord() { navigator.clipboard.writeText("Zinthyn"); alert("UPLINK_DATA_COPIED: Zinthyn"); }
     </script>
 </body>
 </html>
