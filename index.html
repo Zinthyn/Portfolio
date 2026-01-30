@@ -3,213 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // NEURAL_INTERFACE_V7</title>
+    <title>ZINTHYN // NEURAL_ARCHITECT_V8</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@100;400;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00ffaa; --bg: #010203; --glass: rgba(255, 255, 255, 0.03); }
-        * { cursor: none !important; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
+        :root { --neon: #00ffcc; --neon-dim: rgba(0, 255, 204, 0.15); --bg: #030405; --accent: #ff0055; }
+        * { cursor: none !important; margin: 0; padding: 0; box-sizing: border-box; selection-background: var(--neon); }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
 
-        #particle-canvas { position: fixed; inset: 0; z-index: 0; opacity: 0.15; }
-        .crt-effect {
-            position: fixed; inset: 0; z-index: 99999; pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
-            background-size: 100% 3px, 3px 100%;
+        /* CINEMATIC EFFECTS */
+        #particle-canvas { position: fixed; inset: 0; z-index: 0; opacity: 0.3; }
+        .scanline {
+            width: 100%; height: 100px; z-index: 9999; pointer-events: none; position: absolute;
+            background: linear-gradient(0deg, rgba(0, 255, 204, 0) 0%, rgba(0, 255, 204, 0.03) 50%, rgba(0, 255, 204, 0) 100%);
+            animation: scan 8s linear infinite;
         }
+        @keyframes scan { from { top: -100px; } to { top: 100%; } }
 
         #custom-cursor {
-            position: fixed; width: 35px; height: 35px; border: 1px solid var(--neon);
+            position: fixed; width: 40px; height: 40px; border: 1px solid var(--neon);
             border-radius: 50%; pointer-events: none; z-index: 1000000;
-            transform: translate(-50%, -50%); transition: transform 0.06s ease-out;
+            transform: translate(-50%, -50%); transition: transform 0.1s ease-out;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px var(--neon-dim);
         }
 
         #zin-shell {
-            position: relative; width: 96vw; height: 92vh; margin: 4vh auto;
-            background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 255, 170, 0.1);
+            position: relative; width: 97vw; height: 94vh; margin: 3vh auto;
+            background: rgba(2, 4, 6, 0.95); border: 1px solid rgba(0, 255, 204, 0.15);
             display: none; flex-direction: column; opacity: 0;
-            box-shadow: 0 0 100px rgba(0,0,0,1); backdrop-filter: blur(15px);
+            box-shadow: 0 0 120px rgba(0,0,0,1), inset 0 0 50px rgba(0, 255, 204, 0.02);
+            backdrop-filter: blur(25px);
         }
 
+        /* NAVIGATION */
         .nav-link {
-            position: relative; padding: 18px 25px; transition: 0.3s; margin-bottom: 10px;
-            clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
-            background: rgba(255,255,255,0.02);
+            position: relative; padding: 22px 30px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 8px;
+            clip-path: polygon(0 0, 92% 0, 100% 25%, 100% 100%, 8% 100%, 0 75%);
+            background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03);
+            text-transform: uppercase; letter-spacing: 2px;
         }
-        .nav-link:hover { background: var(--neon); color: #000 !important; }
-        .nav-link.active { background: var(--neon); color: #000; box-shadow: 0 0 20px rgba(0, 255, 170, 0.3); }
+        .nav-link:hover { background: var(--neon-dim); color: var(--neon); border-color: var(--neon); }
+        .nav-link.active { background: var(--neon); color: #000; font-weight: 900; box-shadow: 0 0 30px var(--neon-dim); }
 
-        .view { display: none; height: 100%; opacity: 0; transition: 0.4s ease-out; }
+        .view { display: none; height: 100%; opacity: 0; transition: 0.6s ease; }
         .view.active { display: flex; flex-direction: column; opacity: 1; }
 
-        /* SKILL MATRIX */
-        .skill-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; transition: 0.3s; }
-        .skill-item:hover { border-color: var(--neon); background: rgba(0, 255, 170, 0.05); }
-        .skill-bar { height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        /* PROJECT CARDS - HYPER DEPTH */
+        .project-card {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.5s; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .project-card:hover { border-color: var(--neon); transform: scale(1.02); background: rgba(0, 255, 204, 0.03); }
+        .project-card img { filter: grayscale(1) contrast(1.2); transition: 0.8s ease; opacity: 0.4; }
+        .project-card:hover img { filter: grayscale(0) contrast(1); opacity: 1; transform: scale(1.1); }
+        .card-tag { font-size: 8px; padding: 2px 8px; background: rgba(0, 255, 204, 0.1); border: 1px solid var(--neon); color: var(--neon); }
 
-        /* CARDS */
-        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: pointer; overflow: hidden; }
-        .card:hover { border-color: var(--neon); background: rgba(0,255,170,0.02); transform: translateY(-5px); }
-        .card img { filter: grayscale(1); transition: 0.5s; object-fit: cover; height: 160px; width: 100%; opacity: 0.6; }
-        .card:hover img { filter: grayscale(0); opacity: 1; }
+        /* SKILL MATRIX */
+        .skill-bar-container { height: 4px; background: rgba(255,255,255,0.05); width: 100%; margin-top: 10px; position: relative; }
+        .skill-bar-fill { height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); position: relative; }
+        .skill-bar-fill::after { content: ''; position: absolute; right: 0; top: -2px; width: 6px; height: 8px; background: #fff; box-shadow: 0 0 10px #fff; }
 
         /* MODAL */
         #modal-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000000; 
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(12px);
+            position: fixed; inset: 0; background: rgba(1, 2, 3, 0.98); z-index: 2000000; 
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px);
         }
         #modal-content { 
-            width: 850px; max-width: 90vw; background: #050505; border: 1px solid var(--neon);
-            padding: 45px; position: relative; transform: translateY(30px); opacity: 0; transition: 0.4s;
-            box-shadow: 0 0 50px rgba(0, 255, 170, 0.1);
+            width: 1000px; max-width: 95vw; background: #000; border: 1px solid var(--neon);
+            padding: 60px; position: relative; opacity: 0; transform: scale(0.9); transition: 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         }
 
         .orbitron { font-family: 'Orbitron', sans-serif; }
         .tech { font-family: 'Share Tech Mono', monospace; }
+        .custom-scroll::-webkit-scrollbar { width: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--neon); }
     </style>
 </head>
 <body onmousemove="syncUI(event)">
 
-    <div id="custom-cursor"><div class="w-1 h-1 bg-neon rounded-full"></div></div>
-    <div class="crt-effect"></div>
+    <div id="custom-cursor"><div class="w-1.5 h-1.5 bg-neon rounded-full"></div></div>
+    <div class="scanline"></div>
     <canvas id="particle-canvas"></canvas>
 
     <div id="modal-overlay" onclick="closeModal()">
         <div id="modal-content" onclick="event.stopPropagation()">
-            <button class="absolute top-6 right-6 text-neon tech text-xs hover:scale-110 transition-transform" onclick="closeModal()">[ ESC_EXIT ]</button>
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon to-transparent opacity-50"></div>
+            <button class="absolute top-8 right-8 text-neon tech text-xs tracking-widest hover:text-white transition-colors" onclick="closeModal()">// TERMINATE_PROCESS [X]</button>
             <div id="modal-body"></div>
         </div>
     </div>
 
     <div id="boot-gate" class="fixed inset-0 bg-black z-[100000] flex flex-col items-center justify-center">
-        <div class="w-24 h-24 mb-8 border border-neon p-1 bg-black overflow-hidden shadow-[0_0_20px_rgba(0,255,170,0.2)]">
-            <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="w-full h-full object-cover grayscale">
+        <div class="relative group cursor-pointer mb-12">
+            <div class="absolute -inset-4 bg-neon opacity-10 blur-xl group-hover:opacity-30 transition-opacity"></div>
+            <div class="w-32 h-32 border border-neon/40 p-1 bg-black relative">
+                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="w-full h-full object-cover grayscale brightness-125">
+                <div class="absolute inset-0 border-2 border-neon opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
         </div>
-        <div class="w-48 h-[1px] bg-white/10 relative overflow-hidden mb-4">
-            <div id="load-bar" class="absolute inset-0 bg-neon w-0"></div>
+        <div class="w-64 h-1 bg-white/5 relative overflow-hidden mb-6">
+            <div id="load-bar" class="absolute inset-0 bg-neon w-0 shadow-[0_0_15px_#00ffcc]"></div>
         </div>
-        <div id="boot-status" class="tech text-[8px] text-neon/40 tracking-[0.3em] uppercase mb-10">Syncing_Neural_Cores...</div>
-        <button id="entry-btn" class="hidden border border-neon px-12 py-4 orbitron text-neon hover:bg-neon hover:text-black transition-all text-[10px] tracking-[0.2em]" onclick="powerOn()">ESTABLISH_UPLINK</button>
+        <div id="boot-status" class="tech text-[9px] text-neon/60 tracking-[0.4em] uppercase animate-pulse">Establishing_Neural_Link</div>
+        <button id="entry-btn" class="hidden mt-10 border-2 border-neon px-16 py-5 orbitron text-neon font-black hover:bg-neon hover:text-black transition-all text-sm tracking-[0.3em] shadow-[0_0_30px_rgba(0,255,204,0.2)]" onclick="powerOn()">SYNC_INTERFACE</button>
     </div>
 
     <div id="zin-shell">
-        <header class="h-24 border-b border-white/5 flex items-center justify-between px-12 bg-black/50">
-            <div class="flex items-center gap-6">
-                <div class="w-14 h-14 border border-neon/30 overflow-hidden shadow-[0_0_10px_rgba(0,255,170,0.1)]">
+        <header class="h-28 border-b border-white/10 flex items-center justify-between px-16 bg-black/40">
+            <div class="flex items-center gap-8">
+                <div class="w-16 h-16 border border-neon/50 p-1">
                     <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h1 class="orbitron text-xl font-black italic tracking-widest">ZINTHYN<span class="text-neon">_OS</span></h1>
-                    <p class="tech text-[9px] text-white/20 tracking-widest uppercase">Senior Neural Architect // V.07</p>
+                    <h1 class="orbitron text-3xl font-black italic tracking-tighter">ZINTHYN<span class="text-neon">_ARCHITECT</span></h1>
+                    <div class="flex items-center gap-4 mt-1">
+                        <span class="w-2 h-2 bg-neon rounded-full animate-ping"></span>
+                        <p class="tech text-[10px] text-white/30 tracking-[0.2em] uppercase">Status: High_Level_Access // System_Stable</p>
+                    </div>
                 </div>
             </div>
-            <div class="flex gap-16">
+            <div class="flex gap-20">
                 <div class="text-right">
-                    <p class="tech text-[9px] text-neon uppercase">KERNEL_LATENCY</p>
-                    <p id="resmon" class="orbitron text-lg font-black tracking-tighter">0.01ms</p>
+                    <p class="tech text-[10px] text-neon uppercase opacity-50">Frame_Time</p>
+                    <p id="resmon" class="orbitron text-xl font-black">0.01ms</p>
                 </div>
-                <div id="clock" class="orbitron text-2xl font-black text-white/5 italic">00:00:00</div>
+                <div id="clock" class="orbitron text-3xl font-black text-white/5 italic">00:00:00</div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-80 border-r border-white/5 p-12 flex flex-col bg-black/30 backdrop-blur-md">
-                <nav class="flex-1 space-y-4">
-                    <button onclick="tab('about', this)" class="nav-link active w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-brain text-neon"></i> /SKILL_TREE</button>
-                    <button onclick="tab('history', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-server text-neon"></i> /HISTORY</button>
-                    <button onclick="tab('projects', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-microchip text-neon"></i> /PROJECTS</button>
-                    <button onclick="tab('terminal', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-terminal text-neon"></i> /INTERFACE</button>
+            <aside class="w-80 border-r border-white/5 p-12 flex flex-col bg-black/20 backdrop-blur-sm">
+                <nav class="flex-1">
+                    <button onclick="tab('skills', this)" class="nav-link active w-full text-left tech text-xs flex items-center gap-5"><i class="fas fa-microchip"></i> Neural_Matrix</button>
+                    <button onclick="tab('history', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-5"><i class="fas fa-database"></i> Deploy_History</button>
+                    <button onclick="tab('projects', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-5"><i class="fas fa-project-diagram"></i> Vault_Archive</button>
+                    <button onclick="tab('terminal', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-5"><i class="fas fa-terminal"></i> Direct_Console</button>
                 </nav>
-                <div class="mt-auto pt-6 border-t border-white/5">
-                    <p class="tech text-[8px] text-white/10 uppercase">Security Status: Encrypted</p>
+                <div class="mt-auto space-y-4">
+                    <div class="p-4 border border-white/5 bg-white/[0.02]">
+                        <p class="tech text-[8px] text-white/20 mb-2 uppercase">Core_Temp</p>
+                        <div class="h-1 bg-white/10 w-full"><div class="h-full bg-accent w-1/3"></div></div>
+                    </div>
                 </div>
             </aside>
 
-            <main class="flex-1 p-20 overflow-y-auto custom-scroll relative bg-[radial-gradient(circle_at_50%_50%,_rgba(0,255,170,0.02)_0%,_transparent_70%)]">
+            <main class="flex-1 p-24 overflow-y-auto custom-scroll relative">
                 
-                <div id="v-about" class="view active">
-                    <h2 class="orbitron text-6xl font-black italic mb-12 uppercase tracking-tighter">Neural_Matrix</h2>
-                    <div class="grid grid-cols-2 gap-8 max-w-4xl">
-                        <div class="skill-item">
-                            <div class="flex justify-between tech text-xs mb-3"><span>LUA_SCRIPTING</span><span>98%</span></div>
-                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 98%"></div></div>
+                <div id="v-skills" class="view active">
+                    <h2 class="orbitron text-7xl font-black italic mb-16 tracking-tighter text-white uppercase">Expertise_<span class="text-neon">Nodes</span></h2>
+                    <div class="grid grid-cols-2 gap-12 max-w-5xl">
+                        <div class="p-8 border-l border-neon/30 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
+                            <div class="flex justify-between tech text-sm mb-4"><span>LUA_CORE</span><span>98%</span></div>
+                            <div class="skill-bar-container"><div class="skill-bar-fill" style="width: 98%"></div></div>
                         </div>
-                        <div class="skill-item">
-                            <div class="flex justify-between tech text-xs mb-3"><span>FRONTEND_UI</span><span>90%</span></div>
-                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 90%"></div></div>
+                        <div class="p-8 border-l border-neon/30 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
+                            <div class="flex justify-between tech text-sm mb-4"><span>C#_ARCHITECTURE</span><span>85%</span></div>
+                            <div class="skill-bar-container"><div class="skill-bar-fill" style="width: 85%"></div></div>
                         </div>
-                        <div class="skill-item">
-                            <div class="flex justify-between tech text-xs mb-3"><span>PYTHON_AUTOMATION</span><span>75%</span></div>
-                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 75%"></div></div>
+                        <div class="p-8 border-l border-neon/30 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
+                            <div class="flex justify-between tech text-sm mb-4"><span>PYTHON_AUTOMATION</span><span>78%</span></div>
+                            <div class="skill-bar-container"><div class="skill-bar-fill" style="width: 78%"></div></div>
                         </div>
-                        <div class="skill-item">
-                            <div class="flex justify-between tech text-xs mb-3"><span>C#_STANDALONE</span><span>82%</span></div>
-                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 82%"></div></div>
+                        <div class="p-8 border-l border-neon/30 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
+                            <div class="flex justify-between tech text-sm mb-4"><span>C++_NATIVE</span><span>65%</span></div>
+                            <div class="skill-bar-container"><div class="skill-bar-fill" style="width: 65%"></div></div>
+                        </div>
+                        <div class="p-8 border-l border-neon/30 bg-white/[0.01] hover:bg-white/[0.03] transition-colors">
+                            <div class="flex justify-between tech text-sm mb-4"><span>HTML5_NUI_DESIGN</span><span>92%</span></div>
+                            <div class="skill-bar-container"><div class="skill-bar-fill" style="width: 92%"></div></div>
                         </div>
                     </div>
                 </div>
 
                 <div id="v-history" class="view">
-                    <h2 class="orbitron text-6xl font-black italic mb-12 uppercase tracking-tighter">Verified_Deployments</h2>
+                    <h2 class="orbitron text-7xl font-black italic mb-16 tracking-tighter text-white uppercase">Verified_<span class="text-neon">Logs</span></h2>
                     <div class="grid grid-cols-2 gap-8">
-                        <div class="card p-8 group" onclick="openHistory('nopixel')">
-                            <div class="flex justify-between items-start mb-4">
-                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">NOPIXEL</h3>
-                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                        <div class="project-card p-10 group" onclick="openHistory('nopixel')">
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="orbitron text-3xl font-black group-hover:text-neon">NOPIXEL</h3>
+                                <div class="card-tag">SENIOR_DEV</div>
                             </div>
-                            <p class="tech text-[10px] text-white/40">Core Systems Optimization & Latency Management.</p>
+                            <p class="tech text-xs text-white/40 leading-relaxed">Optimization of core server-side entity pooling and high-fidelity MLO streaming protocols.</p>
                         </div>
-                        <div class="card p-8 group" onclick="openHistory('liquid')">
-                            <div class="flex justify-between items-start mb-4">
-                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">LIQUID RP</h3>
-                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                        <div class="project-card p-10 group" onclick="openHistory('liquid')">
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="orbitron text-3xl font-black group-hover:text-neon">LIQUID_RP</h3>
+                                <div class="card-tag">TECH_LEAD</div>
                             </div>
-                            <p class="tech text-[10px] text-white/40">Lead Development Support & Database Scalability.</p>
+                            <p class="tech text-xs text-white/40 leading-relaxed">Lead dev management and database refactoring for high-population concurrency.</p>
                         </div>
-                        <div class="card p-8 group" onclick="openHistory('happy')">
-                            <div class="flex justify-between items-start mb-4">
-                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">HAPPY DAYS</h3>
-                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                        <div class="project-card p-10 group" onclick="openHistory('happy')">
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="orbitron text-3xl font-black group-hover:text-neon">HAPPY_DAYS</h3>
+                                <div class="card-tag">FRAMEWORK_ARCH</div>
                             </div>
-                            <p class="tech text-[10px] text-white/40">Standalone Framework Architecture.</p>
+                            <p class="tech text-xs text-white/40 leading-relaxed">Architecting standalone modular frameworks for sustainable roleplay ecosystems.</p>
                         </div>
-                        <div class="card p-8 group" onclick="openHistory('scora')">
-                            <div class="flex justify-between items-start mb-4">
-                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">SCORA</h3>
-                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                        <div class="project-card p-10 group" onclick="openHistory('scora')">
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="orbitron text-3xl font-black group-hover:text-neon">SCORA_NET</h3>
+                                <div class="card-tag">SECURITY_SPEC</div>
                             </div>
-                            <p class="tech text-[10px] text-white/40">Network Security & Anti-Exploit Deployment.</p>
+                            <p class="tech text-xs text-white/40 leading-relaxed">Implementation of edge-case security patches and custom event-throttling logic.</p>
                         </div>
                     </div>
                 </div>
 
                 <div id="v-projects" class="view">
-                    <h2 class="orbitron text-6xl font-black italic mb-4 uppercase tracking-tighter">Stable_Builds</h2>
-                    <div class="grid grid-cols-3 gap-8 mb-20">
-                        <div class="card" onclick="openProject('anticheat')">
-                            <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="h-40">
-                            <div class="p-6">
-                                <h4 class="orbitron text-sm font-black text-neon">ZIN_SHIELD_V4</h4>
-                                <p class="tech text-[9px] text-white/30 mt-2">Active protection system for high-pop environments.</p>
+                    <div class="flex items-baseline gap-6 mb-12">
+                        <h2 class="orbitron text-7xl font-black italic tracking-tighter text-white uppercase">Stable_<span class="text-neon">Vault</span></h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-8 mb-24">
+                        <div class="project-card" onclick="openProject('anticheat')">
+                            <div class="h-48 overflow-hidden bg-black flex items-center justify-center">
+                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="w-full h-full object-cover">
+                            </div>
+                            <div class="p-8">
+                                <h4 class="orbitron text-lg font-black text-neon">ZIN_SHIELD_V8</h4>
+                                <p class="tech text-[10px] text-white/30 mt-3 uppercase tracking-widest">Status: Deployment_Ready</p>
                             </div>
                         </div>
                     </div>
 
-                    <h2 class="orbitron text-3xl font-black italic mb-6 uppercase text-neon/30">Experimental_Lab</h2>
-                    <div class="grid grid-cols-3 gap-8 pb-10">
-                        <div class="card border-dashed border-neon/20" onclick="openProject('neural_drive')">
-                            <div class="h-40 bg-white/5 flex items-center justify-center tech text-neon/20 text-[10px] italic">REDACTED_PROTOTYPE</div>
-                            <div class="p-6"><h4 class="orbitron text-sm font-black">NEURAL_TRAFFIC_V1</h4></div>
+                    <h2 class="orbitron text-4xl font-black italic mb-10 tracking-tighter text-white/20 uppercase">Experimental_<span class="text-neon/20">Lab</span></h2>
+                    <div class="grid grid-cols-3 gap-8 pb-20">
+                        <div class="project-card border-dashed" onclick="openProject('neural_drive')">
+                            <div class="h-48 bg-white/[0.02] flex items-center justify-center tech text-neon/20 italic">PROTOTYPE_SCANNING...</div>
+                            <div class="p-8"><h4 class="orbitron text-lg font-black">NEURAL_TRAFFIC</h4></div>
                         </div>
-                        <div class="card border-dashed border-neon/20" onclick="openProject('void_ui')">
-                            <div class="h-40 bg-white/5 flex items-center justify-center tech text-neon/20 text-[10px] italic">REDACTED_PROTOTYPE</div>
-                            <div class="p-6"><h4 class="orbitron text-sm font-black">VOID_UI_ENGINE</h4></div>
+                        <div class="project-card border-dashed" onclick="openProject('void_ui')">
+                            <div class="h-48 bg-white/[0.02] flex items-center justify-center tech text-neon/20 italic">PROTOTYPE_SCANNING...</div>
+                            <div class="p-8"><h4 class="orbitron text-lg font-black">VOID_UI_CORE</h4></div>
                         </div>
-                        <div class="card border-dashed border-neon/20" onclick="openProject('synth_shield')">
-                            <div class="h-40 bg-white/5 flex items-center justify-center tech text-neon/20 text-[10px] italic">REDACTED_PROTOTYPE</div>
-                            <div class="p-6"><h4 class="orbitron text-sm font-black">SYNTH_SHIELD_E</h4></div>
+                        <div class="project-card border-dashed" onclick="openProject('synth_gen')">
+                            <div class="h-48 bg-white/[0.02] flex items-center justify-center tech text-neon/20 italic">PROTOTYPE_SCANNING...</div>
+                            <div class="p-8"><h4 class="orbitron text-lg font-black">SYNTH_GEN_3</h4></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="v-terminal" class="view items-center justify-center">
+                    <div class="w-full max-w-4xl bg-[#010203] border border-neon/20 p-12 shadow-[0_0_50px_rgba(0,255,204,0.05)]">
+                        <div id="terminal-out" class="h-80 tech text-sm text-white/40 overflow-y-auto mb-8 custom-scroll leading-relaxed">
+                            > ZINTHYN_OS [VERSION 8.0.1]<br>
+                            > (c) 2026 ZINTHYN NEURAL SYSTEMS. ALL RIGHTS RESERVED.<br><br>
+                            > AUTH_LEVEL: ROOT_ADMIN<br>
+                            > TYPE 'HELP' FOR SYSTEM COMMANDS...<br>
+                        </div>
+                        <div class="flex gap-6 items-center border-t border-white/5 pt-6">
+                            <span class="text-neon tech font-bold">SYSTEM@ZINTHYN:~$</span>
+                            <input type="text" id="term-in" class="bg-transparent outline-none border-none tech text-neon w-full uppercase text-lg" autofocus onkeydown="runCmd(event)">
                         </div>
                     </div>
                 </div>
@@ -222,42 +268,42 @@
         const data = {
             projects: {
                 anticheat: {
-                    title: "ZIN_SHIELD V4",
-                    desc: "A proprietary security layer designed for large-scale roleplay environments. V4 features signature-based detection for 150+ known executors and real-time event throttling. Reduces false positives by 92% compared to standard open-source alternatives.",
+                    title: "ZIN_SHIELD V8",
+                    desc: "The ultimate FiveM security solution. Features kernel-level signature scanning, event-spoofing protection, and a revolutionary AI-driven heuristic engine that adapts to new executor variants within milliseconds.",
                     img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
                 },
                 neural_drive: {
-                    title: "NEURAL_TRAFFIC V1",
-                    desc: "Experimental C# implementation for AI driving. Replaces native GTA driving tasks with a custom node-based logic system, allowing NPCs to behave realistically in player-modified city layouts and races.",
+                    title: "NEURAL_TRAFFIC AI",
+                    desc: "A deep-learning wrapper for NPC tasking. It completely replaces the native GTA pathfinding with a node-independent neural network, allowing NPCs to navigate custom maps with player-like precision.",
                     img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
                 },
                 void_ui: {
-                    title: "VOID_UI ENGINE",
-                    desc: "A headless UI rendering wrapper designed to bypass standard NUI bottlenecks. Optimized for 4K displays with zero impact on client-side FPS, utilizing hardware acceleration for complex animations.",
+                    title: "VOID_UI_CORE",
+                    desc: "A headless UI engine built for the next generation of roleplay. Zero frame latency, hardware-accelerated SVG rendering, and a custom state-management system optimized for 300+ player synchronization.",
                     img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
                 },
-                synth_shield: {
-                    title: "SYNTH_SHIELD_E",
-                    desc: "An edge-computing anti-exploit module. Instead of checking variables constantly, it uses state-prediction to detect when a player's coordinate data doesn't match server-side physics calculations.",
+                synth_gen: {
+                    title: "SYNTH_GEN_3",
+                    desc: "An automated environment generation tool. It procedurally generates optimized MLO layouts and entity sets based on player traffic heatmaps.",
                     img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
                 }
             },
             history: {
                 nopixel: {
-                    title: "NOPIXEL DEPLOYMENT",
-                    desc: "Focused on high-load entity management and MLO streaming. Contributed to core asset optimization which helped maintain stable 60FPS in dense areas like Legion Square during 250+ player events."
+                    title: "NOPIXEL SYSTEMS",
+                    desc: "Engineered high-concurrency event handlers and optimized entity cooling systems for the world's most populated RP server. Focused on reducing network overhead during major criminal heists and large-scale PD interactions."
                 },
                 liquid: {
-                    title: "LIQUID RP LEADERSHIP",
-                    desc: "Managed the technical infrastructure for the server's major 2.0 overhaul. Handled full database migration from MySQL-Async to OxMySQL and implemented custom inventory state handling."
+                    title: "LIQUID_RP LEADERSHIP",
+                    desc: "Architected the server's transition to a standalone custom framework. Developed the proprietary inventory and vehicle handling systems from the ground up, prioritizing low resmon impact (under 0.02ms)."
                 },
                 happy: {
-                    title: "HAPPY DAYS ARCHITECTURE",
-                    desc: "Developed a standalone framework layer that allowed for hot-swapping economy modules without server restarts. Modularized player data for faster loading times."
+                    title: "HAPPY_DAYS FRAMEWORK",
+                    desc: "Developed a revolutionary modular framework allowing for hot-swapping economy and job modules without server restarts. Implemented a custom 1-click installer for administrative management."
                 },
                 scora: {
-                    title: "SCORA NETWORK SECURITY",
-                    desc: "Engineered a custom network-level protection resource to mitigate remote code execution (RCE) attempts and secure server-to-client event calls."
+                    title: "SCORA_NET SECURITY",
+                    desc: "Designed the server's primary anti-DDoS and anti-RCE resource. Implemented complex server-side validation for every client-triggered event to ensure 100% data integrity."
                 }
             }
         };
@@ -265,14 +311,21 @@
         function openProject(id) {
             const p = data.projects[id];
             document.getElementById('modal-body').innerHTML = `
-                <div class="flex gap-12">
-                    <div class="w-1/3 border border-white/10 p-1 bg-black">
-                        <img src="${p.img}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all">
+                <div class="flex gap-16">
+                    <div class="w-2/5 border border-neon p-2 bg-black shadow-[0_0_30px_var(--neon-dim)]">
+                        <img src="${p.img}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
                     </div>
-                    <div class="w-2/3">
-                        <h2 class="orbitron text-4xl font-black text-neon mb-2">${p.title}</h2>
-                        <p class="tech text-[10px] text-white/20 mb-8 uppercase tracking-widest">Project_Type: Stable_Release</p>
-                        <p class="tech text-slate-400 leading-loose text-lg">${p.desc}</p>
+                    <div class="w-3/5">
+                        <h2 class="orbitron text-6xl font-black text-white mb-4 italic tracking-tighter">${p.title}</h2>
+                        <div class="flex gap-4 mb-10">
+                            <span class="tech text-[10px] bg-neon text-black px-3 py-1 font-bold uppercase">STABLE_RELEASE</span>
+                            <span class="tech text-[10px] border border-neon text-neon px-3 py-1 uppercase">ENCRYPTED_SOURCE</span>
+                        </div>
+                        <p class="tech text-white/60 leading-relaxed text-xl mb-12">${p.desc}</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-white/5 border border-white/10 tech text-[10px] text-white/30 uppercase">Impact: 0.00ms</div>
+                            <div class="p-4 bg-white/5 border border-white/10 tech text-[10px] text-white/30 uppercase">Threads: Multi_Core</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -282,10 +335,10 @@
         function openHistory(id) {
             const h = data.history[id];
             document.getElementById('modal-body').innerHTML = `
-                <div class="border-l-4 border-neon pl-10">
-                    <h2 class="orbitron text-5xl font-black text-white mb-2 uppercase italic">${h.title}</h2>
-                    <p class="tech text-neon/40 text-[10px] mb-12 tracking-widest">LOG_STATUS: VERIFIED_CONTRIBUTOR</p>
-                    <p class="tech text-slate-300 leading-relaxed text-xl max-w-2xl">${h.desc}</p>
+                <div class="max-w-3xl border-l-8 border-neon pl-12 py-6">
+                    <h2 class="orbitron text-7xl font-black text-white mb-4 italic uppercase tracking-tighter">${h.title}</h2>
+                    <p class="tech text-neon text-sm mb-12 tracking-[0.5em] uppercase opacity-70">Deployment_History // Root_Record</p>
+                    <p class="tech text-white/70 leading-relaxed text-2xl">${h.desc}</p>
                 </div>
             `;
             showModal();
@@ -295,14 +348,14 @@
             const m = document.getElementById('modal-overlay');
             const c = document.getElementById('modal-content');
             m.style.display = 'flex';
-            setTimeout(() => { c.style.opacity = '1'; c.style.transform = 'translateY(0)'; }, 10);
+            setTimeout(() => { c.style.opacity = '1'; c.style.transform = 'scale(1)'; }, 20);
         }
 
         function closeModal() {
             const m = document.getElementById('modal-overlay');
             const c = document.getElementById('modal-content');
-            c.style.opacity = '0'; c.style.transform = 'translateY(30px)';
-            setTimeout(() => m.style.display = 'none', 400);
+            c.style.opacity = '0'; c.style.transform = 'scale(0.9)';
+            setTimeout(() => m.style.display = 'none', 500);
         }
 
         function syncUI(e) {
@@ -318,41 +371,63 @@
             el.classList.add('active');
         }
 
-        // Boot Loader Logic
+        // Terminal logic
+        function runCmd(e) {
+            if(e.key === 'Enter') {
+                const input = e.target.value.toUpperCase();
+                const out = document.getElementById('terminal-out');
+                let reply = (input === 'HELP') ? "AVAILABLE: STATUS, CLEAR, SYSTEM_REBOOT, WHOAMI" : 
+                            (input === 'STATUS') ? "KERNEL_OPTIMIZED. ALL CORES RUNNING NATIVE." : 
+                            (input === 'WHOAMI') ? "NAME: ZINTHYN. ROLE: SYSTEMS ARCHITECT. ACCESS: LEVEL_8." : "CMD_NOT_RECOGNIZED.";
+                if(input === 'CLEAR') { out.innerHTML = ""; e.target.value = ""; return; }
+                if(input === 'SYSTEM_REBOOT') { window.location.reload(); return; }
+                out.innerHTML += `<br><span class="text-neon">> ${input}</span><br>${reply}`;
+                out.scrollTop = out.scrollHeight;
+                e.target.value = "";
+            }
+        }
+
+        // Boot Loader
         let progress = 0;
         const loader = setInterval(() => {
-            progress += Math.random() * 25;
+            progress += Math.random() * 15;
             document.getElementById('load-bar').style.width = progress + "%";
             if(progress >= 100) {
                 clearInterval(loader);
                 document.getElementById('entry-btn').classList.remove('hidden');
-                document.getElementById('boot-status').innerText = "SYSTEM_READY";
+                document.getElementById('boot-status').innerText = "CONNECTION_READY";
+                document.getElementById('boot-status').classList.remove('animate-pulse');
+                document.getElementById('boot-status').classList.add('text-neon');
             }
-        }, 120);
+        }, 150);
 
         function powerOn() {
-            document.getElementById('boot-gate').style.opacity = '0';
+            document.getElementById('boot-gate').classList.add('transition-all', 'duration-1000', 'opacity-0', 'scale-110');
             setTimeout(() => {
                 document.getElementById('boot-gate').style.display = 'none';
                 const shell = document.getElementById('zin-shell');
                 shell.style.display = 'flex';
                 setTimeout(() => shell.style.opacity = '1', 50);
-            }, 500);
+            }, 1000);
         }
 
-        updateRes = () => { document.getElementById('resmon').innerText = (Math.random() * 0.05).toFixed(2) + 'ms'; requestAnimationFrame(updateRes); }
+        // Real-time HUD
+        updateRes = () => { document.getElementById('resmon').innerText = (Math.random() * 0.03 + 0.01).toFixed(2) + 'ms'; requestAnimationFrame(updateRes); }
         updateRes();
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000);
 
-        // Simple Background Particles
+        // Particle Engine
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let pts = Array(60).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*0.5 }));
+        let pts = Array(80).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*0.8, o: Math.random() }));
         function draw() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "rgba(0, 255, 170, 0.2)";
-            pts.forEach(p => { p.y -= p.s; if(p.y < 0) p.y = canvas.height; ctx.fillRect(p.x, p.y, 1, 1); });
+            pts.forEach(p => { 
+                p.y -= p.s; if(p.y < 0) p.y = canvas.height;
+                ctx.fillStyle = `rgba(0, 255, 204, ${p.o * 0.3})`;
+                ctx.fillRect(p.x, p.y, 1.5, 1.5); 
+            });
             requestAnimationFrame(draw);
         }
         draw();
