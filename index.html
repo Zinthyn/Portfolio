@@ -8,58 +8,57 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00ffaa; --bg: #010203; --accent: #ff0055; --cyan: #00f2ff; }
+        :root { --neon: #00ffaa; --bg: #010203; --code-bg: #0a0b0c; }
         * { cursor: none !important; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; perspective: 1500px; }
+        body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
 
-        /* GLITCH BG */
-        #particle-canvas { position: fixed; inset: 0; z-index: 0; opacity: 0.25; }
+        #particle-canvas { position: fixed; inset: 0; z-index: 0; opacity: 0.15; }
         .crt-effect {
             position: fixed; inset: 0; z-index: 99999; pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
             background-size: 100% 3px, 3px 100%;
         }
 
         #custom-cursor {
-            position: fixed; width: 45px; height: 45px; border: 1px solid var(--neon);
+            position: fixed; width: 35px; height: 35px; border: 1px solid var(--neon);
             border-radius: 50%; pointer-events: none; z-index: 1000000;
             transform: translate(-50%, -50%); transition: transform 0.06s ease-out;
-            display: flex; align-items: center; justify-content: center; mix-blend-mode: exclusion;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* THE CHASSIS */
         #zin-shell {
             position: relative; width: 96vw; height: 92vh; margin: 4vh auto;
-            background: rgba(2, 4, 6, 0.97); border: 1px solid rgba(0, 255, 170, 0.2);
+            background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 255, 170, 0.1);
             display: none; flex-direction: column; opacity: 0;
-            transform-style: preserve-3d; box-shadow: 0 0 100px rgba(0,0,0,1);
-            transition: transform 0.2s ease-out;
+            box-shadow: 0 0 100px rgba(0,0,0,1);
         }
 
-        /* NAVIGATION STYLING */
         .nav-link {
             position: relative; padding: 18px 25px; transition: 0.3s; margin-bottom: 10px;
             clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
             background: rgba(255,255,255,0.02);
         }
-        .nav-link:hover { background: var(--neon); color: #000 !important; transform: translateX(15px); }
-        .nav-link.active { background: var(--neon); color: #000; box-shadow: 0 0 30px rgba(0, 255, 170, 0.4); }
+        .nav-link:hover { background: var(--neon); color: #000 !important; }
+        .nav-link.active { background: var(--neon); color: #000; box-shadow: 0 0 20px rgba(0, 255, 170, 0.3); }
 
-        /* VIEW ANIMATIONS */
-        .view { display: none; height: 100%; opacity: 0; transform: scale(0.95); transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
-        .view.active { display: flex; flex-direction: column; opacity: 1; transform: scale(1); }
+        .view { display: none; height: 100%; opacity: 0; transition: 0.4s ease-out; }
+        .view.active { display: flex; flex-direction: column; opacity: 1; }
 
-        /* PROJECT NODES */
-        .project-node {
-            background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.5s; position: relative;
+        /* CODE PREVIEW STYLES */
+        .code-block {
+            background: var(--code-bg); border: 1px solid rgba(255,255,255,0.05);
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            line-height: 1.6; color: #888; overflow: hidden; position: relative;
         }
-        .project-node:hover { border-color: var(--neon); transform: translateY(-10px) rotateY(5deg); background: rgba(0, 255, 170, 0.03); }
+        .code-keyword { color: #ff0055; }
+        .code-func { color: var(--neon); }
+        .code-string { color: #00f2ff; }
+        .code-comment { color: #444; font-style: italic; }
 
         .orbitron { font-family: 'Orbitron', sans-serif; }
         .tech { font-family: 'Share Tech Mono', monospace; }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--neon); }
     </style>
 </head>
 <body onmousemove="syncUI(event)">
@@ -69,316 +68,239 @@
     <canvas id="particle-canvas"></canvas>
 
     <div id="boot-gate" class="fixed inset-0 bg-black z-[100000] flex flex-col items-center justify-center">
-        <div class="relative mb-10 group">
-            <div class="absolute inset-0 bg-neon blur-2xl opacity-10 group-hover:opacity-30 transition-opacity"></div>
-            <img src="avatar.png" class="w-32 h-32 relative z-10 border border-neon/30 p-2 grayscale hover:grayscale-0 transition-all duration-700">
-        </div>
-        <div class="w-64 h-[1px] bg-white/10 relative overflow-hidden mb-6">
+        <img src="avatar.png" class="w-24 h-24 mb-8 border border-neon/20 p-2 grayscale">
+        <div class="w-48 h-[1px] bg-white/10 relative overflow-hidden mb-4">
             <div id="load-bar" class="absolute inset-0 bg-neon w-0"></div>
         </div>
-        <div id="load-txt" class="tech text-[9px] text-neon/40 tracking-[0.8em] uppercase">Booting_Zinthyn_Environment</div>
-        <button id="entry-btn" class="hidden mt-8 border-2 border-neon px-16 py-4 orbitron text-neon hover:bg-neon hover:text-black transition-all font-black tracking-widest" onclick="powerOn()">SYNC_NEURAL_LINK</button>
+        <div id="load-txt" class="tech text-[8px] text-neon/40 tracking-[0.5em] uppercase">Injecting_Neural_Interface</div>
+        <button id="entry-btn" class="hidden mt-8 border border-neon px-10 py-3 orbitron text-neon hover:bg-neon hover:text-black transition-all text-xs" onclick="powerOn()">SYNC_USER</button>
     </div>
 
     <div id="zin-shell">
-        <header class="h-28 border-b border-white/5 flex items-center justify-between px-12 bg-black/50">
-            <div class="flex items-center gap-8">
-                <div class="relative group">
-                    <img src="avatar.png" class="h-16 w-16 border-2 border-neon shadow-[0_0_20px_rgba(0,255,170,0.3)] group-hover:rotate-12 transition-transform">
-                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-black animate-pulse"></div>
-                </div>
+        <header class="h-24 border-b border-white/5 flex items-center justify-between px-10 bg-black/50">
+            <div class="flex items-center gap-6">
+                <img src="avatar.png" class="h-14 w-14 border border-neon p-1">
                 <div>
-                    <h1 class="orbitron text-3xl font-black italic tracking-tighter">ZINTHYN<span class="text-neon animate-pulse">_V6</span></h1>
-                    <div class="flex gap-4 mt-2 text-[10px] tech text-white/30 tracking-widest">
-                        <span class="text-neon">SECURE_UPLINK: ACTIVE</span>
-                        <span>KERNEL_USER: ARCHITECT</span>
-                    </div>
+                    <h1 class="orbitron text-xl font-black italic">ZINTHYN<span class="text-neon">_OS</span></h1>
+                    <p class="tech text-[9px] text-white/20 tracking-widest uppercase">Senior Systems Architect</p>
                 </div>
             </div>
-
-            <div class="flex gap-16">
-                <div class="text-right border-r border-white/5 pr-16">
-                    <p class="tech text-[10px] text-neon/60 uppercase">System_Impact</p>
-                    <p id="resmon" class="orbitron text-2xl font-black text-white">0.01ms</p>
+            <div class="flex gap-12">
+                <div class="text-right">
+                    <p class="tech text-[9px] text-neon uppercase">CPU_IMPACT</p>
+                    <p id="resmon" class="orbitron text-lg font-black">0.01ms</p>
                 </div>
-                <div class="flex flex-col justify-center">
-                    <div id="clock" class="orbitron text-3xl font-black text-white/10 italic">00:00:00</div>
-                </div>
+                <div id="clock" class="orbitron text-2xl font-black text-white/5 italic">00:00:00</div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-80 border-r border-white/5 p-12 flex flex-col bg-black/40">
-                <nav class="flex-1 space-y-6">
-                    <p class="tech text-[10px] text-white/10 mb-8 tracking-[0.4em]">DIRECTORY_ROOT</p>
-                    <button onclick="tab('about', this)" class="nav-link active w-full text-left tech text-sm text-slate-500 flex items-center gap-4"><i class="fas fa-fingerprint text-neon"></i> /BIOMETRICS</button>
-                    <button onclick="tab('lab', this)" class="nav-link w-full text-left tech text-sm text-slate-500 flex items-center gap-4"><i class="fas fa-vial text-neon"></i> /LAB_REPORTS</button>
-                    <button onclick="tab('stack', this)" class="nav-link w-full text-left tech text-sm text-slate-500 flex items-center gap-4"><i class="fas fa-layer-group text-neon"></i> /TECH_STACK</button>
-                    <button onclick="tab('terminal', this)" class="nav-link w-full text-left tech text-sm text-slate-500 flex items-center gap-4"><i class="fas fa-terminal text-neon"></i> /TERMINAL_GAME</button>
-                    
-                    <div class="pt-12 border-t border-white/5 mt-12">
-                        <button onclick="tab('contact', this)" class="nav-link w-full text-left tech text-sm text-emerald-400 flex items-center gap-4"><i class="fas fa-broadcast-tower"></i> /ESTABLISH_UPLINK</button>
-                    </div>
+            <aside class="w-72 border-r border-white/5 p-10 flex flex-col bg-black/30">
+                <nav class="flex-1 space-y-3">
+                    <button onclick="tab('about', this)" class="nav-link active w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-id-badge text-neon"></i> /BIOMETRICS</button>
+                    <button onclick="tab('showcase', this)" class="nav-link w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-server text-neon"></i> /HISTORY</button>
+                    <button onclick="tab('lab', this)" class="nav-link w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-code-branch text-neon"></i> /LAB_REPORTS</button>
+                    <button onclick="tab('terminal', this)" class="nav-link w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-terminal text-neon"></i> /INTERFACE</button>
+                    <button onclick="tab('contact', this)" class="nav-link w-full text-left tech text-xs text-emerald-400 flex items-center gap-4 pt-10 border-t border-white/5 mt-6"><i class="fas fa-paper-plane"></i> /UPLINK</button>
                 </nav>
-
-                <div class="mt-10 p-6 bg-white/[0.01] border-l-2 border-neon backdrop-blur-md">
-                    <p class="tech text-[9px] text-neon/40 mb-4 tracking-widest">SERVER_HISTORY</p>
-                    <ul class="tech text-[10px] space-y-3 text-white/40">
-                        <li class="hover:text-white transition-colors cursor-default"><span class="text-neon mr-2">»</span> NOPIXEL</li>
-                        <li class="hover:text-white transition-colors cursor-default"><span class="text-neon mr-2">»</span> HAPPY DAYS</li>
-                        <li class="hover:text-white transition-colors cursor-default"><span class="text-neon mr-2">»</span> REVENANT RP</li>
-                        <li class="hover:text-white transition-colors cursor-default"><span class="text-neon mr-2">»</span> LIQUID RP</li>
-                        <li class="hover:text-white transition-colors cursor-default"><span class="text-neon mr-2">»</span> SCORA NETWORK</li>
-                    </ul>
-                </div>
             </aside>
 
-            <main class="flex-1 p-24 overflow-hidden relative">
+            <main class="flex-1 p-16 overflow-hidden relative">
                 
-                <div id="v-about" class="view active overflow-y-auto custom-scroll pr-10">
-                    <h2 class="orbitron text-8xl font-black italic mb-12 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/10">THE_ARCHITECT.</h2>
-                    <div class="grid lg:grid-cols-2 gap-24">
-                        <div class="space-y-12">
-                            <div class="relative">
-                                <i class="fas fa-quote-left absolute -top-10 -left-10 text-neon text-6xl opacity-10"></i>
-                                <p class="tech text-xl text-slate-400 leading-relaxed bg-white/[0.01] p-10 border-l-4 border-neon shadow-[40px_0_100px_rgba(0,0,0,0.5)]">
-                                    I build digital ecosystems where performance meets immersion. Specializing in <span class="text-white">highly-optimized LUA modules</span> and cinematic NUI interfaces for the FiveM platform. 
-                                    My philosophy: if it impacts the CPU, it isn't finished.
-                                </p>
-                            </div>
-                            <div class="flex gap-16">
-                                <div><p class="tech text-neon text-xs mb-1">REGION</p><p class="orbitron text-2xl font-bold">SERBIA [EU]</p></div>
-                                <div><p class="tech text-neon text-xs mb-1">AVAILABILITY</p><p class="orbitron text-2xl font-bold">CONTRACT</p></div>
-                            </div>
+                <div id="v-about" class="view active overflow-y-auto custom-scroll pr-6">
+                    <h2 class="orbitron text-6xl font-black italic mb-8 tracking-tighter uppercase">Profile</h2>
+                    <p class="tech text-lg text-slate-400 leading-relaxed bg-white/[0.01] p-8 border-l-2 border-neon max-w-4xl">
+                        Senior Developer specializing in <span class="text-white">FiveM Systems Architecture</span>. Expert in low-level LUA optimization and modern NUI design. Known for creating secure, low-impact solutions for the world's largest roleplay communities.
+                    </p>
+                </div>
+
+                <div id="v-showcase" class="view">
+                    <h2 class="orbitron text-5xl font-black italic mb-10 uppercase">Verified_Deployments</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="p-6 border border-white/5 bg-white/[0.02]">
+                            <h3 class="orbitron text-neon font-black mb-2">NOPIXEL</h3>
+                            <p class="tech text-[10px] text-white/40 uppercase">Systems Optimization</p>
                         </div>
-                        <div class="space-y-10">
-                            <h3 class="tech text-xs tracking-[0.6em] text-white/20 uppercase">Core_Competency_Matrix</h3>
-                            <div class="space-y-8">
-                                <div><div class="flex justify-between tech text-[10px] mb-3"><span>LUA ENGINE OPTIMIZATION</span><span>99%</span></div><div class="h-1.5 bg-white/5 rounded-full"><div class="h-full bg-neon shadow-[0_0_20px_#00ffaa] rounded-full" style="width: 99%"></div></div></div>
-                                <div><div class="flex justify-between tech text-[10px] mb-3"><span>REACT / VUE UI SYSTEMS</span><span>94%</span></div><div class="h-1.5 bg-white/5 rounded-full"><div class="h-full bg-neon shadow-[0_0_20px_#00ffaa] rounded-full" style="width: 94%"></div></div></div>
-                                <div><div class="flex justify-between tech text-[10px] mb-3"><span>DATABASE ARCHITECTURE</span><span>88%</span></div><div class="h-1.5 bg-white/5 rounded-full"><div class="h-full bg-neon shadow-[0_0_20px_#00ffaa] rounded-full" style="width: 88%"></div></div></div>
-                            </div>
+                        <div class="p-6 border border-white/5 bg-white/[0.02]">
+                            <h3 class="orbitron text-neon font-black mb-2">REVENANT</h3>
+                            <p class="tech text-[10px] text-white/40 uppercase">Lead Architecture</p>
+                        </div>
+                        <div class="p-6 border border-white/5 bg-white/[0.02]">
+                            <h3 class="orbitron text-neon font-black mb-2">LIQUID RP</h3>
+                            <p class="tech text-[10px] text-white/40 uppercase">React/NUI Development</p>
                         </div>
                     </div>
                 </div>
 
                 <div id="v-lab" class="view">
-                    <div class="flex justify-between items-end mb-16">
-                        <h2 class="orbitron text-6xl font-black italic uppercase">Project_Archive</h2>
-                        <span class="tech text-neon text-xs tracking-widest animate-pulse">DECRYPTING_SECURE_REPORTS_...</span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 overflow-y-auto custom-scroll pr-8 pb-32">
+                    <h2 class="orbitron text-5xl font-black italic mb-10 uppercase">Technical_Reports</h2>
+                    <div class="grid lg:grid-cols-2 gap-10 overflow-hidden">
                         
-                        <div class="project-node group p-8">
-                            <div class="h-44 bg-black mb-8 border border-white/5 relative overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070" class="w-full h-full object-cover opacity-30 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 filter saturate-0 group-hover:saturate-100">
-                                <div class="absolute bottom-4 left-4 tech text-[8px] bg-neon text-black px-3 py-1 font-bold">LATENCY: 0.01ms</div>
+                        <div class="space-y-4 overflow-y-auto custom-scroll pr-4">
+                            <div class="p-6 border border-white/5 bg-white/[0.01] hover:bg-neon hover:text-black transition-all cursor-pointer group" onclick="showCode('anticheat')">
+                                <h3 class="orbitron font-black text-lg">ZIN_SHIELD_V4</h3>
+                                <p class="tech text-xs opacity-50 group-hover:text-black/70">Anti-cheat & Heuristic Analysis</p>
                             </div>
-                            <h3 class="orbitron text-xl group-hover:text-neon mb-4 transition-colors">ZIN_SHIELD_V4</h3>
-                            <p class="tech text-[11px] text-slate-500 leading-relaxed mb-6">A military-grade heuristic anti-cheat. Features memory-pattern scanning, movement vector validation, and an automated ban-wave logic module.</p>
-                            <div class="flex gap-4 border-t border-white/5 pt-4">
-                                <span class="tech text-[8px] text-white/20">#SECURITY</span><span class="tech text-[8px] text-white/20">#OPTIMIZATION</span>
-                            </div>
-                        </div>
-
-                        <div class="project-node group p-8">
-                            <div class="h-44 bg-black mb-8 border border-white/5 relative overflow-hidden">
-                                <img src="https://r2.fivemanage.com/image/Zp3mbLrMAEd5.png" class="w-full h-full object-cover opacity-30 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 filter saturate-0 group-hover:saturate-100">
-                                <div class="absolute bottom-4 left-4 tech text-[8px] bg-white/20 text-white px-3 py-1 font-bold">KERNEL: QBOX</div>
-                            </div>
-                            <h3 class="orbitron text-xl group-hover:text-neon mb-4 transition-colors">ZIN_GARAGE_CORE</h3>
-                            <p class="tech text-[11px] text-slate-500 leading-relaxed mb-6">Persistent entity management system. Utilizes custom vehicle shells and metadata storage to reduce server-side entity pooling.</p>
-                            <div class="flex gap-4 border-t border-white/5 pt-4">
-                                <span class="tech text-[8px] text-white/20">#ENTITY_SYNC</span><span class="tech text-[8px] text-white/20">#QBOX</span>
+                            <div class="p-6 border border-white/5 bg-white/[0.01] hover:bg-neon hover:text-black transition-all cursor-pointer group" onclick="showCode('garage')">
+                                <h3 class="orbitron font-black text-lg">ZIN_GARAGE_STALKER</h3>
+                                <p class="tech text-xs opacity-50 group-hover:text-black/70">Persistent Entity Tracking</p>
                             </div>
                         </div>
 
-                        <div class="project-node group p-8">
-                            <div class="h-44 bg-black mb-8 border border-white/5 relative overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=500&q=80" class="w-full h-full object-cover opacity-30 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 filter saturate-0 group-hover:saturate-100">
+                        <div class="code-block p-8 flex flex-col h-full rounded-lg">
+                            <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
+                                <span id="code-title" class="tech text-neon text-[10px]">PREVIEWING: ZIN_SHIELD_V4.lua</span>
+                                <div class="flex gap-2"><div class="w-2 h-2 rounded-full bg-red-500/50"></div><div class="w-2 h-2 rounded-full bg-neon/50"></div></div>
                             </div>
-                            <h3 class="orbitron text-xl group-hover:text-neon mb-4 transition-colors">ZIN_MULTICHAR_NUI</h3>
-                            <p class="tech text-[11px] text-slate-500 leading-relaxed mb-6">A cinematic character selection interface built with React. Features 3D pedestal lighting control and integrated outfit previewing.</p>
-                            <div class="flex gap-4 border-t border-white/5 pt-4">
-                                <span class="tech text-[8px] text-white/20">#REACT</span><span class="tech text-[8px] text-white/20">#NUI</span>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div id="v-stack" class="view">
-                    <h2 class="orbitron text-5xl font-black italic mb-16 tracking-tighter">CERTIFIED_KERNEL_STACK</h2>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-10">
-                        <div class="project-node p-14 flex flex-col items-center group">
-                            <img src="tmc.png" class="h-28 mb-8 grayscale group-hover:grayscale-0 transition-all group-hover:scale-110">
-                            <p class="orbitron text-xs font-bold tracking-widest">TMC_STALKER</p>
-                        </div>
-                        <div class="project-node p-14 flex flex-col items-center group">
-                            <img src="qbox.png" class="h-28 mb-8 grayscale group-hover:grayscale-0 transition-all group-hover:scale-110">
-                            <p class="orbitron text-xs font-bold tracking-widest">QBOX_BASE</p>
-                        </div>
-                        <div class="project-node p-14 flex flex-col items-center group">
-                            <img src="qbcore.png" class="h-28 mb-8 grayscale group-hover:grayscale-0 transition-all group-hover:scale-110">
-                            <p class="orbitron text-xs font-bold tracking-widest">QB_CORE</p>
-                        </div>
-                        <div class="project-node p-14 flex flex-col items-center group">
-                            <img src="esx.png" class="h-28 mb-8 grayscale group-hover:grayscale-0 transition-all group-hover:scale-110">
-                            <p class="orbitron text-xs font-bold tracking-widest">ESX_LEGACY</p>
+                            <pre id="code-content" class="custom-scroll overflow-y-auto">
+<span class="code-comment">-- Heuristic Memory Pattern Scan</span>
+<span class="code-keyword">function</span> <span class="code-func">CheckClientIntegrity</span>(target)
+    <span class="code-keyword">local</span> _p = <span class="code-func">GetPlayerPed</span>(target)
+    <span class="code-keyword">if</span> <span class="code-func">DoesEntityExist</span>(_p) <span class="code-keyword">then</span>
+        <span class="code-func">TriggerEvent</span>(<span class="code-string">'zin:scan'</span>, {
+            id = <span class="code-func">GetPlayerServerId</span>(target),
+            impact = <span class="code-string">'high'</span>
+        })
+    <span class="code-keyword">end</span>
+<span class="code-keyword">end</span></pre>
                         </div>
                     </div>
                 </div>
 
                 <div id="v-terminal" class="view items-center justify-center">
-                    <div class="w-full max-w-3xl bg-black/80 border border-white/10 p-12 backdrop-blur-xl">
-                        <div class="flex justify-between items-center mb-8">
-                            <span class="tech text-neon text-xs tracking-widest">SYSTEM_DECRYPTOR_V2.0</span>
-                            <div class="flex gap-3"><div class="w-3 h-3 bg-red-500 rounded-full"></div><div class="w-3 h-3 bg-neon rounded-full"></div></div>
+                    <div class="w-full max-w-2xl bg-black border border-white/10 p-10">
+                        <div id="terminal-out" class="h-64 tech text-xs text-white/40 overflow-y-auto mb-6 custom-scroll leading-loose">
+                            > ACCESS_GRANTED: ZINTHYN_ROOT<br>
+                            > TYPE 'HELP' FOR COMMANDS...<br>
                         </div>
-                        <div id="terminal-out" class="h-72 tech text-[11px] text-white/40 overflow-y-auto mb-10 custom-scroll leading-loose">
-                            > ACCESSING_KERNEL...<br>
-                            > BIOMETRIC SCAN: ZINTHYN_VERIFIED<br>
-                            > TYPE 'HELP' TO BEGIN DECRYPTION...<br>
-                        </div>
-                        <div class="flex gap-6 items-center">
-                            <span class="text-neon tech text-xl font-black">></span>
-                            <input type="text" id="term-in" class="bg-transparent outline-none border-none tech text-neon text-lg w-full uppercase" autofocus onkeydown="runCmd(event)">
+                        <div class="flex gap-4 items-center">
+                            <span class="text-neon tech">></span>
+                            <input type="text" id="term-in" class="bg-transparent outline-none border-none tech text-neon w-full uppercase" autofocus onkeydown="runCmd(event)">
                         </div>
                     </div>
                 </div>
 
                 <div id="v-contact" class="view items-center justify-center text-center">
-                    <h2 class="orbitron text-9xl font-black mb-16 italic opacity-5 tracking-tighter select-none">UPLINK_HUB</h2>
-                    <div class="flex gap-12">
-                        <a href="#" class="project-node px-24 py-12 orbitron text-2xl font-black hover:bg-neon hover:text-black transition-all">DISCORD</a>
-                        <a href="https://github.com/Zinthyn" target="_blank" class="project-node px-24 py-12 orbitron text-2xl font-black hover:bg-neon hover:text-black transition-all">GITHUB</a>
+                    <h2 class="orbitron text-7xl font-black mb-12 italic opacity-5 tracking-tighter">UPLINK</h2>
+                    <div class="flex gap-8">
+                        <a href="#" class="p-8 border border-white/10 orbitron text-xl font-black hover:bg-neon hover:text-black transition-all">DISCORD</a>
+                        <a href="https://github.com/Zinthyn" target="_blank" class="p-8 border border-white/10 orbitron text-xl font-black hover:bg-neon hover:text-black transition-all">GITHUB</a>
                     </div>
-                    <p class="tech text-[10px] text-white/10 mt-24 tracking-[1.5em] uppercase">Security_Protocol_Active_V6</p>
                 </div>
 
             </main>
         </div>
 
-        <footer class="h-12 border-t border-white/5 flex items-center justify-between px-12 bg-black tech text-[10px] text-white/20">
-            <div class="flex gap-10">
+        <footer class="h-10 border-t border-white/5 flex items-center justify-between px-10 bg-black tech text-[9px] text-white/20">
+            <div class="flex gap-8">
                 <span>SYSTEM: <span class="text-neon">STABLE</span></span>
-                <span>DATA_PACKETS: <span class="text-neon">ENCRYPTED</span></span>
-                <span>API_BRIDGE: <span class="text-white/60">CONNECTED</span></span>
+                <span>DATA_ENCRYPTION: 256_BIT</span>
             </div>
-            <div class="flex gap-6 items-center">
-                <span class="animate-pulse flex items-center gap-2"><div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> LIVE_UPLINK</span>
-                <span class="text-white/10 italic">ZINTHYN_ARCHITECT_PORTFOLIO_2026</span>
-            </div>
+            <span>ZINTHYN_V6_PRO_EDITION</span>
         </footer>
     </div>
 
-    <audio id="click-sound" src="https://www.soundjay.com/buttons/button-50.mp3" preload="auto"></audio>
-
     <script>
-        // SFX ENGINE
-        const sfx = document.getElementById('click-sound');
-        function playSfx() { sfx.currentTime = 0; sfx.volume = 0.05; sfx.play(); }
+        const snippets = {
+            anticheat: {
+                title: "ZIN_SHIELD_V4.lua",
+                content: `<span class="code-comment">-- Heuristic Memory Pattern Scan</span>
+<span class="code-keyword">function</span> <span class="code-func">CheckClientIntegrity</span>(target)
+    <span class="code-keyword">local</span> _p = <span class="code-func">GetPlayerPed</span>(target)
+    <span class="code-keyword">if</span> <span class="code-func">DoesEntityExist</span>(_p) <span class="code-keyword">then</span>
+        <span class="code-func">TriggerEvent</span>(<span class="code-string">'zin:scan'</span>, {
+            id = <span class="code-func">GetPlayerServerId</span>(target),
+            impact = <span class="code-string">'high'</span>
+        })
+    <span class="code-keyword">end</span>
+<span class="code-keyword">end</span>`
+            },
+            garage: {
+                title: "ZIN_GARAGE.lua",
+                content: `<span class="code-comment">-- Optimized Vehicle Metadata Sync</span>
+<span class="code-keyword">RegisterNetEvent</span>(<span class="code-string">'zin:saveVehicle'</span>)
+<span class="code-keyword">AddEventHandler</span>(<span class="code-string">'zin:saveVehicle'</span>, <span class="code-keyword">function</span>(vNetId)
+    <span class="code-keyword">local</span> props = <span class="code-func">GetVehicleProperties</span>(vNetId)
+    <span class="code-func">MySQL.Async.execute</span>(<span class="code-string">'UPDATE vehicles SET meta = @m'</span>, {
+        [<span class="code-string">'@m'</span>] = <span class="code-func">json.encode</span>(props)
+    })
+<span class="code-keyword">end</span>`
+            }
+        };
 
-        // MOUSE PARALLAX & CURSOR
-        function syncUI(e) {
-            const cursor = document.getElementById('custom-cursor');
-            const shell = document.getElementById('zin-shell');
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-
-            const xRotation = (window.innerHeight / 2 - e.clientY) / 80;
-            const yRotation = (e.clientX - window.innerWidth / 2) / 80;
-            shell.style.transform = `rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
+        function showCode(key) {
+            document.getElementById('code-title').innerText = "PREVIEWING: " + snippets[key].title;
+            document.getElementById('code-content').innerHTML = snippets[key].content;
         }
 
-        // VIEW NAVIGATION
+        function syncUI(e) {
+            const cursor = document.getElementById('custom-cursor');
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        }
+
         function tab(id, el) {
-            playSfx();
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(`v-${id}`).classList.add('active');
             document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
         }
 
-        // BOOT LOGIC
         let p = 0;
-        const bar = document.getElementById('load-bar');
-        const txt = document.getElementById('load-txt');
-        const logs = ["Loading Kernel...", "Syncing Database...", "Assets Mounted", "Syncing NUI Assets...", "READY."];
-        
-        const bootInt = setInterval(() => {
-            p += Math.random() * 8;
-            bar.style.width = p + "%";
-            txt.innerText = logs[Math.floor(p/22)] || "Handshaking...";
+        const boot = setInterval(() => {
+            p += Math.random() * 15;
+            document.getElementById('load-bar').style.width = p + "%";
             if(p >= 100) {
-                clearInterval(bootInt);
+                clearInterval(boot);
                 document.getElementById('entry-btn').classList.remove('hidden');
             }
-        }, 150);
+        }, 120);
 
         function powerOn() {
-            playSfx();
-            document.getElementById('boot-gate').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('boot-gate').style.display = 'none';
-                const shell = document.getElementById('zin-shell');
-                shell.style.display = 'flex';
-                setTimeout(() => shell.style.opacity = '1', 50);
-            }, 600);
+            document.getElementById('boot-gate').style.display = 'none';
+            const shell = document.getElementById('zin-shell');
+            shell.style.display = 'flex';
+            setTimeout(() => shell.style.opacity = '1', 50);
         }
 
-        // TERMINAL GAME
         function runCmd(e) {
             if(e.key === 'Enter') {
-                playSfx();
                 const input = e.target.value.toUpperCase();
                 const out = document.getElementById('terminal-out');
-                let reply = "";
-                
-                if(input === 'HELP') reply = "COMMANDS: HELP, STATUS, CLEAR, WHOAMI, HACK";
-                else if(input === 'STATUS') reply = "SYSTEM HEALTH: 100% | LATENCY: 0.01MS | UPTIME: 320D";
-                else if(input === 'HACK') reply = "ATTEMPTING_BYPASS... [ERROR] SECURITY_LEVEL_TOO_HIGH.";
-                else if(input === 'WHOAMI') reply = "ZINTHYN: FIVE_M_SYSTEMS_ARCHITECT.";
-                else if(input === 'CLEAR') { out.innerHTML = "> SYSTEM_PURGED."; e.target.value = ""; return; }
-                else reply = "UNKNOWN_PROTOCOL_IDENTIFIED.";
-
+                let reply = (input === 'HELP') ? "AVAILABLE: STATUS, CLEAR, WHOAMI" : 
+                            (input === 'STATUS') ? "KERNEL_NOMINAL. IMPACT: 0.01MS" : 
+                            (input === 'WHOAMI') ? "ARCHITECT: ZINTHYN." : "CMD_NOT_FOUND.";
+                if(input === 'CLEAR') { out.innerHTML = ""; e.target.value = ""; return; }
                 out.innerHTML += `<br><span class="text-neon">> ${input}</span><br>${reply}`;
                 out.scrollTop = out.scrollHeight;
                 e.target.value = "";
             }
         }
 
-        // REAL RESMON
         let last = performance.now();
         function updateRes() {
             let now = performance.now();
-            let delta = (now - last).toFixed(2);
-            document.getElementById('resmon').innerText = (delta / 100).toFixed(2) + 'ms';
+            document.getElementById('resmon').innerText = ((now - last)/100).toFixed(2) + 'ms';
             last = now;
             requestAnimationFrame(updateRes);
         }
         updateRes();
 
-        // CLOCK
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
         }, 1000);
 
-        // BG CANVAS
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let particles = Array(80).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*0.5 }));
-        function drawParticles() {
+        let pts = Array(50).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*0.4 }));
+        function draw() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "rgba(0, 255, 170, 0.2)";
-            particles.forEach(p => {
-                p.y -= p.s; if(p.y < 0) p.y = canvas.height;
-                ctx.fillRect(p.x, p.y, 1.2, 1.2);
-            });
-            requestAnimationFrame(drawParticles);
+            ctx.fillStyle = "rgba(0, 255, 170, 0.15)";
+            pts.forEach(p => { p.y -= p.s; if(p.y < 0) p.y = canvas.height; ctx.fillRect(p.x, p.y, 1, 1); });
+            requestAnimationFrame(draw);
         }
-        drawParticles();
+        draw();
     </script>
 </body>
 </html>
