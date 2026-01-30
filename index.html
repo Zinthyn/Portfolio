@@ -3,275 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zinthyn | Developer & Problem Solver</title>
+    <title>Zinthyn | FiveM Developer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --bg-dark: #0a0a0a;
-            --accent: #3b82f6; /* Kenshin Blue */
-            --glass: rgba(255, 255, 255, 0.03);
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
-
+        :root { --bg: #0d0d0d; --accent: #3b82f6; --glass: rgba(255, 255, 255, 0.03); }
+        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-
-        /* Kenshin Style Code Overlay */
-        .code-bg {
-            position: fixed;
-            top: 0;
-            right: 0;
-            font-size: 14px;
-            color: rgba(59, 130, 246, 0.05);
-            pointer-events: none;
-            z-index: -1;
-            white-space: pre;
-        }
-
-        .nav-blur {
-            backdrop-filter: blur(12px);
-            background: rgba(10, 10, 10, 0.8);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .hero-title {
-            font-size: clamp(3rem, 10vw, 8rem);
-            line-height: 0.9;
-            letter-spacing: -0.05em;
-        }
-
-        .gradient-text {
-            background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.4) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .card {
-            background: var(--glass);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: var(--accent);
-            background: rgba(59, 130, 246, 0.03);
-        }
-
-        .skill-bar {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .skill-progress {
-            height: 100%;
-            background: var(--accent);
-            width: 0;
-        }
-
-        /* Fun Elements */
-        .floating { animation: float 6s ease-in-out infinite; }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
+        .nav-blur { backdrop-filter: blur(15px); background: rgba(13, 13, 13, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: pointer; }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .skill-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .skill-progress { height: 100%; background: var(--accent); width: 0; }
+        .desc-hidden { display: none; margin-top: 1rem; color: #9ca3af; font-size: 0.875rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; }
     </style>
 </head>
 <body>
 
-    <div class="code-bg mono">
-        local Zinthyn = {}
-        Zinthyn.__index = Zinthyn
-        
-        function Zinthyn:new(name, role)
-           local self = setmetatable({}, Zinthyn)
-           self.name = "Zinthyn"
-           self.status = "Coding the future"
-           return self
-        end
-        
-        -- Initializing...
-        -- [SUCCESS] System Online
-    </div>
-
     <nav class="fixed top-0 w-full z-50 nav-blur">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-xl font-bold tracking-tighter">ZINTHYN<span class="text-blue-500">.</span></div>
+            <div class="text-xl font-extrabold tracking-tighter uppercase">Zinthyn<span class="text-blue-500">.</span></div>
             <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
                 <a href="#about" class="hover:text-white transition">About</a>
-                <a href="#skills" class="hover:text-white transition">Skills</a>
-                <a href="#projects" class="hover:text-white transition">Projects</a>
+                <a href="#frameworks" class="hover:text-white transition">Frameworks</a>
+                <a href="#scripts" class="hover:text-white transition">Scripts</a>
                 <a href="#contact" class="hover:text-white transition">Contact</a>
             </div>
         </div>
     </nav>
 
     <section class="h-screen flex flex-col justify-center items-center text-center px-6">
-        <p class="text-blue-500 mono mb-4 tracking-widest uppercase text-sm animate-pulse">Developer / Creative / Problem Solver</p>
-        <h1 class="hero-title font-extrabold gradient-text mb-6">ZINTHYN</h1>
-        <p class="max-w-xl text-gray-400 text-lg mb-10">
-            Building high-performance digital experiences and solving complex problems with clean, scalable code.
-        </p>
+        <h1 class="text-7xl md:text-9xl font-black mb-4 tracking-tighter">ZINTHYN</h1>
+        <p class="text-blue-500 mono tracking-widest uppercase mb-8">Lead Developer / FiveM Specialist</p>
         <div class="flex space-x-4">
-            <a href="#projects" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105">View My Work</a>
-            <a href="#contact" class="border border-white/10 hover:bg-white/5 text-white px-8 py-4 rounded-full font-bold transition-all">Get In Touch</a>
+            <a href="#scripts" class="bg-blue-600 px-8 py-4 rounded-full font-bold hover:bg-blue-700 transition">View Scripts</a>
         </div>
     </section>
 
-    <section id="about" class="py-24 px-6 max-w-7xl mx-auto">
-        <div class="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-                <h2 class="text-4xl font-bold mb-6">Passionate about <span class="text-blue-500">performance</span>.</h2>
-                <p class="text-gray-400 leading-relaxed mb-6">
-                    I specialize in building immersive environments and robust backend systems. Much like the architecture of high-player count servers, I focus on "Performance First" — ensuring every line of code serves a purpose.
-                </p>
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="card p-6 rounded-2xl">
-                        <div class="text-3xl font-bold text-blue-500">20+</div>
-                        <div class="text-sm text-gray-500 uppercase tracking-wider">Projects Done</div>
-                    </div>
-                    <div class="card p-6 rounded-2xl">
-                        <div class="text-3xl font-bold text-blue-500">5+</div>
-                        <div class="text-sm text-gray-500 uppercase tracking-wider">Years Exp.</div>
-                    </div>
-                </div>
+    <section id="frameworks" class="py-24 px-6 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-12">Supported <span class="text-blue-500">Frameworks</span></h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="card p-8 rounded-2xl text-center">
+                <div class="text-xl font-bold">TMC</div>
             </div>
-            <div class="relative">
-                <div class="card p-8 rounded-3xl border-blue-500/20 floating">
-                    <pre class="mono text-sm text-blue-400">
-{
-  "name": "Zinthyn",
-  "location": "Global",
-  "focus": "Full-Stack Dev",
-  "motto": "Code is Art",
-  "coffee_level": "Critical"
-}</pre>
-                </div>
+            <div class="card p-8 rounded-2xl text-center border-red-500/20">
+                <div class="text-xl font-bold text-red-500">qb-core</div>
+            </div>
+            <div class="card p-8 rounded-2xl text-center border-yellow-500/20">
+                <div class="text-xl font-bold text-yellow-500">Qbox</div>
+            </div>
+            <div class="card p-8 rounded-2xl text-center border-orange-500/20">
+                <div class="text-xl font-bold text-orange-500">ESX</div>
             </div>
         </div>
     </section>
 
-    <section id="skills" class="py-24 bg-black/50">
-        <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-3xl font-bold mb-12">Technical <span class="text-blue-500">Expertise</span></h2>
-            <div class="grid md:grid-cols-2 gap-12">
-                <div class="space-y-8">
+    <section id="scripts" class="py-24 px-6 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-12">Custom <span class="text-blue-500">Scripts</span></h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div class="card p-6 rounded-3xl" onclick="toggleDesc('multichar')">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-xl">ZIN_Multicharacter</h3>
+                    <span class="text-blue-500 text-xs mono">UI/UX</span>
+                </div>
+                <div id="multichar" class="desc-hidden">
+                    Premium character selection screen with 3D ped rotation and smooth metadata transitions.
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-3xl" onclick="toggleDesc('garage')">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-xl">ZIN_Garage</h3>
+                    <span class="text-blue-500 text-xs mono">VEHICLE</span>
+                </div>
+                <div id="garage" class="desc-hidden">
+                    Advanced vehicle management with valet services, persistent damage, and customizable housing integration.
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-3xl" onclick="toggleDesc('oilrig')">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-xl">ZIN_OilRig</h3>
+                    <span class="text-blue-500 text-xs mono">HEIST</span>
+                </div>
+                <div id="oilrig" class="desc-hidden">
+                    Synchronized group heist featuring custom hacking mini-games and dynamic NPC responses.
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-3xl" onclick="toggleDesc('fleeca')">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-xl">ZIN_Fleeca</h3>
+                    <span class="text-blue-500 text-xs mono">HEIST</span>
+                </div>
+                <div id="fleeca" class="desc-hidden">
+                    Classic bank robbery reimagined with thermite drilling and silent/loud entry options.
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-3xl" onclick="toggleDesc('anticheat')">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-xl">ZIN_AC</h3>
+                    <span class="text-blue-500 text-xs mono">SECURITY</span>
+                </div>
+                <div id="anticheat" class="desc-hidden">
+                    Prop-injection protection, event-trigger monitoring, and automatic blacklisted command bans.
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="skills" class="py-24 bg-black/30 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold mb-12">Technical <span class="text-blue-500">Skills</span></h2>
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="space-y-6">
                     <div>
-                        <div class="flex justify-between mb-2">
-                            <span class="font-bold">Backend Development (Node.js/Lua)</span>
-                            <span class="text-blue-500">95%</span>
-                        </div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="95%"></div></div>
+                        <div class="flex justify-between mb-2"><span class="mono">LUA</span><span>98%</span></div>
+                        <div class="skill-bar"><div class="skill-progress" data-width="98%"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between mb-2">
-                            <span class="font-bold">Frontend Engineering (React/Tailwind)</span>
-                            <span class="text-blue-500">90%</span>
-                        </div>
+                        <div class="flex justify-between mb-2"><span class="mono">C#</span><span>85%</span></div>
+                        <div class="skill-bar"><div class="skill-progress" data-width="85%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2"><span class="mono">C++</span><span>75%</span></div>
+                        <div class="skill-bar"><div class="skill-progress" data-width="75%"></div></div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2"><span class="mono">PYTHON</span><span>80%</span></div>
+                        <div class="skill-bar"><div class="skill-progress" data-width="80%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2"><span class="mono">HTML</span><span>90%</span></div>
                         <div class="skill-bar"><div class="skill-progress" data-width="90%"></div></div>
                     </div>
                 </div>
-                <div class="space-y-8">
-                    <div>
-                        <div class="flex justify-between mb-2">
-                            <span class="font-bold">Database Architecture</span>
-                            <span class="text-blue-500">88%</span>
-                        </div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="88%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-2">
-                            <span class="font-bold">System Optimization</span>
-                            <span class="text-blue-500">92%</span>
-                        </div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="92%"></div></div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
 
-    <section id="projects" class="py-24 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold mb-12 text-center">Featured <span class="text-blue-500">Creations</span></h2>
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="card group rounded-3xl overflow-hidden">
-                <div class="h-48 bg-blue-900/20 group-hover:bg-blue-900/40 transition flex items-center justify-center">
-                    <span class="text-blue-500 font-bold">Project Alpha</span>
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-xl mb-2">Advanced Framework</h3>
-                    <p class="text-gray-400 text-sm">A custom-built modular framework designed for high-concurrency environments.</p>
-                </div>
-            </div>
-            <div class="card group rounded-3xl overflow-hidden">
-                <div class="h-48 bg-purple-900/20 group-hover:bg-purple-900/40 transition flex items-center justify-center">
-                    <span class="text-purple-500 font-bold">Project Beta</span>
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-xl mb-2">API Gateway</h3>
-                    <p class="text-gray-400 text-sm">Secure, lightning-fast microservice communication layer.</p>
-                </div>
-            </div>
-            <div class="card group rounded-3xl overflow-hidden">
-                <div class="h-48 bg-green-900/20 group-hover:bg-green-900/40 transition flex items-center justify-center">
-                    <span class="text-green-500 font-bold">Project Gamma</span>
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-xl mb-2">UI Dashboard</h3>
-                    <p class="text-gray-400 text-sm">A minimalist, real-time analytics panel for server owners.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer id="contact" class="py-24 border-t border-white/5 text-center">
-        <h2 class="text-4xl font-bold mb-4">Let's build something <span class="text-blue-500">epic</span>.</h2>
-        <p class="text-gray-500 mb-8">Currently available for new opportunities and collaborations.</p>
-        <a href="mailto:hello@zinthyn.dev" class="text-2xl font-bold hover:text-blue-500 transition underline underline-offset-8">hello@zinthyn.dev</a>
-        <div class="mt-20 text-gray-600 text-sm mono">
-            © 2026 ZINTHYN | ALL RIGHTS RESERVED
-        </div>
+    <footer id="contact" class="py-20 text-center border-t border-white/5">
+        <p class="text-gray-500 mb-4">Interested in custom work?</p>
+        <a href="mailto:contact@zinthyn.dev" class="text-3xl font-bold hover:text-blue-500 transition underline underline-offset-8">contact@zinthyn.dev</a>
     </footer>
 
     <script>
-        // Initialize GSAP ScrollTrigger
         gsap.registerPlugin(ScrollTrigger);
 
-        // Animate Skills
+        // Skill bar animation
         gsap.utils.toArray('.skill-progress').forEach(bar => {
             gsap.to(bar, {
                 width: bar.dataset.width,
-                duration: 1.5,
-                ease: "power4.out",
-                scrollTrigger: {
-                    trigger: bar,
-                    start: "top 90%"
-                }
+                duration: 2,
+                scrollTrigger: { trigger: bar, start: "top 90%" }
             });
         });
 
-        // Fade in cards on scroll
-        gsap.utils.toArray('.card').forEach(card => {
-            gsap.from(card, {
-                y: 50,
-                opacity: 0,
-                duration: 1,
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 85%"
-                }
-            });
-        });
+        // Click description logic
+        function toggleDesc(id) {
+            const el = document.getElementById(id);
+            const isVisible = el.style.display === "block";
+            
+            // Hide all others first for a "clean" feel
+            document.querySelectorAll('.desc-hidden').forEach(d => d.style.display = 'none');
+            
+            el.style.display = isVisible ? "none" : "block";
+        }
     </script>
 </body>
 </html>
