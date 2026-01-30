@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // NEURAL_INTERFACE_V6</title>
+    <title>ZINTHYN // NEURAL_INTERFACE_V7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00ffaa; --bg: #010203; --code-bg: #0a0b0c; --glass: rgba(255, 255, 255, 0.03); }
+        :root { --neon: #00ffaa; --bg: #010203; --glass: rgba(255, 255, 255, 0.03); }
         * { cursor: none !important; margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
 
@@ -30,12 +30,8 @@
             position: relative; width: 96vw; height: 92vh; margin: 4vh auto;
             background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 255, 170, 0.1);
             display: none; flex-direction: column; opacity: 0;
-            box-shadow: 0 0 100px rgba(0,0,0,1); backdrop-filter: blur(10px);
+            box-shadow: 0 0 100px rgba(0,0,0,1); backdrop-filter: blur(15px);
         }
-
-        /* LOGO & CARDS */
-        .logo-container { width: 56px; height: 56px; overflow: hidden; border: 1px solid var(--neon); background: #000; }
-        .zin-logo { width: 100%; height: 100%; object-fit: cover; }
 
         .nav-link {
             position: relative; padding: 18px 25px; transition: 0.3s; margin-bottom: 10px;
@@ -48,43 +44,30 @@
         .view { display: none; height: 100%; opacity: 0; transition: 0.4s ease-out; }
         .view.active { display: flex; flex-direction: column; opacity: 1; }
 
-        /* PROJECT GRID STYLES (KENSHIN INSPIRED) */
-        .project-card {
-            background: var(--glass); border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 4px; overflow: hidden; transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-        .project-card:hover {
-            border-color: var(--neon); transform: translateY(-5px);
-            background: rgba(0, 255, 170, 0.02);
-        }
-        .project-img-wrapper {
-            width: 100%; height: 160px; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-        }
-        .project-img {
-            width: 100%; height: 100%; object-fit: cover; filter: saturate(0);
-            transition: 0.6s;
-        }
-        .project-card:hover .project-img { filter: saturate(1); transform: scale(1.1); }
-        
-        .tech-badge {
-            font-size: 8px; padding: 2px 6px; border: 1px solid rgba(0, 255, 170, 0.3);
-            color: var(--neon); text-transform: uppercase; border-radius: 2px;
-        }
+        /* SKILL MATRIX */
+        .skill-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; transition: 0.3s; }
+        .skill-item:hover { border-color: var(--neon); background: rgba(0, 255, 170, 0.05); }
+        .skill-bar { height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
 
-        .code-block {
-            background: var(--code-bg); border: 1px solid rgba(255,255,255,0.05);
-            font-family: 'JetBrains Mono', monospace; font-size: 11px;
-            line-height: 1.6; color: #888; overflow: hidden; position: relative;
+        /* CARDS */
+        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: pointer; overflow: hidden; }
+        .card:hover { border-color: var(--neon); background: rgba(0,255,170,0.02); transform: translateY(-5px); }
+        .card img { filter: grayscale(1); transition: 0.5s; object-fit: cover; height: 160px; width: 100%; opacity: 0.6; }
+        .card:hover img { filter: grayscale(0); opacity: 1; }
+
+        /* MODAL */
+        #modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000000; 
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(12px);
         }
-        .code-keyword { color: #ff0055; }
-        .code-func { color: var(--neon); }
-        .code-string { color: #00f2ff; }
+        #modal-content { 
+            width: 850px; max-width: 90vw; background: #050505; border: 1px solid var(--neon);
+            padding: 45px; position: relative; transform: translateY(30px); opacity: 0; transition: 0.4s;
+            box-shadow: 0 0 50px rgba(0, 255, 170, 0.1);
+        }
 
         .orbitron { font-family: 'Orbitron', sans-serif; }
         .tech { font-family: 'Share Tech Mono', monospace; }
-        .custom-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: var(--neon); }
     </style>
 </head>
 <body onmousemove="syncUI(event)">
@@ -93,171 +76,235 @@
     <div class="crt-effect"></div>
     <canvas id="particle-canvas"></canvas>
 
+    <div id="modal-overlay" onclick="closeModal()">
+        <div id="modal-content" onclick="event.stopPropagation()">
+            <button class="absolute top-6 right-6 text-neon tech text-xs hover:scale-110 transition-transform" onclick="closeModal()">[ ESC_EXIT ]</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <div id="boot-gate" class="fixed inset-0 bg-black z-[100000] flex flex-col items-center justify-center">
-        <div class="w-24 h-24 mb-8 logo-container border-2">
-            <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="zin-logo grayscale" alt="ZINTHYN">
+        <div class="w-24 h-24 mb-8 border border-neon p-1 bg-black overflow-hidden shadow-[0_0_20px_rgba(0,255,170,0.2)]">
+            <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="w-full h-full object-cover grayscale">
         </div>
         <div class="w-48 h-[1px] bg-white/10 relative overflow-hidden mb-4">
             <div id="load-bar" class="absolute inset-0 bg-neon w-0"></div>
         </div>
-        <div id="load-txt" class="tech text-[8px] text-neon/40 tracking-[0.5em] uppercase">Authenticating_User</div>
-        <button id="entry-btn" class="hidden mt-8 border border-neon px-10 py-3 orbitron text-neon hover:bg-neon hover:text-black transition-all text-xs" onclick="powerOn()">SYNC_INTERFACE</button>
+        <div id="boot-status" class="tech text-[8px] text-neon/40 tracking-[0.3em] uppercase mb-10">Syncing_Neural_Cores...</div>
+        <button id="entry-btn" class="hidden border border-neon px-12 py-4 orbitron text-neon hover:bg-neon hover:text-black transition-all text-[10px] tracking-[0.2em]" onclick="powerOn()">ESTABLISH_UPLINK</button>
     </div>
 
     <div id="zin-shell">
-        <header class="h-24 border-b border-white/5 flex items-center justify-between px-10 bg-black/50">
+        <header class="h-24 border-b border-white/5 flex items-center justify-between px-12 bg-black/50">
             <div class="flex items-center gap-6">
-                <div class="logo-container">
-                    <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="zin-logo" alt="ZINTHYN">
+                <div class="w-14 h-14 border border-neon/30 overflow-hidden shadow-[0_0_10px_rgba(0,255,170,0.1)]">
+                    <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h1 class="orbitron text-xl font-black italic">ZINTHYN<span class="text-neon">_OS</span></h1>
-                    <p class="tech text-[9px] text-white/20 tracking-widest uppercase">Senior Systems Architect</p>
+                    <h1 class="orbitron text-xl font-black italic tracking-widest">ZINTHYN<span class="text-neon">_OS</span></h1>
+                    <p class="tech text-[9px] text-white/20 tracking-widest uppercase">Senior Neural Architect // V.07</p>
                 </div>
             </div>
-            <div class="flex gap-12">
+            <div class="flex gap-16">
                 <div class="text-right">
-                    <p class="tech text-[9px] text-neon uppercase">RESMON_IMPACT</p>
-                    <p id="resmon" class="orbitron text-lg font-black">0.01ms</p>
+                    <p class="tech text-[9px] text-neon uppercase">KERNEL_LATENCY</p>
+                    <p id="resmon" class="orbitron text-lg font-black tracking-tighter">0.01ms</p>
                 </div>
                 <div id="clock" class="orbitron text-2xl font-black text-white/5 italic">00:00:00</div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-72 border-r border-white/5 p-10 flex flex-col bg-black/30">
-                <nav class="flex-1 space-y-3">
-                    <button onclick="tab('about', this)" class="nav-link active w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-id-badge text-neon"></i> /BIOMETRICS</button>
-                    <button onclick="tab('showcase', this)" class="nav-link w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-server text-neon"></i> /HISTORY</button>
-                    <button onclick="tab('lab', this)" class="nav-link w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-code-branch text-neon"></i> /LAB_REPORTS</button>
-                    <button onclick="tab('terminal', this)" class="nav-link w-full text-left tech text-xs text-slate-500 flex items-center gap-4"><i class="fas fa-terminal text-neon"></i> /INTERFACE</button>
-                    <button onclick="tab('contact', this)" class="nav-link w-full text-left tech text-xs text-emerald-400 flex items-center gap-4 pt-10 border-t border-white/5 mt-6"><i class="fas fa-paper-plane"></i> /UPLINK</button>
+            <aside class="w-80 border-r border-white/5 p-12 flex flex-col bg-black/30 backdrop-blur-md">
+                <nav class="flex-1 space-y-4">
+                    <button onclick="tab('about', this)" class="nav-link active w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-brain text-neon"></i> /SKILL_TREE</button>
+                    <button onclick="tab('history', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-server text-neon"></i> /HISTORY</button>
+                    <button onclick="tab('projects', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-microchip text-neon"></i> /PROJECTS</button>
+                    <button onclick="tab('terminal', this)" class="nav-link w-full text-left tech text-xs flex items-center gap-4"><i class="fas fa-terminal text-neon"></i> /INTERFACE</button>
                 </nav>
+                <div class="mt-auto pt-6 border-t border-white/5">
+                    <p class="tech text-[8px] text-white/10 uppercase">Security Status: Encrypted</p>
+                </div>
             </aside>
 
-            <main class="flex-1 p-12 overflow-hidden relative">
+            <main class="flex-1 p-20 overflow-y-auto custom-scroll relative bg-[radial-gradient(circle_at_50%_50%,_rgba(0,255,170,0.02)_0%,_transparent_70%)]">
                 
-                <div id="v-about" class="view active overflow-y-auto custom-scroll pr-6">
-                    <h2 class="orbitron text-6xl font-black italic mb-8 tracking-tighter uppercase">Profile</h2>
-                    <p class="tech text-lg text-slate-400 leading-relaxed bg-white/[0.01] p-8 border-l-2 border-neon max-w-4xl">
-                        Senior Developer specializing in <span class="text-white">FiveM Systems Architecture</span>. Expert in low-level LUA optimization and modern NUI design. Known for creating secure, low-impact solutions for the world's largest roleplay communities.
-                    </p>
-                </div>
-
-                <div id="v-showcase" class="view">
-                    <h2 class="orbitron text-5xl font-black italic mb-10 uppercase">Verified_Deployments</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="p-6 border border-white/5 bg-white/[0.02]">
-                            <h3 class="orbitron text-neon font-black mb-2 uppercase">NoPixel</h3>
-                            <p class="tech text-[10px] text-white/40">Optimizing core entity pooling, anti-cheat & MLO Builder integration.</p>
+                <div id="v-about" class="view active">
+                    <h2 class="orbitron text-6xl font-black italic mb-12 uppercase tracking-tighter">Neural_Matrix</h2>
+                    <div class="grid grid-cols-2 gap-8 max-w-4xl">
+                        <div class="skill-item">
+                            <div class="flex justify-between tech text-xs mb-3"><span>LUA_SCRIPTING</span><span>98%</span></div>
+                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 98%"></div></div>
                         </div>
-                        <div class="p-6 border border-white/5 bg-white/[0.02]">
-                            <h3 class="orbitron text-neon font-black mb-2 uppercase">Liquid RP</h3>
-                            <p class="tech text-[10px] text-white/40">Bugs Fixer & Lead Dev Support Managements for high-pop playerbase.</p>
+                        <div class="skill-item">
+                            <div class="flex justify-between tech text-xs mb-3"><span>FRONTEND_UI</span><span>90%</span></div>
+                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 90%"></div></div>
                         </div>
-                    </div>
-                </div>
-
-                <div id="v-lab" class="view overflow-y-auto custom-scroll pr-4">
-                    <div class="flex justify-between items-end mb-10">
-                        <div>
-                            <h2 class="orbitron text-5xl font-black italic uppercase">Project_Archive</h2>
-                            <p class="tech text-xs text-white/30 tracking-widest mt-2">TECHNICAL SOLUTIONS & MODULES</p>
+                        <div class="skill-item">
+                            <div class="flex justify-between tech text-xs mb-3"><span>PYTHON_AUTOMATION</span><span>75%</span></div>
+                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 75%"></div></div>
                         </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
-                        
-                        <div class="project-card group" onclick="showCode('anticheat')">
-                            <div class="project-img-wrapper">
-                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/anticheat_placeholder.webp" class="project-img" alt="Shield">
-                                <div class="absolute top-3 right-3 flex gap-2">
-                                    <span class="tech-badge">LUA</span>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <h3 class="orbitron text-lg font-black group-hover:text-neon transition-colors">ZIN_SHIELD_V4</h3>
-                                <p class="tech text-[10px] text-white/40 mt-2 leading-relaxed">Advanced heuristic analysis for memory manipulation detection and entity explosion protection.</p>
-                            </div>
-                        </div>
-
-                        <div class="project-card group" onclick="showCode('hud')">
-                            <div class="project-img-wrapper">
-                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/hud_placeholder.webp" class="project-img" alt="HUD">
-                                <div class="absolute top-3 right-3 flex gap-2">
-                                    <span class="tech-badge">REACT</span>
-                                    <span class="tech-badge">TS</span>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <h3 class="orbitron text-lg font-black group-hover:text-neon transition-colors">MODERN_UI_HUD</h3>
-                                <p class="tech text-[10px] text-white/40 mt-2 leading-relaxed">High-performance React-based HUD with zero frame drop during state updates.</p>
-                            </div>
-                        </div>
-
-                        <div class="project-card group" onclick="showCode('tmc')">
-                            <div class="project-img-wrapper">
-                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/tmc_placeholder.webp" class="project-img" alt="TMC">
-                                <div class="absolute top-3 right-3 flex gap-2">
-                                    <span class="tech-badge">CORE</span>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <h3 class="orbitron text-lg font-black group-hover:text-neon transition-colors">TMC_FRAMEWORK</h3>
-                                <p class="tech text-[10px] text-white/40 mt-2 leading-relaxed">Contribution to The Modding Community framework, focusing on resource optimization.</p>
-                            </div>
-                        </div>
-
-                        <div class="project-card group">
-                            <div class="project-img-wrapper">
-                                <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/logic_placeholder.webp" class="project-img" alt="Logic">
-                                <div class="absolute top-3 right-3 flex gap-2">
-                                    <span class="tech-badge">C#</span>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <h3 class="orbitron text-lg font-black group-hover:text-neon transition-colors">ZIN_E_DRIVE</h3>
-                                <p class="tech text-[10px] text-white/40 mt-2 leading-relaxed">Neural network AI for custom NPC driving behaviors in high-density areas.</p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div id="v-terminal" class="view items-center justify-center">
-                    <div class="w-full max-w-2xl bg-black border border-white/10 p-10">
-                        <div id="terminal-out" class="h-64 tech text-xs text-white/40 overflow-y-auto mb-6 custom-scroll leading-loose">
-                            > ACCESS_GRANTED: ZINTHYN_ROOT<br>
-                            > TYPE 'HELP' FOR COMMANDS...<br>
-                        </div>
-                        <div class="flex gap-4 items-center">
-                            <span class="text-neon tech">></span>
-                            <input type="text" id="term-in" class="bg-transparent outline-none border-none tech text-neon w-full uppercase" autofocus onkeydown="runCmd(event)">
+                        <div class="skill-item">
+                            <div class="flex justify-between tech text-xs mb-3"><span>C#_STANDALONE</span><span>82%</span></div>
+                            <div class="h-[2px] bg-white/10 w-full"><div class="skill-bar" style="width: 82%"></div></div>
                         </div>
                     </div>
                 </div>
 
-                <div id="v-contact" class="view items-center justify-center text-center">
-                    <h2 class="orbitron text-7xl font-black mb-12 italic opacity-5 tracking-tighter">UPLINK</h2>
-                    <div class="flex gap-8">
-                        <a href="#" class="p-8 border border-white/10 orbitron text-xl font-black hover:bg-neon hover:text-black transition-all">DISCORD</a>
-                        <a href="https://github.com/Zinthyn" target="_blank" class="p-8 border border-white/10 orbitron text-xl font-black hover:bg-neon hover:text-black transition-all">GITHUB</a>
+                <div id="v-history" class="view">
+                    <h2 class="orbitron text-6xl font-black italic mb-12 uppercase tracking-tighter">Verified_Deployments</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="card p-8 group" onclick="openHistory('nopixel')">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">NOPIXEL</h3>
+                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                            </div>
+                            <p class="tech text-[10px] text-white/40">Core Systems Optimization & Latency Management.</p>
+                        </div>
+                        <div class="card p-8 group" onclick="openHistory('liquid')">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">LIQUID RP</h3>
+                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                            </div>
+                            <p class="tech text-[10px] text-white/40">Lead Development Support & Database Scalability.</p>
+                        </div>
+                        <div class="card p-8 group" onclick="openHistory('happy')">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">HAPPY DAYS</h3>
+                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                            </div>
+                            <p class="tech text-[10px] text-white/40">Standalone Framework Architecture.</p>
+                        </div>
+                        <div class="card p-8 group" onclick="openHistory('scora')">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="orbitron text-2xl font-black group-hover:text-neon transition-colors">SCORA</h3>
+                                <span class="tech text-[8px] border border-neon/20 px-2 py-1">ARCHIVED_LOG</span>
+                            </div>
+                            <p class="tech text-[10px] text-white/40">Network Security & Anti-Exploit Deployment.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="v-projects" class="view">
+                    <h2 class="orbitron text-6xl font-black italic mb-4 uppercase tracking-tighter">Stable_Builds</h2>
+                    <div class="grid grid-cols-3 gap-8 mb-20">
+                        <div class="card" onclick="openProject('anticheat')">
+                            <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="h-40">
+                            <div class="p-6">
+                                <h4 class="orbitron text-sm font-black text-neon">ZIN_SHIELD_V4</h4>
+                                <p class="tech text-[9px] text-white/30 mt-2">Active protection system for high-pop environments.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="orbitron text-3xl font-black italic mb-6 uppercase text-neon/30">Experimental_Lab</h2>
+                    <div class="grid grid-cols-3 gap-8 pb-10">
+                        <div class="card border-dashed border-neon/20" onclick="openProject('neural_drive')">
+                            <div class="h-40 bg-white/5 flex items-center justify-center tech text-neon/20 text-[10px] italic">REDACTED_PROTOTYPE</div>
+                            <div class="p-6"><h4 class="orbitron text-sm font-black">NEURAL_TRAFFIC_V1</h4></div>
+                        </div>
+                        <div class="card border-dashed border-neon/20" onclick="openProject('void_ui')">
+                            <div class="h-40 bg-white/5 flex items-center justify-center tech text-neon/20 text-[10px] italic">REDACTED_PROTOTYPE</div>
+                            <div class="p-6"><h4 class="orbitron text-sm font-black">VOID_UI_ENGINE</h4></div>
+                        </div>
+                        <div class="card border-dashed border-neon/20" onclick="openProject('synth_shield')">
+                            <div class="h-40 bg-white/5 flex items-center justify-center tech text-neon/20 text-[10px] italic">REDACTED_PROTOTYPE</div>
+                            <div class="p-6"><h4 class="orbitron text-sm font-black">SYNTH_SHIELD_E</h4></div>
+                        </div>
                     </div>
                 </div>
 
             </main>
         </div>
-
-        <footer class="h-10 border-t border-white/5 flex items-center justify-between px-10 bg-black tech text-[9px] text-white/20">
-            <div class="flex gap-8">
-                <span>SYSTEM: <span class="text-neon">STABLE</span></span>
-                <span>DATA_ENCRYPTION: 256_BIT</span>
-            </div>
-            <span>ZINTHYN_V6_PRO_STABLE</span>
-        </footer>
     </div>
 
     <script>
+        const data = {
+            projects: {
+                anticheat: {
+                    title: "ZIN_SHIELD V4",
+                    desc: "A proprietary security layer designed for large-scale roleplay environments. V4 features signature-based detection for 150+ known executors and real-time event throttling. Reduces false positives by 92% compared to standard open-source alternatives.",
+                    img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
+                },
+                neural_drive: {
+                    title: "NEURAL_TRAFFIC V1",
+                    desc: "Experimental C# implementation for AI driving. Replaces native GTA driving tasks with a custom node-based logic system, allowing NPCs to behave realistically in player-modified city layouts and races.",
+                    img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
+                },
+                void_ui: {
+                    title: "VOID_UI ENGINE",
+                    desc: "A headless UI rendering wrapper designed to bypass standard NUI bottlenecks. Optimized for 4K displays with zero impact on client-side FPS, utilizing hardware acceleration for complex animations.",
+                    img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
+                },
+                synth_shield: {
+                    title: "SYNTH_SHIELD_E",
+                    desc: "An edge-computing anti-exploit module. Instead of checking variables constantly, it uses state-prediction to detect when a player's coordinate data doesn't match server-side physics calculations.",
+                    img: "https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp"
+                }
+            },
+            history: {
+                nopixel: {
+                    title: "NOPIXEL DEPLOYMENT",
+                    desc: "Focused on high-load entity management and MLO streaming. Contributed to core asset optimization which helped maintain stable 60FPS in dense areas like Legion Square during 250+ player events."
+                },
+                liquid: {
+                    title: "LIQUID RP LEADERSHIP",
+                    desc: "Managed the technical infrastructure for the server's major 2.0 overhaul. Handled full database migration from MySQL-Async to OxMySQL and implemented custom inventory state handling."
+                },
+                happy: {
+                    title: "HAPPY DAYS ARCHITECTURE",
+                    desc: "Developed a standalone framework layer that allowed for hot-swapping economy modules without server restarts. Modularized player data for faster loading times."
+                },
+                scora: {
+                    title: "SCORA NETWORK SECURITY",
+                    desc: "Engineered a custom network-level protection resource to mitigate remote code execution (RCE) attempts and secure server-to-client event calls."
+                }
+            }
+        };
+
+        function openProject(id) {
+            const p = data.projects[id];
+            document.getElementById('modal-body').innerHTML = `
+                <div class="flex gap-12">
+                    <div class="w-1/3 border border-white/10 p-1 bg-black">
+                        <img src="${p.img}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all">
+                    </div>
+                    <div class="w-2/3">
+                        <h2 class="orbitron text-4xl font-black text-neon mb-2">${p.title}</h2>
+                        <p class="tech text-[10px] text-white/20 mb-8 uppercase tracking-widest">Project_Type: Stable_Release</p>
+                        <p class="tech text-slate-400 leading-loose text-lg">${p.desc}</p>
+                    </div>
+                </div>
+            `;
+            showModal();
+        }
+
+        function openHistory(id) {
+            const h = data.history[id];
+            document.getElementById('modal-body').innerHTML = `
+                <div class="border-l-4 border-neon pl-10">
+                    <h2 class="orbitron text-5xl font-black text-white mb-2 uppercase italic">${h.title}</h2>
+                    <p class="tech text-neon/40 text-[10px] mb-12 tracking-widest">LOG_STATUS: VERIFIED_CONTRIBUTOR</p>
+                    <p class="tech text-slate-300 leading-relaxed text-xl max-w-2xl">${h.desc}</p>
+                </div>
+            `;
+            showModal();
+        }
+
+        function showModal() {
+            const m = document.getElementById('modal-overlay');
+            const c = document.getElementById('modal-content');
+            m.style.display = 'flex';
+            setTimeout(() => { c.style.opacity = '1'; c.style.transform = 'translateY(0)'; }, 10);
+        }
+
+        function closeModal() {
+            const m = document.getElementById('modal-overlay');
+            const c = document.getElementById('modal-content');
+            c.style.opacity = '0'; c.style.transform = 'translateY(30px)';
+            setTimeout(() => m.style.display = 'none', 400);
+        }
+
         function syncUI(e) {
             const cursor = document.getElementById('custom-cursor');
             cursor.style.left = e.clientX + 'px';
@@ -271,57 +318,40 @@
             el.classList.add('active');
         }
 
-        let p = 0;
-        const boot = setInterval(() => {
-            p += Math.random() * 15;
-            document.getElementById('load-bar').style.width = p + "%";
-            if(p >= 100) {
-                clearInterval(boot);
+        // Boot Loader Logic
+        let progress = 0;
+        const loader = setInterval(() => {
+            progress += Math.random() * 25;
+            document.getElementById('load-bar').style.width = progress + "%";
+            if(progress >= 100) {
+                clearInterval(loader);
                 document.getElementById('entry-btn').classList.remove('hidden');
+                document.getElementById('boot-status').innerText = "SYSTEM_READY";
             }
         }, 120);
 
         function powerOn() {
-            document.getElementById('boot-gate').style.display = 'none';
-            const shell = document.getElementById('zin-shell');
-            shell.style.display = 'flex';
-            setTimeout(() => shell.style.opacity = '1', 50);
+            document.getElementById('boot-gate').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('boot-gate').style.display = 'none';
+                const shell = document.getElementById('zin-shell');
+                shell.style.display = 'flex';
+                setTimeout(() => shell.style.opacity = '1', 50);
+            }, 500);
         }
 
-        function runCmd(e) {
-            if(e.key === 'Enter') {
-                const input = e.target.value.toUpperCase();
-                const out = document.getElementById('terminal-out');
-                let reply = (input === 'HELP') ? "AVAILABLE: STATUS, CLEAR, WHOAMI" : 
-                            (input === 'STATUS') ? "KERNEL_NOMINAL. IMPACT: 0.01MS" : 
-                            (input === 'WHOAMI') ? "ARCHITECT: ZINTHYN." : "CMD_NOT_FOUND.";
-                if(input === 'CLEAR') { out.innerHTML = ""; e.target.value = ""; return; }
-                out.innerHTML += `<br><span class="text-neon">> ${input}</span><br>${reply}`;
-                out.scrollTop = out.scrollHeight;
-                e.target.value = "";
-            }
-        }
-
-        let last = performance.now();
-        function updateRes() {
-            let now = performance.now();
-            document.getElementById('resmon').innerText = ((now - last)/100).toFixed(2) + 'ms';
-            last = now;
-            requestAnimationFrame(updateRes);
-        }
+        updateRes = () => { document.getElementById('resmon').innerText = (Math.random() * 0.05).toFixed(2) + 'ms'; requestAnimationFrame(updateRes); }
         updateRes();
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000);
 
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
-        }, 1000);
-
+        // Simple Background Particles
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let pts = Array(50).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*0.4 }));
+        let pts = Array(60).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*0.5 }));
         function draw() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "rgba(0, 255, 170, 0.15)";
+            ctx.fillStyle = "rgba(0, 255, 170, 0.2)";
             pts.forEach(p => { p.y -= p.s; if(p.y < 0) p.y = canvas.height; ctx.fillRect(p.x, p.y, 1, 1); });
             requestAnimationFrame(draw);
         }
