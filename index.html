@@ -12,52 +12,63 @@
         * { cursor: none !important; margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 
+        /* CRT EFFECT */
         body::before {
             content: " "; position: fixed; inset: 0; 
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             z-index: 10000; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
 
         #cursor {
-            position: fixed; width: 30px; height: 30px; border: 2px solid var(--neon);
+            position: fixed; width: 25px; height: 25px; border: 1px solid var(--neon);
             border-radius: 50%; pointer-events: none; z-index: 1000000;
-            transform: translate(-50%, -50%); transition: width 0.1s;
-            box-shadow: 0 0 15px var(--neon);
+            transform: translate(-50%, -50%); transition: width 0.1s, height 0.1s;
+            box-shadow: 0 0 10px var(--neon);
         }
 
         #main-shell {
-            position: relative; width: 94vw; height: 92vh;
-            background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 242, 255, 0.15);
+            position: relative; width: 96vw; height: 94vh;
+            background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 242, 255, 0.1);
             display: none; flex-direction: column; opacity: 0;
-            box-shadow: 0 0 100px rgba(0,0,0,1); z-index: 1000; backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0,0,0,1); z-index: 1000; backdrop-filter: blur(10px);
         }
 
-        .view { display: none; animation: fadeIn 0.4s ease-out; height: 100%; }
+        .view { display: none; height: 100%; animation: fadeIn 0.4s ease-out; }
         .view.active-view { display: flex; flex-direction: column; }
-        @keyframes fadeIn { from { opacity: 0; filter: blur(15px); } to { opacity: 1; filter: blur(0); } }
+        @keyframes fadeIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
 
-        .card-image-wrapper { width: 100%; height: 130px; background: #000; position: relative; overflow: hidden; }
+        /* PROJECT CARDS */
+        .card-image-wrapper { width: 100%; height: 120px; background: #000; position: relative; overflow: hidden; }
         .card-image-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; transition: 0.5s; }
-        .holo-card:hover img { opacity: 1; transform: scale(1.1); }
+        .holo-card:hover img { opacity: 0.8; transform: scale(1.1); }
         
         .card-image-wrapper::after {
             content: ""; position: absolute; top: -100%; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.2), transparent);
+            background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.1), transparent);
             animation: scan 4s infinite linear; pointer-events: none;
         }
         @keyframes scan { 0% { top: -100%; } 100% { top: 100%; } }
 
-        .holo-card { background: var(--card); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .holo-card { background: var(--card); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: none !important; }
         .holo-card:hover { border-color: var(--neon); background: rgba(0, 242, 255, 0.05); }
 
-        .term-input {
-            background: rgba(0,0,0,0.5); border: none; border-left: 2px solid rgba(0, 242, 255, 0.1);
-            color: var(--neon); outline: none; width: 100%; padding: 12px 15px; font-family: 'JetBrains Mono';
-            font-size: 11px; margin-bottom: 15px;
+        /* MODAL */
+        #project-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: none; z-index: 20000; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
         }
+        .modal-content {
+            background: #05070a; border: 1px solid var(--neon);
+            width: 90%; max-width: 600px; padding: 2rem; position: relative;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1); animation: modalOpen 0.3s ease-out;
+        }
+        @keyframes modalOpen { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         #stars { position: fixed; inset: 0; z-index: 1; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
+        .custom-scroll::-webkit-scrollbar { width: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--neon); }
     </style>
 </head>
 <body onmousemove="moveCursor(event)">
@@ -65,8 +76,20 @@
     <div id="cursor"></div>
     <canvas id="stars"></canvas>
 
+    <div id="project-modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="absolute top-4 right-4 text-cyan-500 hover:text-white orbitron text-xs" onclick="closeModal()">[X] CLOSE</button>
+            <div id="modal-img-container" class="w-full h-48 mb-6 border border-white/10 overflow-hidden">
+                <img id="modal-img" src="" class="w-full h-full object-cover">
+            </div>
+            <h2 id="modal-title" class="orbitron text-2xl text-cyan-400 mb-2"></h2>
+            <p id="modal-tag" class="text-[10px] text-cyan-900 orbitron mb-4 tracking-widest"></p>
+            <div id="modal-desc" class="text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4"></div>
+        </div>
+    </div>
+
     <div id="boot-screen" class="fixed inset-0 bg-black z-[90000] flex flex-col items-center justify-center">
-        <div class="orbitron text-cyan-950 text-[10px] mb-8 tracking-[2em] animate-pulse">SYSTEM_IDLE</div>
+        <div class="orbitron text-cyan-950 text-[10px] mb-8 tracking-[2em] animate-pulse">TERMINAL_IDLE</div>
         <button class="border border-cyan-500/30 py-4 px-12 orbitron text-cyan-500 hover:bg-cyan-500 hover:text-black transition-all" onclick="launchSystem()">INITIALIZE_OMEGA</button>
     </div>
 
@@ -80,48 +103,71 @@
             <aside class="w-20 lg:w-64 border-r border-white/5 p-6 flex flex-col bg-black/40">
                 <nav class="space-y-4 mb-auto">
                     <button onclick="tab('home')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 uppercase p-2"><i class="fas fa-home"></i> <span class="hidden lg:block">Home</span></button>
-                    <button onclick="tab('about')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 uppercase p-2"><i class="fas fa-fingerprint"></i> <span class="hidden lg:block">About</span></button>
-                    <button onclick="tab('projects')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 uppercase p-2"><i class="fas fa-code"></i> <span class="hidden lg:block">Projects</span></button>
-                    <button onclick="tab('contact')" class="w-full text-left text-emerald-900 hover:text-emerald-400 orbitron text-[10px] flex gap-4 uppercase p-2 border-t border-white/5 mt-4 pt-4"><i class="fas fa-satellite-dish"></i> <span class="hidden lg:block">Comm_Link</span></button>
+                    <button onclick="tab('projects')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[10px] flex gap-4 uppercase p-2"><i class="fas fa-folder-open"></i> <span class="hidden lg:block">Lab_Modules</span></button>
+                    <button onclick="tab('contact')" class="w-full text-left text-emerald-900 hover:text-emerald-400 orbitron text-[10px] flex gap-4 uppercase p-2 pt-4 border-t border-white/5"><i class="fas fa-satellite-dish"></i> <span class="hidden lg:block">Comm_Link</span></button>
                 </nav>
+                <div id="kernel-log" class="text-[8px] text-cyan-900 font-mono mt-4 leading-tight"></div>
             </aside>
 
             <main class="flex-1 p-10 overflow-hidden relative">
+                
                 <div id="view-home" class="view active-view justify-center">
                     <h1 class="text-7xl lg:text-9xl font-black orbitron italic text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-black">OMEGA.</h1>
-                    <div id="kernel-log" class="text-cyan-600 font-mono text-[10px] leading-loose"></div>
                 </div>
 
-                <div id="view-about" class="view">
-                    <h2 class="orbitron text-2xl mb-8 text-cyan-500">BIO_DATA</h2>
-                    <p class="text-slate-400 text-sm max-w-xl">Architect from Serbia. Specialized in FiveM systems and high-end NUI.</p>
-                </div>
-
-                <div id="view-projects" class="view overflow-y-auto pr-4">
-                    <h2 class="orbitron text-2xl mb-8 text-cyan-500">PROJECT_LABS</h2>
-                    <div class="grid lg:grid-cols-3 gap-6">
-                        <div class="holo-card group">
-                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=500&q=80"></div>
-                            <div class="p-4"><h3 class="orbitron text-[10px] text-white">ZIN_ID_V3</h3></div>
-                        </div>
-                        <div class="holo-card group">
+                <div id="view-projects" class="view">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="orbitron text-2xl text-cyan-500">PROJECT_LABS</h2>
+                        <span class="text-[8px] orbitron text-slate-600">CLICK_FOR_DATA_DECRYPT</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto custom-scroll pr-4 pb-20">
+                        
+                        <div class="holo-card p-2" onclick="openProject('shield')">
                             <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=500&q=80"></div>
-                            <div class="p-4"><h3 class="orbitron text-[10px] text-white">ZIN_SHIELD</h3></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_SHIELD</h3></div>
                         </div>
-                        <div class="holo-card group">
-                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=500&q=80"></div>
-                            <div class="p-4"><h3 class="orbitron text-[10px] text-white">ZIN_UI_PRO</h3></div>
+
+                        <div class="holo-card p-2" onclick="openProject('garage')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1493238792040-d710475a6d3b?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_GARAGE</h3></div>
                         </div>
+
+                        <div class="holo-card p-2" onclick="openProject('multi')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_MULTICHARACTER</h3></div>
+                        </div>
+
+                        <div class="holo-card p-2" onclick="openProject('oilrig')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_OILRIG</h3></div>
+                        </div>
+
+                        <div class="holo-card p-2" onclick="openProject('fleeca')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_FLEECABANK</h3></div>
+                        </div>
+
+                        <div class="holo-card p-2" onclick="openProject('weed')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1536859355448-76f92ebff33d?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_WEEDGROWING</h3></div>
+                        </div>
+
+                        <div class="holo-card p-2" onclick="openProject('airport')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_AIRPORTJOB</h3></div>
+                        </div>
+
                     </div>
                 </div>
 
                 <div id="view-contact" class="view">
-                    <h2 class="orbitron text-2xl mb-8 text-emerald-500">ESTABLISH_UPLINK</h2>
-                    <div class="max-w-md">
-                        <input type="text" placeholder="NAME" class="term-input">
-                        <input type="email" value="zinthyn@gmail.com" class="term-input" readonly>
-                        <textarea placeholder="MESSAGE" class="term-input" rows="4"></textarea>
-                        <button onclick="alert('TRANSMISSION_SENT')" class="w-full py-3 border border-emerald-500/20 orbitron text-emerald-500 text-[10px] hover:bg-emerald-500 hover:text-black transition-all">EXECUTE_SEND</button>
+                    <h2 class="orbitron text-2xl mb-8 text-emerald-500 uppercase">Comm_Link</h2>
+                    <div class="max-w-md bg-black/40 p-6 border border-emerald-900/20">
+                        <div class="text-[10px] orbitron text-emerald-800 mb-4 uppercase">Direct_Uplink: zinthyn@gmail.com</div>
+                        <input type="text" placeholder="NAME" class="w-full bg-black/50 border-b border-emerald-900/50 p-3 text-xs mb-4 outline-none text-emerald-400">
+                        <textarea placeholder="MESSAGE_STRING" class="w-full bg-black/50 border-b border-emerald-900/50 p-3 text-xs mb-4 outline-none text-emerald-400" rows="4"></textarea>
+                        <button class="w-full py-3 border border-emerald-500/30 text-emerald-500 orbitron text-[10px] hover:bg-emerald-500 hover:text-black transition-all">SEND_PACKET</button>
                     </div>
                 </div>
             </main>
@@ -129,30 +175,94 @@
     </div>
 
     <script>
+        // DATA OBJECT
+        const projects = {
+            shield: {
+                title: "ZIN_SHIELD",
+                tag: "SECURITY_PROTOCOL",
+                img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=500&q=80",
+                desc: "A heuristic anti-cheat system designed for high-population FiveM servers. ZIN_SHIELD monitors injection attempts, executor execution strings, and abnormal entity movement in real-time."
+            },
+            garage: {
+                title: "ZIN_GARAGE",
+                tag: "LOGISTICS_MODULE",
+                img: "https://images.unsplash.com/photo-1493238792040-d710475a6d3b?auto=format&fit=crop&w=500&q=80",
+                desc: "Advanced vehicle management system featuring individual storage state tracking, customizable interior viewing, and a persistent damage engine that saves every scratch on the database."
+            },
+            multi: {
+                title: "ZIN_MULTICHARACTER",
+                tag: "IDENTITY_KERNEL",
+                img: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=500&q=80",
+                desc: "A futuristic selection interface that allows users to swap between biometric identities. Features live 3D preview, metadata loading, and seamless spawn-point integration."
+            },
+            oilrig: {
+                title: "ZIN_OILRIG",
+                tag: "INDUSTRIAL_JOB",
+                img: "https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&w=500&q=80",
+                desc: "High-risk offshore activity script. Players engage in complex drilling tasks involving pressure management and maintenance puzzles, rewarded with crude materials for processing."
+            },
+            fleeca: {
+                title: "ZIN_FLEECABANK",
+                tag: "ECONOMY_HEIST",
+                img: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=500&q=80",
+                desc: "A complete overhaul of the banking heist system. Includes custom thermal charges, vault door synchronization, and a minigame-based hacking interface for the security panel."
+            },
+            weed: {
+                title: "ZIN_WEEDGROWING",
+                tag: "CONTRA_SYSTEM",
+                img: "https://images.unsplash.com/photo-1536859355448-76f92ebff33d?auto=format&fit=crop&w=500&q=80",
+                desc: "Deep botanical system featuring soil quality tracking, pH balancing, and strain mutation. Plants grow in real-time even when the player is offline, requiring constant attention."
+            },
+            airport: {
+                title: "ZIN_AIRPORTJOB",
+                tag: "CIVILIAN_WORK",
+                img: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=500&q=80",
+                desc: "Immersive logistics career. Players manage luggage sorting, fuel management, and automated plane taxiing, utilizing a custom tablet interface to track daily flight schedules."
+            }
+        };
+
         function moveCursor(e) {
             const c = document.getElementById('cursor');
             c.style.left = e.clientX + 'px'; c.style.top = e.clientY + 'px';
         }
+
         function launchSystem() {
             document.getElementById('boot-screen').style.display = 'none';
             const s = document.getElementById('main-shell');
             s.style.display = 'flex'; setTimeout(() => { s.style.opacity = '1'; }, 50);
             startTyping();
         }
+
         function tab(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
             document.getElementById(`view-${id}`).classList.add('active-view');
         }
+
+        function openProject(key) {
+            const data = projects[key];
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-tag').innerText = data.tag;
+            document.getElementById('modal-img').src = data.img;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('project-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('project-modal').style.display = 'none';
+        }
+
         function startTyping() {
             const log = document.getElementById('kernel-log');
-            const lines = ["> STATUS: ONLINE", "> AUTH: ZINTHYN_01", "> UPLINK: zinthyn@gmail.com"];
+            const lines = ["> STATUS_READY", "> ENCRYPTION_ON", "> UPLINK_ZINTHYN"];
             let i = 0; const int = setInterval(() => {
                 log.innerHTML += lines[i] + "<br>";
                 i++; if(i >= lines.length) clearInterval(int);
-            }, 400);
+            }, 500);
         }
+
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        
+
+        // STARS
         const canvas = document.getElementById('stars'); const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const stars = Array(150).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*canvas.width }));
@@ -164,7 +274,7 @@
                 const sz = (1 - s.z/canvas.width) * 1.5;
                 ctx.fillStyle = `rgba(0, 242, 255, ${1 - s.z/canvas.width})`;
                 ctx.beginPath(); ctx.arc(px,py,sz,0,Math.PI*2); ctx.fill();
-                s.z -= 0.8; if(s.z <= 0) s.z = canvas.width;
+                s.z -= 0.5; if(s.z <= 0) s.z = canvas.width;
             });
             requestAnimationFrame(draw);
         }
