@@ -16,40 +16,42 @@
         }
 
         #cursor {
-            position: fixed; width: 30px; height: 30px; border: 1px solid var(--neon);
+            position: fixed; width: 30px; height: 30px; border: 2px solid var(--neon);
             border-radius: 50%; pointer-events: none; z-index: 9999;
             transform: translate(-50%, -50%); transition: transform 0.05s ease-out;
+            box-shadow: 0 0 15px var(--neon);
         }
 
-        /* 3D Shell */
         #main-shell {
             width: 95%; height: 90%; max-width: 1600px;
-            background: rgba(2, 4, 6, 0.9); border: 1px solid rgba(0, 242, 255, 0.15);
-            transform-style: preserve-3d; transition: all 0.5s ease-in-out;
+            background: rgba(2, 4, 6, 0.95); border: 1px solid rgba(0, 242, 255, 0.2);
+            transform-style: preserve-3d; transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
             display: flex; flex-direction: column; opacity: 0; scale: 0.5; transform: translateZ(-2000px);
+            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
-        /* Content Transitions */
-        .content-view { display: none; animation: flicker 0.3s ease-in-out; }
+        .content-view { display: none; animation: flicker 0.4s ease-in-out; }
         .content-view.active { display: block; }
-        @keyframes flicker { 0% { opacity: 0; filter: brightness(2); } 100% { opacity: 1; filter: brightness(1); } }
+        @keyframes flicker { 0% { opacity: 0; filter: blur(10px); } 100% { opacity: 1; filter: blur(0); } }
 
-        /* The Self-Destruct Sequence */
-        .nuke-active { animation: nuke-shake 0.1s infinite !important; border-color: var(--nuke) !important; filter: hue-rotate(280deg) !important; }
-        @keyframes nuke-shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(1px, -1px); } }
+        /* The Destruct UI */
+        .nuke-active { animation: shake 0.1s infinite !important; filter: saturate(2) contrast(1.5) hue-rotate(300deg) !important; }
+        @keyframes shake { 0% { transform: translate(3px, 3px); } 50% { transform: translate(-3px, -3px); } 100% { transform: translate(0); } }
         
-        #nuke-flash {
-            position: fixed; inset: 0; background: white; z-index: 5000; opacity: 0; pointer-events: none; transition: opacity 0.1s;
-        }
+        #nuke-flash { position: fixed; inset: 0; background: white; z-index: 10000; opacity: 0; pointer-events: none; }
 
-        .nuke-btn {
-            color: #440000; border: 1px solid #440000; padding: 2px 10px; font-size: 8px;
-            transition: 0.3s; cursor: pointer;
+        .destruct-trigger {
+            background: rgba(255, 0, 51, 0.1); border: 1px solid var(--nuke);
+            color: var(--nuke); padding: 8px 15px; font-size: 10px; font-weight: bold;
+            transition: all 0.3s; animation: pulse-red 2s infinite;
         }
-        .nuke-btn:hover { background: var(--nuke); color: white; border-color: var(--nuke); box-shadow: 0 0 20px var(--nuke); }
+        .destruct-trigger:hover { background: var(--nuke); color: white; box-shadow: 0 0 30px var(--nuke); transform: scale(1.1); }
+        @keyframes pulse-red { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
         #stars { position: fixed; inset: 0; z-index: -1; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
+        .nav-btn { width: 100%; text-align: left; padding: 10px; border-left: 2px solid transparent; transition: 0.3s; }
+        .nav-btn:hover { border-left-color: var(--neon); background: rgba(0, 242, 255, 0.05); color: var(--neon); }
     </style>
 </head>
 <body>
@@ -58,54 +60,76 @@
     <div id="nuke-flash"></div>
     <canvas id="stars"></canvas>
 
-    <div id="intro-overlay" class="fixed inset-0 bg-black z-[3000] flex flex-col items-center justify-center transition-opacity duration-[1.5s]">
-        <button class="border border-cyan-500 px-10 py-4 orbitron text-cyan-500 hover:bg-cyan-500 hover:text-black transition" onclick="initialize()">[ START_UPLINK ]</button>
+    <div id="intro-overlay" class="fixed inset-0 bg-black z-[9000] flex flex-col items-center justify-center transition-opacity duration-1000">
+        <div class="orbitron text-cyan-900 text-[10px] mb-10 tracking-[2em] animate-pulse">SYSTEM_LOCKED</div>
+        <button class="border-2 border-cyan-500 px-12 py-5 orbitron text-cyan-500 font-bold hover:bg-cyan-500 hover:text-black transition-all text-xl" onclick="initialize()">[ UPLINK ]</button>
     </div>
 
-    <div id="main-shell" class="rounded-sm">
-        <div class="h-12 border-b border-white/5 flex items-center justify-between px-6 bg-black/80">
-            <div class="orbitron text-cyan-500 font-black tracking-widest italic">ZIN_OS_7.0</div>
-            <div class="flex items-center gap-6">
-                <div id="nuke-timer" class="text-xs orbitron text-red-600 hidden">TERMINATION IN: 3.00</div>
-                <div class="text-[10px] orbitron text-white" id="clock">00:00:00</div>
+    <div id="main-shell" class="rounded-lg">
+        <header class="h-16 border-b border-white/10 flex items-center justify-between px-8 bg-black/60">
+            <div class="orbitron text-2xl font-black italic tracking-tighter text-cyan-400">ZINTHYN<span class="text-white/20">.OS</span></div>
+            <div class="flex items-center gap-10">
+                <div id="nuke-timer" class="text-red-500 font-bold orbitron text-sm hidden">CRITICAL_FAILURE: 3.00s</div>
+                <div class="text-xs orbitron text-slate-500" id="clock">00:00:00</div>
             </div>
-        </div>
+        </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-20 lg:w-64 border-r border-white/5 flex flex-col p-6 gap-10 bg-black/40">
-                <nav class="space-y-10">
-                    <button onclick="switchTab('root')" class="w-full text-left group">
-                        <p class="orbitron text-[10px] text-slate-500 group-hover:text-cyan-400 flex items-center gap-3"><i class="fas fa-terminal w-4"></i> <span class="hidden lg:block">CORE_ROOT</span></p>
+            <aside class="w-20 lg:w-72 border-r border-white/5 flex flex-col p-8 gap-8 bg-black/30">
+                <nav class="space-y-6">
+                    <button onclick="switchTab('root')" class="nav-btn group">
+                        <span class="orbitron text-xs tracking-widest text-slate-400 group-hover:text-cyan-400 flex items-center gap-4">
+                            <i class="fas fa-microchip"></i> <span class="hidden lg:block">CORE_DATA</span>
+                        </span>
                     </button>
-                    <button onclick="switchTab('projects')" class="w-full text-left group">
-                        <p class="orbitron text-[10px] text-slate-500 group-hover:text-cyan-400 flex items-center gap-3"><i class="fas fa-code-branch w-4"></i> <span class="hidden lg:block">PROJECTS</span></p>
+                    <button onclick="switchTab('projects')" class="nav-btn group">
+                        <span class="orbitron text-xs tracking-widest text-slate-400 group-hover:text-cyan-400 flex items-center gap-4">
+                            <i class="fas fa-layer-group"></i> <span class="hidden lg:block">PROJECTS</span>
+                        </span>
                     </button>
-                    <button onclick="copyDiscord()" class="w-full text-left group">
-                        <p class="orbitron text-[10px] text-slate-500 group-hover:text-cyan-400 flex items-center gap-3"><i class="fab fa-discord w-4"></i> <span class="hidden lg:block">UPLINK</span></p>
+                    <button onclick="copyDiscord()" class="nav-btn group text-cyan-500">
+                        <span class="orbitron text-xs tracking-widest flex items-center gap-4">
+                            <i class="fab fa-discord"></i> <span class="hidden lg:block">CONTACT</span>
+                        </span>
                     </button>
                 </nav>
+
+                <div class="mt-auto hidden lg:block">
+                    <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full bg-cyan-500 w-2/3 animate-pulse"></div>
+                    </div>
+                    <p class="text-[8px] orbitron text-cyan-900 mt-2">MEM_SYNC: ACTIVE</p>
+                </div>
             </aside>
 
-            <main class="flex-1 p-16 overflow-y-auto relative">
+            <main class="flex-1 p-12 lg:p-20 overflow-y-auto relative">
+                
                 <div id="view-root" class="content-view active">
-                    <h1 class="text-8xl lg:text-9xl font-black orbitron mb-6 italic">ARCHITECT.</h1>
-                    <p class="text-slate-500 max-w-xl text-sm leading-relaxed italic">"Simplicity is the soul of efficiency."</p>
+                    <h2 class="text-cyan-700 text-[10px] orbitron tracking-[1.5em] mb-4">ACCESS_GRANTED</h2>
+                    <h1 class="text-8xl lg:text-9xl font-black orbitron mb-8 italic tracking-tighter leading-none">THE <br>ARCHITECT.</h1>
+                    <p class="text-slate-500 max-w-2xl text-lg font-light leading-relaxed">Designing high-performance infrastructure and 3D UI experiences for the next generation of FiveM.</p>
                 </div>
 
                 <div id="view-projects" class="content-view">
-                    <div class="grid lg:grid-cols-2 gap-8">
-                        <div class="border border-white/5 p-8 bg-white/[0.01]">
-                            <h3 class="orbitron text-xl text-cyan-400 mb-4 underline">ZIN_SYNC</h3>
-                            <p class="text-[10px] text-slate-500 leading-loose">Experimental C# wrapper for high-frequency data transmission.</p>
+                    <h2 class="text-cyan-500 text-[10px] orbitron tracking-[1em] mb-12">DATA_MODULES</h2>
+                    <div class="grid lg:grid-cols-2 gap-10">
+                        <div class="p-10 bg-white/[0.02] border border-white/5 hover:border-cyan-500 transition-all group">
+                            <h3 class="orbitron text-2xl text-white group-hover:text-cyan-400 mb-4">ZIN_MULTI</h3>
+                            <p class="text-sm text-slate-500 italic">Advanced character selection framework. 0.01ms resmon.</p>
+                        </div>
+                        <div class="p-10 bg-white/[0.02] border border-white/5 hover:border-cyan-500 transition-all group">
+                            <h3 class="orbitron text-2xl text-white group-hover:text-cyan-400 mb-4">ZIN_GUARD</h3>
+                            <p class="text-sm text-slate-500 italic">Security layers designed for kernel-injection detection.</p>
                         </div>
                     </div>
                 </div>
+
             </main>
         </div>
 
-        <footer class="h-10 border-t border-white/5 flex items-center px-6 justify-between">
-            <div class="text-[8px] orbitron text-cyan-900">UPLINK_SECURE // AES_256</div>
-            <button class="nuke-btn orbitron" onclick="triggerSelfDestruct()">[ SELF_DESTRUCT ]</button>
+        <footer class="h-16 border-t border-white/10 bg-black/80 flex items-center px-8 justify-between">
+            <div class="text-[10px] orbitron text-cyan-900 uppercase tracking-widest">© ZINTHYN_V7 // SECURITY: ENCRYPTED</div>
+            <button class="destruct-trigger orbitron" onclick="triggerSelfDestruct()">[ SYSTEM_DETONATE ]</button>
         </footer>
     </div>
 
@@ -113,6 +137,7 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(freq, type, duration, vol) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = type;
@@ -123,7 +148,7 @@
         }
 
         function switchTab(viewId) {
-            playSound(150, 'square', 0.1, 0.05);
+            playSound(200, 'square', 0.1, 0.05);
             document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${viewId}`).classList.add('active');
         }
@@ -134,31 +159,28 @@
             shell.classList.add('nuke-active');
             timer.classList.remove('hidden');
             
-            // Alarm Beeps
-            let count = 3;
+            let count = 3.0;
             const interval = setInterval(() => {
-                count -= 0.1;
-                timer.innerText = `TERMINATION IN: ${count.toFixed(2)}`;
-                playSound(880, 'sine', 0.05, 0.1);
+                count -= 0.05;
+                timer.innerText = `CRITICAL_FAILURE: ${count.toFixed(2)}s`;
+                playSound(1000, 'sine', 0.05, 0.05);
                 if(count <= 0) {
                     clearInterval(interval);
                     detonate();
                 }
-            }, 100);
+            }, 50);
         }
 
         function detonate() {
-            playSound(50, 'sawtooth', 2, 0.5); // Low rumble
+            playSound(40, 'sawtooth', 2, 0.4);
             document.getElementById('nuke-flash').style.opacity = '1';
-            document.getElementById('main-shell').style.transform = 'scale(5) rotate(45deg) translateZ(1000px)';
-            document.getElementById('main-shell').style.opacity = '0';
-            setTimeout(() => {
-                window.location.reload(); // Restores the site after the "explosion"
-            }, 2000);
+            document.getElementById('main-shell').style.transform = 'scale(0) rotate(720deg) translateZ(2000px)';
+            setTimeout(() => window.location.reload(), 1500);
         }
 
         function initialize() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            playSound(60, 'sawtooth', 1.5, 0.1);
             document.getElementById('intro-overlay').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('intro-overlay').style.display = 'none';
@@ -172,13 +194,13 @@
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
             if(document.getElementById('intro-overlay').style.display === 'none') {
-                const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
-                const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 40;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
                 document.getElementById('main-shell').style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
             }
         });
 
-        // Background Starfield logic (Same as before)
+        // Background Starfield
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -191,12 +213,18 @@
                 const y = (s.y - canvas.height/2) * (canvas.width/s.z) + canvas.height/2;
                 const size = s.size * (canvas.width/s.z);
                 ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fill();
-                s.z -= 2; if(s.z <= 0) s.z = canvas.width;
+                s.z -= 3; if(s.z <= 0) s.z = canvas.width;
             });
             requestAnimationFrame(drawStars);
         }
         drawStars();
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+
+        function copyDiscord() {
+            playSound(300, 'square', 0.1, 0.1);
+            navigator.clipboard.writeText("Zinthyn");
+            alert("DISCORD_UPLINK: Zinthyn");
+        }
     </script>
 </body>
 </html>
