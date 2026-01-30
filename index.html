@@ -33,6 +33,21 @@
             box-shadow: 0 0 100px rgba(0,0,0,1);
         }
 
+        /* LOGO STYLING */
+        .zin-logo {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 170, 0.2));
+            transition: 0.5s;
+        }
+        .logo-container {
+            width: 56px; height: 56px; overflow: hidden; border: 1px solid var(--neon);
+            background: #000; position: relative;
+        }
+        .logo-container::after {
+            content: ''; position: absolute; inset: 0;
+            box-shadow: inset 0 0 15px rgba(0, 255, 170, 0.2); pointer-events: none;
+        }
+
         .nav-link {
             position: relative; padding: 18px 25px; transition: 0.3s; margin-bottom: 10px;
             clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
@@ -44,7 +59,6 @@
         .view { display: none; height: 100%; opacity: 0; transition: 0.4s ease-out; }
         .view.active { display: flex; flex-direction: column; opacity: 1; }
 
-        /* CODE PREVIEW STYLES */
         .code-block {
             background: var(--code-bg); border: 1px solid rgba(255,255,255,0.05);
             font-family: 'JetBrains Mono', monospace; font-size: 11px;
@@ -53,7 +67,6 @@
         .code-keyword { color: #ff0055; }
         .code-func { color: var(--neon); }
         .code-string { color: #00f2ff; }
-        .code-comment { color: #444; font-style: italic; }
 
         .orbitron { font-family: 'Orbitron', sans-serif; }
         .tech { font-family: 'Share Tech Mono', monospace; }
@@ -68,18 +81,22 @@
     <canvas id="particle-canvas"></canvas>
 
     <div id="boot-gate" class="fixed inset-0 bg-black z-[100000] flex flex-col items-center justify-center">
-        <img src="avatar.png" class="w-24 h-24 mb-8 border border-neon/20 p-2 grayscale">
+        <div class="w-24 h-24 mb-8 logo-container border-2">
+            <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="zin-logo grayscale" alt="ZINTHYN">
+        </div>
         <div class="w-48 h-[1px] bg-white/10 relative overflow-hidden mb-4">
             <div id="load-bar" class="absolute inset-0 bg-neon w-0"></div>
         </div>
-        <div id="load-txt" class="tech text-[8px] text-neon/40 tracking-[0.5em] uppercase">Injecting_Neural_Interface</div>
-        <button id="entry-btn" class="hidden mt-8 border border-neon px-10 py-3 orbitron text-neon hover:bg-neon hover:text-black transition-all text-xs" onclick="powerOn()">SYNC_USER</button>
+        <div id="load-txt" class="tech text-[8px] text-neon/40 tracking-[0.5em] uppercase">Authenticating_User</div>
+        <button id="entry-btn" class="hidden mt-8 border border-neon px-10 py-3 orbitron text-neon hover:bg-neon hover:text-black transition-all text-xs" onclick="powerOn()">SYNC_INTERFACE</button>
     </div>
 
     <div id="zin-shell">
         <header class="h-24 border-b border-white/5 flex items-center justify-between px-10 bg-black/50">
             <div class="flex items-center gap-6">
-                <img src="avatar.png" class="h-14 w-14 border border-neon p-1">
+                <div class="logo-container">
+                    <img src="https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp" class="zin-logo" alt="ZINTHYN">
+                </div>
                 <div>
                     <h1 class="orbitron text-xl font-black italic">ZINTHYN<span class="text-neon">_OS</span></h1>
                     <p class="tech text-[9px] text-white/20 tracking-widest uppercase">Senior Systems Architect</p>
@@ -118,16 +135,12 @@
                     <h2 class="orbitron text-5xl font-black italic mb-10 uppercase">Verified_Deployments</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="p-6 border border-white/5 bg-white/[0.02]">
-                            <h3 class="orbitron text-neon font-black mb-2">NOPIXEL</h3>
-                            <p class="tech text-[10px] text-white/40 uppercase">Systems Optimization</p>
+                            <h3 class="orbitron text-neon font-black mb-2 uppercase">NoPixel</h3>
+                            <p class="tech text-[10px] text-white/40">Optimizing core entity pooling and anti-cheat.</p>
                         </div>
                         <div class="p-6 border border-white/5 bg-white/[0.02]">
-                            <h3 class="orbitron text-neon font-black mb-2">REVENANT</h3>
-                            <p class="tech text-[10px] text-white/40 uppercase">Lead Architecture</p>
-                        </div>
-                        <div class="p-6 border border-white/5 bg-white/[0.02]">
-                            <h3 class="orbitron text-neon font-black mb-2">LIQUID RP</h3>
-                            <p class="tech text-[10px] text-white/40 uppercase">React/NUI Development</p>
+                            <h3 class="orbitron text-neon font-black mb-2 uppercase">Revenant</h3>
+                            <p class="tech text-[10px] text-white/40">Full systems architecture & lead developer.</p>
                         </div>
                     </div>
                 </div>
@@ -135,32 +148,21 @@
                 <div id="v-lab" class="view">
                     <h2 class="orbitron text-5xl font-black italic mb-10 uppercase">Technical_Reports</h2>
                     <div class="grid lg:grid-cols-2 gap-10 overflow-hidden">
-                        
                         <div class="space-y-4 overflow-y-auto custom-scroll pr-4">
                             <div class="p-6 border border-white/5 bg-white/[0.01] hover:bg-neon hover:text-black transition-all cursor-pointer group" onclick="showCode('anticheat')">
                                 <h3 class="orbitron font-black text-lg">ZIN_SHIELD_V4</h3>
                                 <p class="tech text-xs opacity-50 group-hover:text-black/70">Anti-cheat & Heuristic Analysis</p>
                             </div>
-                            <div class="p-6 border border-white/5 bg-white/[0.01] hover:bg-neon hover:text-black transition-all cursor-pointer group" onclick="showCode('garage')">
-                                <h3 class="orbitron font-black text-lg">ZIN_GARAGE_STALKER</h3>
-                                <p class="tech text-xs opacity-50 group-hover:text-black/70">Persistent Entity Tracking</p>
-                            </div>
                         </div>
-
                         <div class="code-block p-8 flex flex-col h-full rounded-lg">
                             <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                                 <span id="code-title" class="tech text-neon text-[10px]">PREVIEWING: ZIN_SHIELD_V4.lua</span>
-                                <div class="flex gap-2"><div class="w-2 h-2 rounded-full bg-red-500/50"></div><div class="w-2 h-2 rounded-full bg-neon/50"></div></div>
                             </div>
                             <pre id="code-content" class="custom-scroll overflow-y-auto">
-<span class="code-comment">-- Heuristic Memory Pattern Scan</span>
 <span class="code-keyword">function</span> <span class="code-func">CheckClientIntegrity</span>(target)
     <span class="code-keyword">local</span> _p = <span class="code-func">GetPlayerPed</span>(target)
     <span class="code-keyword">if</span> <span class="code-func">DoesEntityExist</span>(_p) <span class="code-keyword">then</span>
-        <span class="code-func">TriggerEvent</span>(<span class="code-string">'zin:scan'</span>, {
-            id = <span class="code-func">GetPlayerServerId</span>(target),
-            impact = <span class="code-string">'high'</span>
-        })
+        <span class="code-func">TriggerEvent</span>(<span class="code-string">'zin:scan'</span>, target)
     <span class="code-keyword">end</span>
 <span class="code-keyword">end</span></pre>
                         </div>
@@ -196,41 +198,14 @@
                 <span>SYSTEM: <span class="text-neon">STABLE</span></span>
                 <span>DATA_ENCRYPTION: 256_BIT</span>
             </div>
-            <span>ZINTHYN_V6_PRO_EDITION</span>
+            <span>ZINTHYN_V6_PRO_STABLE</span>
         </footer>
     </div>
 
     <script>
-        const snippets = {
-            anticheat: {
-                title: "ZIN_SHIELD_V4.lua",
-                content: `<span class="code-comment">-- Heuristic Memory Pattern Scan</span>
-<span class="code-keyword">function</span> <span class="code-func">CheckClientIntegrity</span>(target)
-    <span class="code-keyword">local</span> _p = <span class="code-func">GetPlayerPed</span>(target)
-    <span class="code-keyword">if</span> <span class="code-func">DoesEntityExist</span>(_p) <span class="code-keyword">then</span>
-        <span class="code-func">TriggerEvent</span>(<span class="code-string">'zin:scan'</span>, {
-            id = <span class="code-func">GetPlayerServerId</span>(target),
-            impact = <span class="code-string">'high'</span>
-        })
-    <span class="code-keyword">end</span>
-<span class="code-keyword">end</span>`
-            },
-            garage: {
-                title: "ZIN_GARAGE.lua",
-                content: `<span class="code-comment">-- Optimized Vehicle Metadata Sync</span>
-<span class="code-keyword">RegisterNetEvent</span>(<span class="code-string">'zin:saveVehicle'</span>)
-<span class="code-keyword">AddEventHandler</span>(<span class="code-string">'zin:saveVehicle'</span>, <span class="code-keyword">function</span>(vNetId)
-    <span class="code-keyword">local</span> props = <span class="code-func">GetVehicleProperties</span>(vNetId)
-    <span class="code-func">MySQL.Async.execute</span>(<span class="code-string">'UPDATE vehicles SET meta = @m'</span>, {
-        [<span class="code-string">'@m'</span>] = <span class="code-func">json.encode</span>(props)
-    })
-<span class="code-keyword">end</span>`
-            }
-        };
-
         function showCode(key) {
-            document.getElementById('code-title').innerText = "PREVIEWING: " + snippets[key].title;
-            document.getElementById('code-content').innerHTML = snippets[key].content;
+            // Simplified for logic
+            document.getElementById('code-title').innerText = "PREVIEWING: ZIN_SHIELD_V4.lua";
         }
 
         function syncUI(e) {
