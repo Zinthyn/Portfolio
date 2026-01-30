@@ -3,225 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // ARCHITECT</title>
+    <title>Zinthyn — FiveM, alt:V & Discord Development Services</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00ffcc; --bg: #050505; }
-        body { background-color: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        :root { --accent: #00ffaa; --bg: #030303; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .text-accent { color: var(--accent); }
-        .bg-accent { background-color: var(--accent); }
-        .border-accent { border-color: var(--accent); }
         
-        /* Debug HUD like Kenshin13 */
-        #debug-hud { position: fixed; top: 20px; right: 20px; z-index: 9999; font-size: 10px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #333; pointer-events: none; }
+        /* Debug HUD Clone */
+        #visual-debugger { 
+            position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; 
+            font-size: 11px; background: rgba(0,0,0,0.8); padding: 12px 16px; 
+            border: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.4);
+            backdrop-filter: blur(10px); line-height: 1.8;
+        }
+
+        /* Glass Cards */
+        .glass-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); transition: 0.4s cubic-bezier(0.2, 1, 0.3, 1); }
+        .glass-card:hover { border-color: var(--accent); transform: translateY(-5px); background: rgba(255,255,255,0.04); }
+
+        /* Smooth Reveal Pre-animation State */
+        .reveal { opacity: 0; transform: translateY(30px); }
 
         /* Code Block Styling */
-        .code-window { background: #0d0d0d; border: 1px solid #222; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .code-header { background: #1a1a1a; padding: 10px 15px; border-bottom: 1px solid #222; display: flex; gap: 6px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .code-window { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; }
+        .code-dot { width: 12px; height: 12px; border-radius: 50%; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        .client-card { transition: all 0.3s ease; border: 1px solid #111; background: #0a0a0a; }
-        .client-card:hover { border-color: var(--accent); transform: translateY(-5px); }
     </style>
 </head>
 <body>
 
-    <div id="debug-hud" class="mono text-white/50 uppercase tracking-widest">
-        FPS: <span id="fps" class="text-accent">60</span><br>
-        DOM NODES: <span id="nodes" class="text-accent">0</span><br>
-        SCROLL: <span id="scroll-pct" class="text-accent">0%</span>
+    <div id="visual-debugger" class="mono uppercase tracking-widest">
+        FPS: <span id="fps-val" class="text-[#00ffaa]">60</span><br>
+        DOM NODES: <span id="node-val" class="text-[#00ffaa]">0</span><br>
+        SCROLL_TRIGGERS: <span class="text-[#00ffaa]">4</span>
     </div>
 
-    <nav class="fixed w-full z-50 px-10 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-accent rounded-sm flex items-center justify-center text-black font-black">Z</div>
-            <span class="font-bold tracking-tighter text-xl">ZINTHYN</span>
+    <nav class="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center gap-3 group cursor-pointer">
+            <div class="w-10 h-10 bg-white text-black flex items-center justify-center font-black text-xl group-hover:bg-[#00ffaa] transition-colors">Z</div>
+            <span class="font-bold tracking-tighter text-2xl uppercase">Zinthyn</span>
         </div>
-        <div class="hidden md:flex gap-10 text-xs font-semibold uppercase tracking-widest text-white/50">
-            <a href="#home" class="hover:text-accent transition-colors">Home</a>
-            <a href="#about" class="hover:text-accent transition-colors">About</a>
-            <a href="#skills" class="hover:text-accent transition-colors">Skills</a>
-            <a href="#clients" class="hover:text-accent transition-colors">Clients</a>
+        <div class="hidden lg:flex gap-12 text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
+            <a href="#" class="hover:text-white transition-colors">Home</a>
+            <a href="#about" class="hover:text-white transition-colors">About</a>
+            <a href="#skills" class="hover:text-white transition-colors">Skills</a>
+            <a href="#clients" class="hover:text-white transition-colors">Clients</a>
         </div>
     </nav>
 
-    <section id="home" class="min-h-screen pt-32 px-10 md:px-32 flex flex-col md:flex-row items-center gap-20">
+    <main class="min-h-screen pt-48 px-8 lg:px-32 flex flex-col lg:flex-row gap-20">
         <div class="flex-1">
-            <h2 class="text-accent mono mb-4 text-sm tracking-widest uppercase">Developer / Architect / Lead</h2>
-            <h1 class="text-7xl md:text-9xl font-black italic tracking-tighter mb-6">ZINTHYN</h1>
-            <p class="text-xl text-white/60 max-w-lg mb-10 leading-relaxed">
-                Specializing in high-performance server architecture and custom roleplay frameworks for FiveM and beyond.
-            </p>
-            <div class="flex gap-6">
-                <a href="#clients" class="bg-white text-black px-8 py-4 font-bold rounded-sm hover:bg-accent transition-all">VIEW CLIENTS</a>
-                <a href="#about" class="border border-white/20 px-8 py-4 font-bold rounded-sm hover:border-accent hover:text-accent transition-all">ABOUT ME</a>
+            <div class="reveal">
+                <p class="text-[#00ffaa] mono text-xs mb-6 tracking-[0.3em] uppercase">Developer / Architect / Problem Solver</p>
+                <h1 class="text-7xl lg:text-9xl font-black mb-8 tracking-tighter uppercase leading-[0.85]">Zinthyn</h1>
+                <p class="text-xl text-white/50 max-w-xl mb-12 leading-relaxed">
+                    Passionate about creating unique roleplay experiences. I help communities bring their server dreams to life through high-performance code and optimization.
+                </p>
+                <div class="flex gap-8">
+                    <button class="bg-[#00ffaa] text-black px-10 py-5 font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform">View Clients</button>
+                    <button class="border border-white/10 px-10 py-5 font-bold text-xs uppercase tracking-widest hover:border-white transition-colors">Get In Touch</button>
+                </div>
             </div>
         </div>
 
-        <div class="flex-1 w-full max-w-xl">
-            <div class="code-window overflow-hidden">
-                <div class="code-header">
-                    <div class="dot bg-red-500"></div><div class="dot bg-yellow-500"></div><div class="dot bg-green-500"></div>
-                    <span class="text-[10px] mono text-white/20 ml-4">server.lua</span>
+        <div class="flex-1 w-full max-w-2xl reveal" style="transition-delay: 200ms;">
+            <div class="code-window">
+                <div class="px-6 py-4 border-b border-white/5 flex gap-2">
+                    <div class="code-dot bg-[#ff5f56]"></div>
+                    <div class="code-dot bg-[#ffbd2e]"></div>
+                    <div class="code-dot bg-[#27c93f]"></div>
+                    <span class="ml-4 text-[10px] mono text-white/20 uppercase">server.lua</span>
                 </div>
-                <div class="p-8 mono text-sm leading-loose">
-                    <p><span class="text-purple-400">local</span> <span class="text-blue-400">Developer</span> = {}</p>
-                    <p><span class="text-blue-400">Developer</span>.<span class="text-yellow-400">__index</span> = <span class="text-blue-400">Developer</span></p>
+                <div class="p-10 mono text-sm leading-8">
+                    <p><span class="text-[#c678dd]">local</span> <span class="text-[#61afef]">Developer</span> = {}</p>
+                    <p><span class="text-[#61afef]">Developer</span>.<span class="text-[#e06c75]">__index</span> = <span class="text-[#61afef]">Developer</span></p>
                     <p>&nbsp;</p>
-                    <p><span class="text-purple-400">function</span> <span class="text-blue-400">Developer</span>:<span class="text-yellow-400">init</span>()</p>
-                    <p>&nbsp;&nbsp;<span class="text-purple-400">self</span>.<span class="text-white">name</span> = <span class="text-green-400">"Zinthyn"</span></p>
-                    <p>&nbsp;&nbsp;<span class="text-purple-400">self</span>.<span class="text-white">focus</span> = <span class="text-green-400">"Performance"</span></p>
-                    <p>&nbsp;&nbsp;<span class="text-purple-400">print</span>(<span class="text-green-400">"System Synchronized."</span>)</p>
-                    <p><span class="text-purple-400">end</span></p>
-                    <p>&nbsp;</p>
-                    <p><span class="text-blue-400">Developer</span>:<span class="text-yellow-400">init</span>() <span class="text-gray-500">-- Launching...</span></p>
+                    <p><span class="text-[#c678dd]">function</span> <span class="text-[#61afef]">Developer</span>:<span class="text-[#98c379]">new</span>(name, role)</p>
+                    <p>&nbsp;&nbsp;<span class="text-[#c678dd]">local</span> self = <span class="text-[#e06c75]">setmetatable</span>({}, <span class="text-[#61afef]">Developer</span>)</p>
+                    <p>&nbsp;&nbsp;self.<span class="text-[#e06c75]">name</span> = <span class="text-[#98c379]">"Zinthyn"</span></p>
+                    <p>&nbsp;&nbsp;self.<span class="text-[#e06c75]">role</span> = <span class="text-[#98c379]">"Systems Lead"</span></p>
+                    <p>&nbsp;&nbsp;<span class="text-[#c678dd]">return</span> self</p>
+                    <p><span class="text-[#c678dd]">end</span></p>
                 </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="py-40 px-8 lg:px-32">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-20">
+            <div class="reveal">
+                <p class="text-5xl font-black mb-2 tracking-tighter">150+</p>
+                <p class="mono text-[10px] text-white/30 uppercase tracking-widest">Projects Finished</p>
+            </div>
+            <div class="reveal">
+                <p class="text-5xl font-black mb-2 tracking-tighter">40+</p>
+                <p class="mono text-[10px] text-white/30 uppercase tracking-widest">Active Clients</p>
+            </div>
+            <div class="reveal">
+                <p class="text-5xl font-black mb-2 tracking-tighter">6</p>
+                <p class="mono text-[10px] text-white/30 uppercase tracking-widest">Years of Code</p>
+            </div>
+            <div class="reveal">
+                <p class="text-5xl font-black mb-2 tracking-tighter">90k+</p>
+                <p class="mono text-[10px] text-white/30 uppercase tracking-widest">Servers Supported</p>
             </div>
         </div>
     </section>
 
-    <section id="about" class="py-32 px-10 md:px-32 bg-[#080808]">
-        <div class="max-w-4xl">
-            <h3 class="text-accent mono text-sm mb-4 uppercase">About Me</h3>
-            <h2 class="text-5xl font-extrabold mb-10">Crafting Digital Ecosystems.</h2>
-            <p class="text-2xl text-white/50 leading-relaxed">
-                I am a senior developer focusing on <span class="text-white">FiveM performance optimization</span>. From architecting core frameworks for 1,000+ players to securing servers against exploits, I ensure every line of code serves a purpose.
-            </p>
-        </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mt-20 border-t border-white/5 pt-20">
-            <div><p class="text-4xl font-black mb-2">150+</p><p class="text-xs uppercase tracking-widest text-white/30">Projects Completed</p></div>
-            <div><p class="text-4xl font-black mb-2">40+</p><p class="text-xs uppercase tracking-widest text-white/30">Active Clients</p></div>
-            <div><p class="text-4xl font-black mb-2">6</p><p class="text-xs uppercase tracking-widest text-white/30">Years Experience</p></div>
-            <div><p class="text-4xl font-black mb-2">99%</p><p class="text-xs uppercase tracking-widest text-white/30">Uptime Focus</p></div>
-        </div>
-    </section>
-
-    <section id="clients" class="py-32 px-10 md:px-32">
-        <div class="flex justify-between items-end mb-16">
-            <div>
-                <h3 class="text-accent mono text-sm mb-4 uppercase">Portfolio</h3>
-                <h2 class="text-6xl font-black italic tracking-tighter">CLIENT_DATABASE</h2>
-            </div>
-            <div class="text-right hidden md:block">
-                <p class="text-xs text-white/20 mono uppercase">Filter: All_Deployments</p>
-            </div>
+    <section id="clients" class="py-40 px-8 lg:px-32 bg-[#050505]">
+        <div class="mb-24 reveal">
+            <h3 class="text-[#00ffaa] mono text-xs mb-4 uppercase tracking-widest">My Network</h3>
+            <h2 class="text-6xl font-black italic tracking-tighter uppercase">Client Database</h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="client-card p-8 rounded-sm">
-                <div class="flex justify-between items-start mb-10">
-                    <span class="bg-accent/10 text-accent text-[10px] font-bold px-3 py-1 rounded-full uppercase">Active</span>
-                    <span class="text-white/20 mono text-xs">2026</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="glass-card p-10 reveal">
+                <div class="flex justify-between mb-12">
+                    <span class="text-[10px] mono text-white/20">2026 // LUA</span>
+                    <span class="w-2 h-2 rounded-full bg-[#00ffaa] animate-pulse"></span>
                 </div>
-                <h4 class="text-2xl font-bold mb-2 uppercase">NoPixel</h4>
-                <p class="text-white/40 text-sm mb-8">System optimization and custom entity management for 500+ slots.</p>
-                <div class="flex gap-2">
-                    <span class="text-[9px] border border-white/10 px-2 py-1 text-white/30">LUA</span>
-                    <span class="text-[9px] border border-white/10 px-2 py-1 text-white/30">C#</span>
-                </div>
+                <h4 class="text-2xl font-bold mb-4">NOPIXEL</h4>
+                <p class="text-white/40 text-sm leading-relaxed mb-8">Performance optimization and core systems refactoring for the 4.0 architecture.</p>
+                <div class="text-[10px] mono text-white/20 uppercase">Global Deployment</div>
             </div>
 
-            <div class="client-card p-8 rounded-sm">
-                <div class="flex justify-between items-start mb-10">
-                    <span class="bg-accent/10 text-accent text-[10px] font-bold px-3 py-1 rounded-full uppercase">Completed</span>
-                    <span class="text-white/20 mono text-xs">2025</span>
+            <div class="glass-card p-10 reveal">
+                <div class="flex justify-between mb-12">
+                    <span class="text-[10px] mono text-white/20">2025 // C#</span>
+                    <span class="w-2 h-2 rounded-full bg-white/10"></span>
                 </div>
-                <h4 class="text-2xl font-bold mb-2 uppercase">Liquid RP</h4>
-                <p class="text-white/40 text-sm mb-8">Full-scale framework refactoring and database migration.</p>
-                <div class="flex gap-2">
-                    <span class="text-[9px] border border-white/10 px-2 py-1 text-white/30">MYSQL</span>
-                    <span class="text-[9px] border border-white/10 px-2 py-1 text-white/30">JS</span>
-                </div>
+                <h4 class="text-2xl font-bold mb-4">LIQUID RP</h4>
+                <p class="text-white/40 text-sm leading-relaxed mb-8">Lead developer for custom banking and inventory synchronization modules.</p>
+                <div class="text-[10px] mono text-white/20 uppercase">Active Status</div>
             </div>
 
-            <div class="client-card p-8 rounded-sm">
-                <div class="flex justify-between items-start mb-10">
-                    <span class="bg-accent/10 text-accent text-[10px] font-bold px-3 py-1 rounded-full uppercase">Active</span>
-                    <span class="text-white/20 mono text-xs">2026</span>
+            <div class="glass-card p-10 reveal">
+                <div class="flex justify-between mb-12">
+                    <span class="text-[10px] mono text-white/20">2026 // TS</span>
+                    <span class="w-2 h-2 rounded-full bg-[#00ffaa] animate-pulse"></span>
                 </div>
-                <h4 class="text-2xl font-bold mb-2 uppercase">Alpha City</h4>
-                <p class="text-white/40 text-sm mb-8">Lead development for unique criminal and civil systems.</p>
-                <div class="flex gap-2">
-                    <span class="text-[9px] border border-white/10 px-2 py-1 text-white/30">LUA</span>
-                    <span class="text-[9px] border border-white/10 px-2 py-1 text-white/30">FIVE-M</span>
-                </div>
+                <h4 class="text-2xl font-bold mb-4">SCORA NETWORK</h4>
+                <p class="text-white/40 text-sm leading-relaxed mb-8">Full-stack infrastructure management for community discord and game integrations.</p>
+                <div class="text-[10px] mono text-white/20 uppercase">Lead Architect</div>
             </div>
         </div>
     </section>
 
-    <footer class="py-20 border-t border-white/5 text-center">
-        <div class="w-12 h-12 bg-white/5 mx-auto flex items-center justify-center mb-8 rotate-45 border border-white/10 hover:border-accent transition-colors">
-            <span class="rotate-[-45deg] font-bold">Z</span>
-        </div>
-        <p class="text-white/20 mono text-[10px] uppercase tracking-[0.4em]">&copy; 2026 ZINTHYN_ARCHITECT // SECURED_CONNECTION</p>
+    <footer class="py-20 text-center border-t border-white/5">
+        <p class="mono text-[10px] text-white/20 uppercase tracking-[0.5em]">© 2026 Zinthyn Systems // All Rights Reserved</p>
     </footer>
 
     <script>
-        // Register GSAP Plugins
+        // GSAP Implementation
         gsap.registerPlugin(ScrollTrigger);
 
-        // Update Debug HUD
-        const fpsDisplay = document.getElementById('fps');
-        const nodeDisplay = document.getElementById('nodes');
-        const scrollDisplay = document.getElementById('scroll-pct');
-
+        // HUD Logic
+        const fpsDisplay = document.getElementById('fps-val');
+        const nodeDisplay = document.getElementById('node-val');
         nodeDisplay.innerText = document.getElementsByTagName('*').length;
 
-        let lastCalledTime;
-        let fps;
-        function requestAnimFrame() {
-            if(!lastCalledTime) {
-                lastCalledTime = Date.now();
-                fps = 0;
-            } else {
-                let delta = (Date.now() - lastCalledTime)/1000;
-                lastCalledTime = Date.now();
-                fps = Math.round(1/delta);
-                fpsDisplay.innerText = fps;
-            }
-            window.requestAnimationFrame(requestAnimFrame);
+        let lastTime = performance.now();
+        function updateFPS() {
+            const now = performance.now();
+            const delta = now - lastTime;
+            lastTime = now;
+            fpsDisplay.innerText = Math.round(1000 / delta);
+            requestAnimationFrame(updateFPS);
         }
-        requestAnimFrame();
+        updateFPS();
 
-        window.addEventListener('scroll', () => {
-            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            let scrolled = (winScroll / height) * 100;
-            scrollDisplay.innerText = Math.round(scrolled) + "%";
-        });
-
-        // Animations
-        gsap.from(".client-card", {
-            scrollTrigger: {
-                trigger: "#clients",
-                start: "top 80%"
-            },
-            y: 50,
-            opacity: 0,
-            stagger: 0.1,
-            duration: 1
-        });
-
-        gsap.from("#about h2, #about p", {
-            scrollTrigger: {
-                trigger: "#about",
-                start: "top 70%"
-            },
-            y: 30,
-            opacity: 0,
-            duration: 1,
-            stagger: 0.2
+        // Reveal Animations
+        gsap.utils.toArray('.reveal').forEach(elem => {
+            gsap.to(elem, {
+                scrollTrigger: {
+                    trigger: elem,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                },
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: 'power4.out'
+            });
         });
     </script>
 </body>
