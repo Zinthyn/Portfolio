@@ -3,240 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // 3D_ARCHITECT</title>
+    <title>ZINTHYN // 1.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00f2ff; --bg: #000000; }
+        :root { --neon: #00f2ff; --bg: #000; --low-glow: rgba(0, 242, 255, 0.1); }
         body { 
-            background: var(--bg); 
-            color: #fff; 
-            font-family: 'JetBrains Mono', monospace;
-            height: 100vh;
-            overflow: hidden;
-            perspective: 1200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace;
+            height: 100vh; overflow: hidden; perspective: 1500px;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* Cinematic Intro Overlay */
+        /* Scanline Grit */
+        .scanline-grit {
+            position: fixed; inset: 0; pointer-events: none; z-index: 2000;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 2px, 3px 100%; opacity: 0.4;
+        }
+
         #intro-overlay {
-            position: fixed; inset: 0; background: #000; z-index: 1000;
+            position: fixed; inset: 0; background: #000; z-index: 3000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 1.5s cubic-bezier(0.8, 0, 0.2, 1);
+            transition: 1.5s cubic-bezier(0.8, 0, 0.2, 1);
         }
 
-        .initiate-btn {
-            border: 1px solid var(--neon);
-            padding: 1rem 3.5rem;
-            color: var(--neon);
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.6em;
-            cursor: pointer;
-            position: relative;
-            transition: 0.4s;
-            background: transparent;
-            text-transform: uppercase;
-            font-weight: 900;
+        .cyber-btn {
+            border: 1px solid var(--neon); padding: 1rem 3rem; color: var(--neon);
+            font-family: 'Orbitron', sans-serif; letter-spacing: 0.8em; cursor: pointer;
+            transition: 0.3s; background: transparent; position: relative;
         }
-        .initiate-btn:hover { 
-            background: var(--neon); 
-            color: #000; 
-            box-shadow: 0 0 80px var(--neon);
-            letter-spacing: 0.8em;
-        }
+        .cyber-btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 50px var(--neon); }
 
-        /* 3D Floating Shell */
+        /* The 3D Engine */
         #main-shell {
-            width: 92%;
-            height: 88%;
-            max-width: 1500px;
-            background: rgba(5, 7, 10, 0.85);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            box-shadow: 0 50px 150px rgba(0,0,0,1);
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out, opacity 1.2s ease, scale 1.8s cubic-bezier(0.1, 0.8, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(25px);
-            opacity: 0;
-            scale: 0.1;
-            transform: translateZ(-2500px);
+            width: 95%; height: 90%; max-width: 1600px;
+            background: rgba(2, 4, 6, 0.9); border: 1px solid rgba(0, 242, 255, 0.15);
+            transform-style: preserve-3d; transition: transform 0.1s ease-out, opacity 1s, scale 1.5s;
+            display: flex; flex-direction: column; opacity: 0; scale: 0.5; transform: translateZ(-2000px);
+        }
+
+        .glitch:hover {
+            animation: glitch-anim 0.2s linear infinite;
+            text-shadow: 2px 0 red, -2px 0 blue;
+        }
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 2px); }
+            40% { transform: translate(-3px, -2px); }
+            60% { transform: translate(3px, 2px); }
+            80% { transform: translate(3px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .data-stream {
+            font-size: 8px; color: #004444; white-space: nowrap; 
+            writing-mode: vertical-rl; text-orientation: monospace;
+        }
+
+        .card-3d {
+            background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-3d:hover {
+            transform: translateZ(120px); border-color: var(--neon);
+            background: rgba(0, 242, 255, 0.05); box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
         }
 
         #stars { position: fixed; inset: 0; z-index: -1; }
-
-        .project-card-3d {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transform: translateZ(20px);
-        }
-        .project-card-3d:hover {
-            transform: translateZ(100px) scale(1.05);
-            border-color: var(--neon);
-            background: rgba(0, 242, 255, 0.05);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-        }
-
         .orbitron { font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
 <body>
 
+    <div class="scanline-grit"></div>
     <canvas id="stars"></canvas>
 
     <div id="intro-overlay">
-        <div class="orbitron text-[9px] text-cyan-900 mb-10 tracking-[1.5em] animate-pulse">ENCRYPTION_LAYER_01_ACTIVE</div>
-        <button class="initiate-btn" onclick="startUplink()">[ INITIATE_UPLINK ]</button>
+        <div class="orbitron text-[10px] text-cyan-900 mb-6 tracking-[1em]">ZINTHYN_VIRTUAL_OS</div>
+        <button class="cyber-btn" onclick="initialize()">ESTABLISH_LINK</button>
     </div>
 
-    <div id="main-shell" class="rounded-2xl overflow-hidden">
-        
-        <header class="p-8 border-b border-white/5 flex justify-between items-center bg-black/50">
-            <div class="orbitron text-3xl font-black italic tracking-tighter text-cyan-400 group cursor-default">
-                ZINTHYN<span class="text-white opacity-20">.SYS</span>
+    <div id="main-shell" class="rounded-sm">
+        <div class="h-12 border-b border-white/5 flex items-center justify-between px-6 bg-black/80">
+            <div class="flex items-center gap-6">
+                <div class="orbitron text-cyan-500 font-black text-lg tracking-widest glitch">ZIN_OS_7.0</div>
+                <div class="text-[8px] orbitron text-slate-700 hidden lg:block">LOCAL_LATENCY: 0.0001ms // CORE: LOCKED</div>
             </div>
-            <div class="flex gap-10 text-[9px] orbitron text-slate-500">
-                <span class="flex items-center gap-2 text-cyan-500"><i class="fas fa-signal animate-bounce"></i> UPLINK: 99%</span>
-                <span>VOLTAGE: 1.2V</span>
+            <div class="flex items-center gap-4 text-[10px] orbitron">
+                <span id="ping" class="text-emerald-500">Pinging server...</span>
+                <span id="clock" class="text-white">00:00:00</span>
             </div>
-        </header>
+        </div>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-24 md:w-72 border-r border-white/5 p-10 flex flex-col gap-12 bg-black/40">
-                <nav class="space-y-12">
-                    <div class="text-cyan-400 orbitron text-[11px] font-black tracking-widest cursor-pointer flex items-center gap-4">
-                        <div class="w-1 h-5 bg-cyan-500 shadow-[0_0_15px_#00f2ff]"></div> 01_ROOT
+            <aside class="w-16 lg:w-64 border-r border-white/5 flex flex-col p-6 gap-10 bg-black/40">
+                <div class="space-y-10">
+                    <div class="group cursor-pointer" onclick="playClick()">
+                        <i class="fas fa-terminal text-cyan-500 mb-2"></i>
+                        <p class="hidden lg:block orbitron text-[10px] text-slate-500 group-hover:text-cyan-400 transition">SYSTEM_ROOT</p>
                     </div>
-                    <div class="text-slate-600 orbitron text-[11px] cursor-pointer hover:text-white transition tracking-widest">02_PROJECTS</div>
-                    <div class="text-slate-600 orbitron text-[11px] cursor-pointer hover:text-white transition tracking-widest">03_VOUCHES</div>
-                </nav>
-                <div class="mt-auto opacity-20 text-[8px] orbitron text-slate-400 leading-loose">
-                    SEC_LEVEL: RED<br>NODE: LA_NORTH
+                    <div class="group cursor-pointer" onclick="playClick()">
+                        <i class="fas fa-microchip text-slate-700 group-hover:text-cyan-400 mb-2"></i>
+                        <p class="hidden lg:block orbitron text-[10px] text-slate-500 group-hover:text-cyan-400 transition">CORE_MODULES</p>
+                    </div>
                 </div>
+                <div id="side-log" class="mt-auto hidden lg:block text-[7px] text-cyan-950 font-mono space-y-1 opacity-50 overflow-hidden h-32"></div>
             </aside>
 
-            <main class="flex-1 p-16 overflow-y-auto scroll-smooth">
-                <section class="mb-40">
-                    <h2 class="text-cyan-800 text-[11px] orbitron tracking-[1.2em] mb-6">AUTHORIZED_PERSONNEL_ONLY</h2>
-                    <h1 class="text-8xl lg:text-9xl font-black orbitron tracking-tighter mb-8 leading-none">THE <br><span class="text-transparent" style="-webkit-text-stroke: 1px #00f2ff;">DEEP_ARCH.</span></h1>
-                    <p class="text-slate-500 max-w-2xl text-base font-light leading-relaxed">
-                        Zinthyn specializes in modular FiveM infrastructure, high-fidelity NUI interfaces, and kernel-level anti-cheat bridges.
-                    </p>
-                </section>
+            <main class="flex-1 p-8 lg:p-16 overflow-y-auto scroll-smooth flex">
+                <div class="flex-1">
+                    <section class="mb-32">
+                        <div class="inline-block px-2 py-1 border border-cyan-900 text-[8px] orbitron text-cyan-800 mb-6 tracking-widest">ENCRYPTED_ARCHITECT_PROFILE</div>
+                        <h1 class="text-7xl lg:text-9xl font-black orbitron mb-6 italic tracking-tighter">
+                            VIRTUAL <br><span class="text-cyan-400">SYNC.</span>
+                        </h1>
+                        <p class="text-slate-500 max-w-xl text-sm leading-relaxed">
+                            Engineered performance for high-concurrency environments. Bridging the gap between raw hardware and immersive player interaction.
+                        </p>
+                    </section>
 
-                <div class="grid md:grid-cols-2 gap-10 mb-20">
-                    <div class="project-card-3d p-10 rounded-xl">
-                        <div class="flex justify-between items-center mb-6">
-                            <i class="fas fa-microchip text-cyan-500"></i>
-                            <span class="orbitron text-[8px] text-cyan-900">v4.02</span>
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <div class="card-3d p-8 rounded-sm" onclick="playClick()">
+                            <div class="flex justify-between items-start mb-10">
+                                <span class="orbitron text-[10px] text-cyan-500">PROJECT_01</span>
+                                <i class="fas fa-cube text-cyan-900"></i>
+                            </div>
+                            <h3 class="orbitron text-xl mb-2 italic">ZIN_MULTICHAR</h3>
+                            <p class="text-xs text-slate-600 mb-6 leading-relaxed">Dynamic metadata rendering with cinematic transition states.</p>
+                            <div class="text-[8px] orbitron text-cyan-900 font-bold tracking-widest">REACT // LUA // REDIS</div>
                         </div>
-                        <h3 class="orbitron text-xl mb-4">ZIN_MULTICHAR</h3>
-                        <p class="text-[12px] text-slate-500 font-light italic leading-loose">Cinematic selection system with real-time SQL metadata streaming.</p>
-                    </div>
-                    <div class="project-card-3d p-10 rounded-xl border-l-cyan-500 border-l-2">
-                        <div class="flex justify-between items-center mb-6">
-                            <i class="fas fa-shield-halved text-cyan-500"></i>
-                            <span class="orbitron text-[8px] text-cyan-900">CLASSIFIED</span>
+                        <div class="card-3d p-8 rounded-sm" onclick="playClick()">
+                            <div class="flex justify-between items-start mb-10">
+                                <span class="orbitron text-[10px] text-purple-500">EXP_09</span>
+                                <i class="fas fa-brain text-purple-900"></i>
+                            </div>
+                            <h3 class="orbitron text-xl mb-2 italic">NEURAL_SYNC</h3>
+                            <p class="text-xs text-slate-600 mb-6 leading-relaxed">AI-driven predictive movement sync for high-speed entities.</p>
+                            <div class="text-[8px] orbitron text-purple-900 font-bold tracking-widest">WASM // C# // KERNEL</div>
                         </div>
-                        <h3 class="orbitron text-xl mb-4">NEURAL_GUARD</h3>
-                        <p class="text-[12px] text-slate-500 font-light italic leading-loose">AI-assisted resource monitor detecting anomalous event execution.</p>
                     </div>
+                </div>
+
+                <div class="w-12 hidden lg:flex flex-col items-center border-l border-white/5 data-stream py-4 gap-4">
+                    <span>SYS_CORE_7.0.1</span>
+                    <span class="text-cyan-900">\\\\\\\\\\\\\\\\\\\\</span>
+                    <span>X_COORD_LOCKED</span>
+                    <span class="text-cyan-900">\\\\\\\\\\\\\\\\\\\\</span>
                 </div>
             </main>
         </div>
 
-        <footer class="h-12 bg-black/90 flex items-center px-10 text-[9px] font-mono text-cyan-950 uppercase tracking-widest">
-            Uplink maintained by Zinthyn // All rights reserved 2026.
+        <footer class="h-10 bg-black border-t border-white/5 flex items-center px-6 justify-between text-[8px] orbitron text-cyan-900 tracking-widest">
+            <div>READY // CONNECTION_SECURE</div>
+            <div class="hover:text-cyan-400 cursor-pointer transition" onclick="copyDiscord()">DISCORD: ZINTHYN</div>
         </footer>
     </div>
 
     <script>
-        // AUDIO ENGINE
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playClick() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+            gain.connect(audioCtx.destination);
+            osc.connect(gain);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
 
-        function playBootSound() {
-            // Power Up "Whoosh"
+        function playBoot() {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(40, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1.5);
+            osc.frequency.setValueAtTime(20, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 2);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1.5);
-
-            // Low Hum (Ambient)
-            const hum = audioCtx.createOscillator();
-            const humGain = audioCtx.createGain();
-            hum.type = 'sine';
-            hum.frequency.setValueAtTime(60, audioCtx.currentTime);
-            humGain.gain.setValueAtTime(0, audioCtx.currentTime);
-            humGain.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 3);
-            hum.connect(humGain);
-            humGain.connect(audioCtx.destination);
-            hum.start();
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 2);
         }
 
-        const shell = document.getElementById('main-shell');
-        const overlay = document.getElementById('intro-overlay');
-
-        function startUplink() {
+        function initialize() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            playBootSound();
-
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.style.display = 'none', 1500);
-
-            shell.style.opacity = '1';
-            shell.style.scale = '1';
-            shell.style.transform = 'translateZ(0px)';
+            playBoot();
+            document.getElementById('intro-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('intro-overlay').style.display = 'none';
+                document.getElementById('main-shell').style.opacity = '1';
+                document.getElementById('main-shell').style.scale = '1';
+                document.getElementById('main-shell').style.transform = 'translateZ(0px)';
+            }, 1000);
         }
 
-        // 3D Tilt Interaction
+        // 3D Engine
         document.addEventListener('mousemove', (e) => {
-            if(overlay.style.display === 'none') {
-                const xAxis = (window.innerWidth / 2 - e.pageX) / 45;
-                const yAxis = (window.innerHeight / 2 - e.pageY) / 45;
-                shell.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            if(document.getElementById('intro-overlay').style.display === 'none') {
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+                document.getElementById('main-shell').style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
             }
         });
 
-        // Warp Speed Stars
+        // Real-time Clock & Ping
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            document.getElementById('ping').innerText = `LATENCY: ${Math.floor(Math.random() * 5) + 1}ms`;
+        }, 1000);
+
+        // Side Log Generator
+        const logs = ["Vector3_sync: OK", "OxLib_bridge: READY", "Memory_dump: 0.04s", "NUI_proxy: CONNECTED", "Auth_token: VALID"];
+        setInterval(() => {
+            const logBox = document.getElementById('side-log');
+            const div = document.createElement('div');
+            div.innerText = `> ${logs[Math.floor(Math.random() * logs.length)]}`;
+            logBox.prepend(div);
+            if(logBox.childNodes.length > 10) logBox.removeChild(logBox.lastChild);
+        }, 2000);
+
+        // Starfield Canvas
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const stars = Array(400).fill().map(() => ({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            z: Math.random() * canvas.width,
-            size: Math.random() * 1.5
-        }));
-
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const stars = Array(300).fill().map(() => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, z: Math.random() * canvas.width, size: Math.random() * 1.5 }));
         function drawStars() {
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "black"; ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = "white";
             stars.forEach(s => {
-                const x = (s.x - canvas.width / 2) * (canvas.width / s.z) + canvas.width / 2;
-                const y = (s.y - canvas.height / 2) * (canvas.width / s.z) + canvas.height / 2;
-                const size = s.size * (canvas.width / s.z);
-                ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
-                ctx.fill();
-                s.z -= 4; // Faster warp
-                if (s.z <= 0) s.z = canvas.width;
+                const x = (s.x - canvas.width/2) * (canvas.width/s.z) + canvas.width/2;
+                const y = (s.y - canvas.height/2) * (canvas.width/s.z) + canvas.height/2;
+                const size = s.size * (canvas.width/s.z);
+                ctx.beginPath(); ctx.arc(x,y,size,0,Math.PI*2); ctx.fill();
+                s.z -= 2; if(s.z <= 0) s.z = canvas.width;
             });
             requestAnimationFrame(drawStars);
         }
         drawStars();
+
+        function copyDiscord() {
+            playClick();
+            navigator.clipboard.writeText("Zinthyn");
+            alert("UPLINK_COPIED: Zinthyn");
+        }
     </script>
 </body>
 </html>
