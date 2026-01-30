@@ -3,180 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zinthyn | FiveM Developer</title>
+    <title>Zinthyn | Creative Developer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #0d0d0d; --accent: #3b82f6; --glass: rgba(255, 255, 255, 0.03); }
-        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        :root {
+            --bg: #050505;
+            --accent: #00f2ff;
+            --secondary: #7000ff;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            cursor: none; /* Custom Cursor */
+        }
+
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .nav-blur { backdrop-filter: blur(15px); background: rgba(13, 13, 13, 0.8); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: pointer; }
-        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
-        .skill-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .skill-progress { height: 100%; background: var(--accent); width: 0; }
-        .desc-hidden { display: none; margin-top: 1rem; color: #9ca3af; font-size: 0.875rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; }
+
+        /* Custom Cursor */
+        #cursor {
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        /* Glitch Effect for ZINTHYN */
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+        .glitch::before, .glitch::after {
+            content: 'ZINTHYN';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+        }
+        .glitch::before { left: 2px; text-shadow: -2px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
+        .glitch::after { left: -2px; text-shadow: -2px 0 #00fff9; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim2 5s infinite linear alternate-reverse; }
+
+        @keyframes glitch-anim { 0% { clip: rect(10px, 9999px, 20px, 0); } 100% { clip: rect(80px, 9999px, 90px, 0); } }
+        @keyframes glitch-anim2 { 0% { clip: rect(50px, 9999px, 60px, 0); } 100% { clip: rect(10px, 9999px, 30px, 0); } }
+
+        /* Grid Background */
+        .grid-bg {
+            background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: absolute; width: 100%; height: 100%; z-index: -1;
+        }
+
+        .framework-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .framework-card:hover {
+            transform: scale(1.05) rotate(2deg);
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        }
+
+        .script-desc {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.3s;
+            opacity: 0;
+        }
+        .script-card.active .script-desc {
+            max-height: 200px;
+            opacity: 1;
+            padding-top: 1rem;
+        }
     </style>
 </head>
 <body>
 
-    <nav class="fixed top-0 w-full z-50 nav-blur">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-xl font-extrabold tracking-tighter uppercase">Zinthyn<span class="text-blue-500">.</span></div>
-            <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
-                <a href="#about" class="hover:text-white transition">About</a>
-                <a href="#frameworks" class="hover:text-white transition">Frameworks</a>
-                <a href="#scripts" class="hover:text-white transition">Scripts</a>
-                <a href="#contact" class="hover:text-white transition">Contact</a>
-            </div>
+    <div id="cursor"></div>
+    <div class="grid-bg"></div>
+
+    <nav class="fixed top-0 w-full z-50 p-6 flex justify-between items-center mix-blend-difference">
+        <div class="text-2xl font-black tracking-tighter">ZIN.</div>
+        <div class="flex space-x-6 mono text-xs uppercase tracking-widest">
+            <a href="#scripts" class="hover:text-cyan-400">Scripts</a>
+            <a href="#skills" class="hover:text-cyan-400">System</a>
+            <a href="#contact" class="hover:text-cyan-400">Contact</a>
         </div>
     </nav>
 
-    <section class="h-screen flex flex-col justify-center items-center text-center px-6">
-        <h1 class="text-7xl md:text-9xl font-black mb-4 tracking-tighter">ZINTHYN</h1>
-        <p class="text-blue-500 mono tracking-widest uppercase mb-8">Lead Developer / FiveM Specialist</p>
-        <div class="flex space-x-4">
-            <a href="#scripts" class="bg-blue-600 px-8 py-4 rounded-full font-bold hover:bg-blue-700 transition">View Scripts</a>
-        </div>
-    </section>
-
-    <section id="frameworks" class="py-24 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold mb-12">Supported <span class="text-blue-500">Frameworks</span></h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="card p-8 rounded-2xl text-center">
-                <div class="text-xl font-bold">TMC</div>
-            </div>
-            <div class="card p-8 rounded-2xl text-center border-red-500/20">
-                <div class="text-xl font-bold text-red-500">qb-core</div>
-            </div>
-            <div class="card p-8 rounded-2xl text-center border-yellow-500/20">
-                <div class="text-xl font-bold text-yellow-500">Qbox</div>
-            </div>
-            <div class="card p-8 rounded-2xl text-center border-orange-500/20">
-                <div class="text-xl font-bold text-orange-500">ESX</div>
+    <section class="min-h-screen flex flex-col justify-center items-center relative">
+        <div class="text-center">
+            <p class="mono text-cyan-500 mb-2 opacity-0 hero-fade">Initializing Zinthyn.sys...</p>
+            <h1 class="text-8xl md:text-9xl font-black glitch hero-fade opacity-0">ZINTHYN</h1>
+            <div class="mt-8 flex justify-center space-x-4 hero-fade opacity-0">
+                <span class="px-4 py-1 border border-white/20 rounded-full text-xs mono">FiveM Specialist</span>
+                <span class="px-4 py-1 border border-white/20 rounded-full text-xs mono">Backend Arch</span>
             </div>
         </div>
     </section>
 
-    <section id="scripts" class="py-24 px-6 max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold mb-12">Custom <span class="text-blue-500">Scripts</span></h2>
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <section class="py-20 px-6 max-w-6xl mx-auto">
+        <h2 class="text-4xl font-black mb-12 italic">FRAMEWORKS.</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="framework-card p-10 rounded-xl text-center">
+                <img src="https://i.imgur.com/your-tmc-logo.png" alt="TMC" class="h-12 mx-auto mb-4 opacity-50">
+                <div class="font-bold mono">TMC</div>
+            </div>
+            <div class="framework-card p-10 rounded-xl text-center">
+                <div class="text-red-500 text-2xl font-black mb-4 italic">qb-core</div>
+                <div class="font-bold mono text-red-500/50">High Perf</div>
+            </div>
+            <div class="framework-card p-10 rounded-xl text-center">
+                <div class="text-yellow-400 text-2xl font-black mb-4 italic">Qbox</div>
+                <div class="font-bold mono text-yellow-500/50">Next Gen</div>
+            </div>
+            <div class="framework-card p-10 rounded-xl text-center">
+                <div class="text-orange-500 text-2xl font-black mb-4 italic">ESX</div>
+                <div class="font-bold mono text-orange-500/50">Legacy</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="scripts" class="py-20 px-6 max-w-6xl mx-auto">
+        <h2 class="text-4xl font-black mb-12 italic text-right">THE_WAREHOUSE.</h2>
+        <div class="space-y-4">
             
-            <div class="card p-6 rounded-3xl" onclick="toggleDesc('multichar')">
-                <div class="flex justify-between items-start">
-                    <h3 class="font-bold text-xl">ZIN_Multicharacter</h3>
-                    <span class="text-blue-500 text-xs mono">UI/UX</span>
+            <div class="script-card group border-b border-white/10 py-8 cursor-pointer" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-3xl font-bold group-hover:text-cyan-400 transition">ZIN_Multicharacter</h3>
+                    <div class="text-cyan-500 mono text-sm">[ CLICK TO EXPAND ]</div>
                 </div>
-                <div id="multichar" class="desc-hidden">
-                    Premium character selection screen with 3D ped rotation and smooth metadata transitions.
-                </div>
-            </div>
-
-            <div class="card p-6 rounded-3xl" onclick="toggleDesc('garage')">
-                <div class="flex justify-between items-start">
-                    <h3 class="font-bold text-xl">ZIN_Garage</h3>
-                    <span class="text-blue-500 text-xs mono">VEHICLE</span>
-                </div>
-                <div id="garage" class="desc-hidden">
-                    Advanced vehicle management with valet services, persistent damage, and customizable housing integration.
+                <div class="script-desc text-gray-400 flex gap-10 items-center">
+                    <div class="w-1/3 h-32 bg-white/5 rounded-lg flex items-center justify-center font-black italic text-white/10 text-4xl">PREVIEW</div>
+                    <p class="w-2/3 leading-relaxed">A sleek, high-performance character selection screen. Features include 3D ped interaction, seamless coordinate transitions, and full JSON-based metadata display.</p>
                 </div>
             </div>
 
-            <div class="card p-6 rounded-3xl" onclick="toggleDesc('oilrig')">
-                <div class="flex justify-between items-start">
-                    <h3 class="font-bold text-xl">ZIN_OilRig</h3>
-                    <span class="text-blue-500 text-xs mono">HEIST</span>
+            <div class="script-card group border-b border-white/10 py-8 cursor-pointer" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-3xl font-bold group-hover:text-cyan-400 transition">ZIN_Garage</h3>
+                    <div class="text-cyan-500 mono text-sm">[ CLICK TO EXPAND ]</div>
                 </div>
-                <div id="oilrig" class="desc-hidden">
-                    Synchronized group heist featuring custom hacking mini-games and dynamic NPC responses.
-                </div>
-            </div>
-
-            <div class="card p-6 rounded-3xl" onclick="toggleDesc('fleeca')">
-                <div class="flex justify-between items-start">
-                    <h3 class="font-bold text-xl">ZIN_Fleeca</h3>
-                    <span class="text-blue-500 text-xs mono">HEIST</span>
-                </div>
-                <div id="fleeca" class="desc-hidden">
-                    Classic bank robbery reimagined with thermite drilling and silent/loud entry options.
+                <div class="script-desc text-gray-400 flex gap-10 items-center">
+                    <div class="w-1/3 h-32 bg-white/5 rounded-lg flex items-center justify-center font-black italic text-white/10 text-4xl">PREVIEW</div>
+                    <p class="w-2/3">The ultimate vehicle management system. Persistent state saving, custom damage interpolation, and a modern NUI interface built for speed.</p>
                 </div>
             </div>
 
-            <div class="card p-6 rounded-3xl" onclick="toggleDesc('anticheat')">
-                <div class="flex justify-between items-start">
-                    <h3 class="font-bold text-xl">ZIN_AC</h3>
-                    <span class="text-blue-500 text-xs mono">SECURITY</span>
+            <div class="script-card group border-b border-white/10 py-8 cursor-pointer" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-3xl font-bold group-hover:text-cyan-400 transition">ZIN_OilRig</h3>
+                    <div class="text-cyan-500 mono text-sm">[ CLICK TO EXPAND ]</div>
                 </div>
-                <div id="anticheat" class="desc-hidden">
-                    Prop-injection protection, event-trigger monitoring, and automatic blacklisted command bans.
+                <div class="script-desc text-gray-400">
+                    <p class="leading-relaxed">An offshore heist involving boat chases, hacking sequences, and high-tier loot tables. Optimized for 0.01ms idle.</p>
+                </div>
+            </div>
+
+             <div class="script-card group border-b border-white/10 py-8 cursor-pointer" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-3xl font-bold group-hover:text-cyan-400 transition text-red-500">ZIN_AC</h3>
+                    <div class="text-red-500 mono text-sm">[ SYSTEM SECURE ]</div>
+                </div>
+                <div class="script-desc text-gray-400">
+                    <p class="leading-relaxed">State-of-the-art protection against prop-spawning, event-triggering, and executor-based injection. Keep your community clean.</p>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <section id="skills" class="py-24 bg-black/30 px-6">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-bold mb-12">Technical <span class="text-blue-500">Skills</span></h2>
-            <div class="grid md:grid-cols-2 gap-10">
+    <section id="skills" class="py-20 px-6 max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-20">
+            <div>
+                <h2 class="text-4xl font-black mb-8 italic">CORE_LOGIC.</h2>
                 <div class="space-y-6">
-                    <div>
-                        <div class="flex justify-between mb-2"><span class="mono">LUA</span><span>98%</span></div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="98%"></div></div>
+                    <div class="skill-row">
+                        <div class="flex justify-between mono text-xs mb-2 text-cyan-500"><span>LUA</span><span>100%</span></div>
+                        <div class="h-1 bg-white/10 w-full"><div class="h-1 bg-cyan-500 w-full"></div></div>
                     </div>
-                    <div>
-                        <div class="flex justify-between mb-2"><span class="mono">C#</span><span>85%</span></div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="85%"></div></div>
+                    <div class="skill-row">
+                        <div class="flex justify-between mono text-xs mb-2"><span>C# / C++</span><span>85%</span></div>
+                        <div class="h-1 bg-white/10 w-full"><div class="h-1 bg-white w-5/6"></div></div>
                     </div>
-                    <div>
-                        <div class="flex justify-between mb-2"><span class="mono">C++</span><span>75%</span></div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="75%"></div></div>
+                    <div class="skill-row">
+                        <div class="flex justify-between mono text-xs mb-2"><span>PYTHON</span><span>70%</span></div>
+                        <div class="h-1 bg-white/10 w-full"><div class="h-1 bg-white w-2/3"></div></div>
+                    </div>
+                    <div class="skill-row">
+                        <div class="flex justify-between mono text-xs mb-2"><span>HTML/CSS</span><span>95%</span></div>
+                        <div class="h-1 bg-white/10 w-full"><div class="h-1 bg-white w-11/12"></div></div>
                     </div>
                 </div>
-                <div class="space-y-6">
-                    <div>
-                        <div class="flex justify-between mb-2"><span class="mono">PYTHON</span><span>80%</span></div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="80%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-2"><span class="mono">HTML</span><span>90%</span></div>
-                        <div class="skill-bar"><div class="skill-progress" data-width="90%"></div></div>
-                    </div>
-                </div>
+            </div>
+            <div class="bg-white/5 p-8 rounded-2xl mono text-xs text-cyan-500 border border-white/5">
+                <p class="mb-2">> Zinthyn.load_profile()</p>
+                <p class="mb-2">> Checking modules...</p>
+                <p class="mb-2 text-white">> Status: <span class="animate-pulse">AVAILABLE FOR HIRE</span></p>
+                <p class="mb-2">> Favorite Framework: QBOX</p>
+                <p class="mb-2">> Last Project: ZIN_AC Security Update</p>
+                <p class="mt-8 opacity-50">-- System running on Node.js --</p>
             </div>
         </div>
     </section>
 
-    <footer id="contact" class="py-20 text-center border-t border-white/5">
-        <p class="text-gray-500 mb-4">Interested in custom work?</p>
-        <a href="mailto:contact@zinthyn.dev" class="text-3xl font-bold hover:text-blue-500 transition underline underline-offset-8">contact@zinthyn.dev</a>
+    <footer id="contact" class="py-20 text-center">
+        <p class="mono text-xs opacity-30 mb-4 uppercase tracking-widest">End of Transmission</p>
+        <a href="mailto:contact@zinthyn.dev" class="text-5xl font-black hover:text-cyan-400 transition italic underline decoration-cyan-500/20">GET_IN_TOUCH</a>
     </footer>
 
     <script>
-        gsap.registerPlugin(ScrollTrigger);
-
-        // Skill bar animation
-        gsap.utils.toArray('.skill-progress').forEach(bar => {
-            gsap.to(bar, {
-                width: bar.dataset.width,
-                duration: 2,
-                scrollTrigger: { trigger: bar, start: "top 90%" }
-            });
+        // Custom Cursor Movement
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
         });
 
-        // Click description logic
-        function toggleDesc(id) {
-            const el = document.getElementById(id);
-            const isVisible = el.style.display === "block";
-            
-            // Hide all others first for a "clean" feel
-            document.querySelectorAll('.desc-hidden').forEach(d => d.style.display = 'none');
-            
-            el.style.display = isVisible ? "none" : "block";
-        }
+        // Hover Effect for Cursor
+        document.querySelectorAll('a, .script-card, .framework-card').forEach(item => {
+            item.addEventListener('mouseenter', () => cursor.style.transform = 'scale(3)');
+            item.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+        });
+
+        // Hero Animation
+        gsap.to('.hero-fade', {
+            opacity: 1,
+            y: -20,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power4.out"
+        });
+
+        // Scroll Reveal
+        gsap.utils.toArray('.script-card').forEach(card => {
+            gsap.from(card, {
+                scrollTrigger: card,
+                x: -50,
+                opacity: 0,
+                duration: 1
+            });
+        });
     </script>
 </body>
 </html>
