@@ -3,211 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zinthyn | FiveM Developer Portfolio</title>
-    
+    <title>ZINTHYN // ARCHITECT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono&family=Outfit:wght@100;400;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        :root {
-            --bg-color: #0a0a0a;
-            --accent-color: #3b82f6; /* Blue accent */
-            --card-bg: #111111;
+        :root { --neon: #00f2ff; --darker: #020202; --accent: #7000ff; }
+        * { cursor: none !important; } /* Custom cursor logic */
+        
+        body { 
+            background-color: var(--darker); 
+            color: #fff; 
+            font-family: 'Outfit', sans-serif; 
+            overflow-x: hidden; 
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: #ffffff;
-            font-family: 'Inter', sans-serif;
-            scroll-behavior: smooth;
+        .font-sync { font-family: 'Syncopate', sans-serif; }
+        .font-mono { font-family: 'Space Mono', monospace; }
+
+        /* Custom Cursor */
+        #cursor {
+            width: 20px; height: 20px; border: 2px solid var(--neon);
+            border-radius: 50%; position: fixed; pointer-events: none;
+            z-index: 9999; transition: transform 0.1s;
+        }
+        #cursor-dot {
+            width: 4px; height: 4px; background: white;
+            position: fixed; pointer-events: none; z-index: 9999; border-radius: 50%;
         }
 
-        .font-mono { font-family: 'Fira Code', monospace; }
-
-        /* Smooth reveal animation */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease-out;
-        }
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
+        /* Animated Grid Background */
+        .bg-grid {
+            background-size: 50px 50px;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            position: fixed; inset: 0; z-index: -1;
         }
 
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        /* Scanline Effect */
+        body::before {
+            content: " "; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
 
-        .skill-bar {
-            height: 4px;
-            background: #222;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .skill-progress {
-            height: 100%;
-            background: var(--accent-color);
-            width: 0%;
-            transition: width 1.5s ease-in-out;
+        /* Glitch Hero */
+        .hero-title {
+            font-size: clamp(3rem, 15vw, 15rem);
+            line-height: 0.8;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.3));
         }
 
-        /* Hide scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .project-card {
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative; overflow: hidden;
+        }
+        .project-card:hover {
+            border-color: var(--neon);
+            background: rgba(0, 242, 255, 0.05);
+            transform: scale(1.02) translateY(-10px);
+        }
+
+        .boot-screen {
+            position: fixed; inset: 0; background: black; z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; padding: 10%;
+            font-family: 'Space Mono', monospace; color: var(--neon);
+            transition: opacity 1s ease-in-out;
+        }
+
+        @keyframes pulse-neon {
+            0% { box-shadow: 0 0 5px var(--neon); }
+            50% { box-shadow: 0 0 20px var(--neon); }
+            100% { box-shadow: 0 0 5px var(--neon); }
+        }
+
+        .stat-circle {
+            width: 150px; height: 150px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
     </style>
 </head>
-<body class="selection:bg-blue-500 selection:text-white">
+<body class="selection:bg-cyan-500 selection:text-black">
 
-    <nav class="fixed top-0 w-full z-[100] px-6 py-4 flex justify-between items-center glass">
-        <div class="text-xl font-black tracking-tighter uppercase tracking-[0.2em]">Zinthyn<span class="text-blue-500">.</span></div>
-        <div class="hidden md:flex space-x-10 text-[11px] font-bold uppercase tracking-widest text-gray-400">
-            <a href="#home" class="hover:text-white transition">Home</a>
-            <a href="#about" class="hover:text-white transition">About</a>
-            <a href="#skills" class="hover:text-white transition">Skills</a>
-            <a href="#services" class="hover:text-white transition">Services</a>
-            <a href="#contact" class="text-blue-500 hover:text-blue-400">Contact</a>
+    <div id="cursor"></div>
+    <div id="cursor-dot"></div>
+    <div class="bg-grid"></div>
+
+    <div id="boot-screen" class="boot-screen">
+        <div id="boot-text" class="text-xs md:text-lg"></div>
+    </div>
+
+    <nav class="fixed top-0 w-full z-50 p-10 flex justify-between items-end mix-blend-difference">
+        <div class="font-sync font-bold text-2xl tracking-tighter">ZIN.</div>
+        <div class="flex gap-12 font-mono text-[10px] tracking-[0.4em] uppercase">
+            <a href="#work" class="hover:text-cyan-400">Systems</a>
+            <a href="#about" class="hover:text-cyan-400">Profile</a>
+            <a href="#terminal" class="hover:text-cyan-400">Control</a>
         </div>
     </nav>
 
-    <section id="home" class="min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden">
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -z-10"></div>
+    <section class="min-h-screen flex flex-col justify-center px-6 md:px-20 relative">
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none rotate-90 hidden md:block">
+            <h1 class="text-[20rem] font-black tracking-widest text-white">2026</h1>
+        </div>
         
-        <div class="text-center mt-20">
-            <p class="font-mono text-blue-500 text-xs tracking-[0.3em] uppercase mb-4">Developer / Freelancer / Problem Solver</p>
-            <h1 class="text-7xl md:text-[10rem] font-black leading-none tracking-tighter mb-8 uppercase">Zinthyn</h1>
-            <p class="text-gray-400 max-w-xl mx-auto text-sm md:text-lg leading-relaxed mb-10">
-                Crafting high-performance FiveM systems and immersive roleplay environments. Turning complex ideas into optimized reality.
+        <div class="z-10">
+            <p class="font-mono text-cyan-500 text-sm mb-6 tracking-widest uppercase animate-pulse">
+                [// STATUS: SYSTEM_OPTIMIZED_VERSION_3.0]
             </p>
-            <div class="flex flex-col md:flex-row gap-4 justify-center">
-                <a href="#services" class="bg-white text-black px-10 py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all duration-300">Explore Services</a>
-                <a href="#about" class="border border-white/10 px-10 py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all duration-300">Learn More</a>
-            </div>
-        </div>
-
-        <div class="mt-20 w-full max-w-2xl glass rounded-lg overflow-hidden shadow-2xl font-mono text-[13px] border border-white/10">
-            <div class="bg-white/5 px-4 py-2 flex items-center justify-between border-b border-white/5">
-                <div class="flex space-x-2">
-                    <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
-                    <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                    <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
-                </div>
-                <span class="text-gray-500 text-[10px]">zinthyn.lua</span>
-            </div>
-            <div class="p-6 space-y-1">
-                <p><span class="text-blue-400">local</span> Zinthyn = {</p>
-                <p>&nbsp;&nbsp;status = <span class="text-green-400">"Available for Work"</span>,</p>
-                <p>&nbsp;&nbsp;specialty = <span class="text-green-400">"FiveM Optimization"</span>,</p>
-                <p>&nbsp;&nbsp;experience = <span class="text-yellow-400">4</span></p>
-                <p>}</p>
-                <p>&nbsp;</p>
-                <p><span class="text-blue-400">function</span> <span class="text-yellow-400">Zinthyn:StartProject</span>(client)</p>
-                <p>&nbsp;&nbsp;<span class="text-purple-400">print</span>(<span class="text-green-400">"Building excellence for "</span> .. client)</p>
-                <p><span class="text-blue-400">end</span></p>
-            </div>
-        </div>
-    </section>
-
-    <section id="about" class="py-32 px-6 max-w-6xl mx-auto reveal">
-        <div class="grid md:grid-cols-2 gap-20 items-center">
-            <div>
-                <h4 class="text-blue-500 font-mono text-xs uppercase tracking-[0.2em] mb-4">About Me</h4>
-                <h2 class="text-4xl font-bold mb-6">Building the future of <br>Roleplay Servers.</h2>
-                <p class="text-gray-400 leading-relaxed mb-6">
-                    I specialize in full-stack FiveM development, from backend Lua logic to frontend NUI interfaces. My focus is always on <strong>performance</strong>—ensuring your server stays at 0.01ms while providing unique features that keep players coming back.
+            <h1 class="font-sync hero-title font-black uppercase tracking-tighter mb-4">
+                ZIN<br><span class="ml-20">THYN</span>
+            </h1>
+            <div class="max-w-2xl mt-10">
+                <p class="text-xl md:text-2xl text-gray-400 font-light leading-relaxed">
+                    Developing digital ecosystems for the next generation of Roleplay. Specialized in <span class="text-white border-b-2 border-cyan-500">high-frequency Lua logic</span> and reactive server architectures.
                 </p>
-                <div class="grid grid-cols-2 gap-6 mt-10">
-                    <div><h3 class="text-2xl font-bold">50+</h3><p class="text-gray-500 text-xs uppercase tracking-widest">Completed Scripts</p></div>
-                    <div><h3 class="text-2xl font-bold">12</h3><p class="text-gray-500 text-xs uppercase tracking-widest">Global Clients</p></div>
-                </div>
             </div>
-            <div class="relative">
-                <div class="aspect-square bg-gradient-to-tr from-blue-600 to-purple-600 rounded-2xl opacity-20 absolute -inset-4 blur-3xl"></div>
-                <div class="glass p-8 rounded-2xl relative border border-white/10">
-                    <img src="https://via.placeholder.com/400x400" alt="Zinthyn" class="rounded-lg grayscale hover:grayscale-0 transition duration-500">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="skills" class="py-32 px-6 bg-[#080808] reveal">
-        <div class="max-w-6xl mx-auto">
-            <h4 class="text-blue-500 font-mono text-xs uppercase tracking-[0.2em] mb-4">My Stack</h4>
-            <h2 class="text-4xl font-bold mb-16">Technical Expertise</h2>
             
-            <div class="grid md:grid-cols-2 gap-x-20 gap-y-10">
-                <div>
-                    <div class="flex justify-between mb-2"><span class="text-sm font-bold">Lua (FiveM API)</span><span class="text-gray-500">95%</span></div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 95%"></div></div>
+            <div class="mt-16 flex items-center gap-10">
+                <div class="flex flex-col">
+                    <span class="font-mono text-[10px] text-cyan-600 uppercase">Available for</span>
+                    <span class="text-xl font-bold uppercase tracking-widest">Global Ops</span>
                 </div>
-                <div>
-                    <div class="flex justify-between mb-2"><span class="text-sm font-bold">JavaScript (NUI/React)</span><span class="text-gray-500">85%</span></div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 85%"></div></div>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-2"><span class="text-sm font-bold">SQL / Database Design</span><span class="text-gray-500">90%</span></div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 90%"></div></div>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-2"><span class="text-sm font-bold">Server Optimization</span><span class="text-gray-500">98%</span></div>
-                    <div class="skill-bar"><div class="skill-progress" style="width: 98%"></div></div>
+                <div class="h-12 w-[1px] bg-white/10"></div>
+                <div class="flex flex-col">
+                    <span class="font-mono text-[10px] text-cyan-600 uppercase">Specialty</span>
+                    <span class="text-xl font-bold uppercase tracking-widest">0.01ms Performance</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="services" class="py-32 px-6 reveal">
-        <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-            <div class="glass p-10 rounded-2xl hover:border-blue-500/50 transition border border-white/5">
-                <i class="fas fa-code text-blue-500 text-3xl mb-6"></i>
-                <h3 class="text-xl font-bold mb-4">Custom Scripts</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Unique mechanics built from the ground up. No leaked scripts, no messy code. Just pure performance.</p>
+    <section id="work" class="py-40 px-6 md:px-20">
+        <div class="flex justify-between items-end mb-20">
+            <h2 class="font-sync text-4xl uppercase tracking-tighter">Verified_Output</h2>
+            <p class="font-mono text-[10px] text-gray-500 uppercase">Archive Vol. 01 / 2026</p>
+        </div>
+
+        <div class="grid md:grid-cols-12 gap-6">
+            <div onclick="openModal('ZIN_Multicharacter')" class="md:col-span-8 h-[500px] project-card rounded-3xl p-12 flex flex-col justify-between group cursor-pointer">
+                <div class="flex justify-between items-start">
+                    <div class="text-4xl font-bold font-sync">01</div>
+                    <i class="fas fa-arrow-right -rotate-45 group-hover:rotate-0 transition-transform duration-500"></i>
+                </div>
+                <div>
+                    <h3 class="text-6xl font-black uppercase mb-4 tracking-tighter">Multicharacter</h3>
+                    <p class="text-gray-400 max-w-sm">3D Cinematic transitions with dynamic metadata caching. Built for ESX/QB & Custom Frameworks.</p>
+                </div>
             </div>
-            <div class="glass p-10 rounded-2xl hover:border-blue-500/50 transition border border-white/5">
-                <i class="fas fa-microchip text-blue-500 text-3xl mb-6"></i>
-                <h3 class="text-xl font-bold mb-4">Optimization</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Laggy server? I specialize in reducing resource hitch-time and cleaning up heavy SQL queries.</p>
+
+            <div onclick="openModal('ZIN_Garage')" class="md:col-span-4 h-[500px] project-card rounded-3xl p-10 flex flex-col justify-between cursor-pointer group">
+                <div class="text-xl font-mono text-cyan-500">ZIN_Garage</div>
+                <div class="space-y-4">
+                    <h3 class="text-4xl font-bold uppercase">Vehicle Persistence</h3>
+                    <p class="text-sm text-gray-500 italic">"Efficiency at scale."</p>
+                </div>
             </div>
-            <div class="glass p-10 rounded-2xl hover:border-blue-500/50 transition border border-white/5">
-                <i class="fas fa-desktop text-blue-500 text-3xl mb-6"></i>
-                <h3 class="text-xl font-bold mb-4">UI/UX Design</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Modern, clean, and responsive interfaces (NUI) using React or Vue to make your server stand out.</p>
+
+            <div onclick="openModal('ZIN_AC')" class="md:col-span-4 h-[400px] project-card rounded-3xl p-10 flex flex-col justify-between cursor-pointer group bg-red-950/5">
+                <i class="fas fa-shield-halved text-red-600 text-3xl"></i>
+                <h3 class="text-3xl font-bold uppercase tracking-tighter">ZIN_AntiCheat</h3>
+            </div>
+
+            <div onclick="openModal('ZIN_WeedGrowing')" class="md:col-span-4 h-[400px] project-card rounded-3xl p-10 flex flex-col justify-between cursor-pointer">
+                <i class="fas fa-seedling text-green-600 text-3xl"></i>
+                <h3 class="text-3xl font-bold uppercase tracking-tighter">Weed Growing</h3>
+            </div>
+
+            <div onclick="openModal('Heists')" class="md:col-span-4 h-[400px] project-card rounded-3xl p-10 flex flex-col justify-between cursor-pointer">
+                <i class="fas fa-vault text-yellow-600 text-3xl"></i>
+                <h3 class="text-3xl font-bold uppercase tracking-tighter">Heist Systems</h3>
             </div>
         </div>
     </section>
 
-    <footer id="contact" class="py-20 border-t border-white/5 text-center">
-        <div class="max-w-xl mx-auto px-6">
-            <h2 class="text-3xl font-black mb-6 uppercase tracking-widest">Zinthyn</h2>
-            <div class="flex justify-center space-x-6 mb-8 text-gray-500">
-                <a href="#" class="hover:text-blue-500"><i class="fab fa-discord fa-xl"></i></a>
-                <a href="#" class="hover:text-blue-500"><i class="fab fa-github fa-xl"></i></a>
-                <a href="#" class="hover:text-blue-500"><i class="fab fa-twitter fa-xl"></i></a>
+    <section id="about" class="py-40 bg-white/5 backdrop-blur-3xl border-y border-white/5 px-6">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-10">
+            <div class="stat-circle mx-auto">
+                <span class="text-4xl font-black">99%</span>
+                <span class="text-[8px] font-mono text-gray-500 uppercase mt-2">Optimization</span>
             </div>
-            <p class="text-[10px] text-gray-600 uppercase tracking-widest">&copy; 2026 Zinthyn Development. All Rights Reserved.</p>
+            <div class="stat-circle mx-auto border-cyan-500/30">
+                <span class="text-4xl font-black">10k+</span>
+                <span class="text-[8px] font-mono text-gray-500 uppercase mt-2">Daily Players</span>
+            </div>
+            <div class="stat-circle mx-auto">
+                <span class="text-4xl font-black">112+</span>
+                <span class="text-[8px] font-mono text-gray-500 uppercase mt-2">Server Installs</span>
+            </div>
+            <div class="stat-circle mx-auto">
+                <span class="text-4xl font-black">24/7</span>
+                <span class="text-[8px] font-mono text-gray-500 uppercase mt-2">System Uptime</span>
+            </div>
         </div>
-    </footer>
+    </section>
+
+    <section id="terminal" class="py-40 px-6 max-w-4xl mx-auto">
+        <div class="flex items-center gap-4 mb-10">
+            <div class="w-3 h-3 rounded-full bg-cyan-500 animate-ping"></div>
+            <h3 class="font-mono text-xs uppercase tracking-[0.5em]">Direct Console Access</h3>
+        </div>
+        <div class="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="p-4 bg-white/5 border-b border-white/5 flex gap-2">
+                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+            </div>
+            <div id="terminal-body" class="p-8 h-80 font-mono text-sm overflow-y-auto space-y-2 text-cyan-400/80">
+                <div>> SYSTEM INITIALIZED...</div>
+                <div>> WELCOME BACK, ZINTHYN.</div>
+            </div>
+            <div class="p-6 bg-white/5 flex gap-4">
+                <span class="text-white font-mono">$</span>
+                <input type="text" id="term-input" class="bg-transparent border-none outline-none text-white font-mono w-full" autofocus placeholder="Type 'help'...">
+            </div>
+        </div>
+    </section>
+
+    <div id="modal" class="fixed inset-0 z-[200] hidden bg-black/98 backdrop-blur-xl p-10 md:p-20 overflow-y-auto">
+        <button onclick="closeModal()" class="fixed top-10 right-10 text-6xl font-thin hover:text-cyan-400 transition">&times;</button>
+        <div id="modal-content" class="max-w-4xl mx-auto mt-20">
+            </div>
+    </div>
 
     <script>
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 150;
-                if (elementTop < windowHeight - elementVisible) {
-                    reveals[i].classList.add("active");
-                }
+        // Custom Cursor Logic
+        const cursor = document.getElementById('cursor');
+        const dot = document.getElementById('cursor-dot');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            dot.style.left = e.clientX + 'px';
+            dot.style.top = e.clientY + 'px';
+        });
+
+        // Boot Sequence
+        const bootText = [
+            "> INITIALIZING KERNEL...",
+            "> LOADING ZINTHYN_CORE_SYSTEMS...",
+            "> CHECKING LUA PERFORMANCE: 0.01MS DETECTED",
+            "> ESTABLISHING NEURAL LINK...",
+            "> ACCESS GRANTED."
+        ];
+        let line = 0;
+        function typeBoot() {
+            if (line < bootText.length) {
+                document.getElementById('boot-text').innerHTML += bootText[line] + "<br>";
+                line++;
+                setTimeout(typeBoot, 400);
+            } else {
+                setTimeout(() => {
+                    document.getElementById('boot-screen').style.opacity = '0';
+                    setTimeout(() => document.getElementById('boot-screen').style.display = 'none', 1000);
+                }, 800);
             }
         }
-        window.addEventListener("scroll", reveal);
-        // Initial check
-        reveal();
+        typeBoot();
+
+        // Terminal Logic
+        const input = document.getElementById('term-input');
+        const body = document.getElementById('terminal-body');
+        input.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                const cmd = input.value.toLowerCase();
+                const div = document.createElement('div');
+                div.innerHTML = `<span class="text-white">$ ${cmd}</span>`;
+                body.appendChild(div);
+                
+                let res = "";
+                if(cmd === 'help') res = "AVAILABLE: help, contact, status, clear, projects";
+                else if(cmd === 'status') res = "SYSTEM: OPTIMAL | LATENCY: 12ms | PROJECTS: 100% SUCCESS";
+                else if(cmd === 'contact') res = "DIRECT_CONNECT: DISCORD.GG/ZINTHYN";
+                else if(cmd === 'clear') { body.innerHTML = ""; input.value = ""; return; }
+                else if(cmd === 'projects') { res = "OPENING ARCHIVE..."; setTimeout(openModal, 1000, 'All'); }
+                else res = "ERROR: COMMAND NOT RECOGNIZED";
+
+                const resDiv = document.createElement('div');
+                resDiv.innerHTML = `> ${res}`;
+                body.appendChild(resDiv);
+                input.value = "";
+                body.scrollTop = body.scrollHeight;
+            }
+        });
+
+        // Modal Logic
+        function openModal(title) {
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal-content').innerHTML = `
+                <h1 class="text-8xl font-black uppercase font-sync mb-10">${title}</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="space-y-6 text-xl text-gray-400">
+                        <p>This project represents the peak of technical optimization. Developed over 4 months, it utilizes a proprietary event-syncing method that reduces CPU load by 40%.</p>
+                        <p class="text-cyan-500 font-mono text-sm uppercase tracking-widest">Key Features: NUI Interaction, SQL Caching, 3D Rendering.</p>
+                    </div>
+                    <div class="bg-white/5 aspect-video rounded-3xl border border-white/10 flex items-center justify-center font-mono text-gray-600 italic">
+                        [PREVIEW_IMAGE_NOT_LOADED]
+                    </div>
+                </div>
+            `;
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
     </script>
 </body>
 </html>
