@@ -3,252 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // MULTIVERSE OS</title>
+    <title>ZINTHYN // PRIME SINGULARITY</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@800&family=Space+Mono:wght@400;700&family=Outfit:wght@300;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@800&family=Space+Mono:wght@400;700&family=Outfit:wght@200;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --accent: #ff0055; --bg: #050505; }
+        :root { --neon: #00f2ff; --warn: #ff0055; --bg: #030303; }
         * { cursor: crosshair; box-sizing: border-box; user-select: none; }
         body { background: var(--bg); color: #fff; font-family: 'Space Mono', monospace; overflow: hidden; height: 100vh; }
 
-        /* 3D FLOATING BACKGROUND */
+        /* KERNEL OVERLAY */
+        #glitch-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 1000; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px); background-size: 100% 3px; }
+
+        /* DATA STREAM BACKGROUND */
         #bg-canvas { position: fixed; inset: 0; z-index: -1; }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, black 120%); pointer-events: none; }
 
-        /* TASKBAR */
-        .taskbar {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            padding: 10px 30px; display: flex; gap: 40px; z-index: 1000;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        /* OS TASKBAR */
+        .dock {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 24px;
+            padding: 12px 30px; display: flex; gap: 40px; z-index: 2000;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
-        .nav-item { transition: 0.3s; position: relative; }
-        .nav-item:hover { transform: translateY(-10px); color: var(--neon); }
-        .nav-item i { font-size: 24px; }
-        .nav-label { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-size: 8px; opacity: 0; transition: 0.3s; white-space: nowrap; }
-        .nav-item:hover .nav-label { opacity: 1; }
+        .dock-item { transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+        .dock-item:hover { transform: translateY(-15px) scale(1.2); color: var(--neon); text-shadow: 0 0 15px var(--neon); }
+        .dock-item i { font-size: 28px; }
+        .dock-label { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); font-size: 9px; opacity: 0; transition: 0.3s; color: var(--neon); white-space: nowrap; font-weight: bold; }
+        .dock-item:hover .dock-label { opacity: 1; }
 
-        /* WINDOW SYSTEM */
-        .window {
-            position: absolute; width: 800px; height: 500px; 
-            background: rgba(10, 10, 10, 0.95); border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 12px; display: none; flex-direction: column;
-            box-shadow: 0 30px 100px rgba(0,0,0,0.8); overflow: hidden;
-            resize: both;
+        /* WINDOW ARCHITECTURE */
+        .app-window {
+            position: absolute; min-width: 400px; background: rgba(5, 5, 5, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px;
+            display: none; flex-direction: column; box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            backdrop-filter: blur(30px); transform: scale(0.9); opacity: 0; transition: transform 0.3s, opacity 0.3s;
         }
-        .window-header {
-            background: rgba(255, 255, 255, 0.05); padding: 12px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1); cursor: move;
-        }
-        .window-content { flex: 1; overflow-y: auto; padding: 40px; scrollbar-width: none; }
-        .window-content::-webkit-scrollbar { display: none; }
+        .app-window.active { transform: scale(1); opacity: 1; z-index: 500; border-color: var(--neon); }
         
-        .active-window { z-index: 500; border-color: var(--neon); box-shadow: 0 0 40px rgba(0, 242, 255, 0.1); }
-        .close-btn { color: #ff5555; font-size: 18px; }
-
-        /* SPECIFIC APP STYLES */
-        .project-card { border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; transition: 0.3s; }
-        .project-card:hover { border-color: var(--neon); background: rgba(0, 242, 255, 0.02); }
-        
-        /* BOOT SCREEN */
-        #boot-loader {
-            position: fixed; inset: 0; background: black; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        .win-header {
+            padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); cursor: grab;
         }
-        .loading-text { font-family: 'Syncopate'; font-size: 14px; letter-spacing: 10px; color: var(--neon); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .win-body { flex: 1; overflow-y: auto; padding: 40px; scrollbar-width: none; }
+        .win-body::-webkit-scrollbar { display: none; }
+
+        /* BOOT INTERFACE */
+        #boot-seq {
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center; font-family: 'Syncopate';
+        }
+
+        /* CUSTOM GAME STYLES */
+        #game-canvas { border: 1px solid var(--neon); background: #000; width: 100%; height: 300px; cursor: crosshair; }
     </style>
 </head>
 <body>
 
-    <div id="boot-loader">
-        <div class="loading-text mb-4">ZINTHYN_OS</div>
-        <div class="text-[8px] text-white/30 uppercase tracking-[0.5em]">Mounting Neural Frameworks...</div>
+    <div id="glitch-overlay"></div>
+    <div id="boot-seq">
+        <div class="text-center">
+            <h1 class="text-2xl tracking-[1.5em] text-cyan-400 mb-4 animate-pulse">ZINTHYN_OS</h1>
+            <div id="boot-status" class="font-mono text-[9px] text-white/30 tracking-[0.3em]">INITIALIZING_KERNEL...</div>
+        </div>
     </div>
 
     <canvas id="bg-canvas"></canvas>
-    <div class="vignette"></div>
 
-    <div class="fixed top-8 left-8 z-10 font-mono text-[9px] text-white/40">
-        <div>SYSTEM: ZINTHYN_V5</div>
-        <div id="clock">00:00:00</div>
+    <div class="fixed top-10 left-10 z-[50] font-mono text-[9px] text-cyan-400/50">
+        <div>COORDINATES: <span id="mouse-x">0</span>, <span id="mouse-y">0</span></div>
+        <div>UPLINK: ACTIVE_ENCRYPTED</div>
     </div>
 
-    <div id="win-about" class="window" style="top: 15%; left: 10%;">
-        <div class="window-header">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Identity_Protocol.exe</span>
-            <button onclick="closeWindow('win-about')" class="close-btn"><i class="fas fa-times-circle"></i></button>
+    <div id="win-about" class="app-window w-[600px] h-[500px]" style="top: 15%; left: 10%;">
+        <div class="win-header">
+            <span class="text-[10px] font-bold text-cyan-400 tracking-widest uppercase">Bio_Process.sys</span>
+            <button onclick="closeApp('win-about')" class="text-red-500 text-lg hover:rotate-90 transition"><i class="fas fa-times"></i></button>
         </div>
-        <div class="window-content">
-            <div class="flex gap-10 items-start">
-                <div class="w-32 h-32 bg-cyan-400/10 border border-cyan-400/50 rounded-full flex items-center justify-center">
-                    <i class="fas fa-user-astronaut text-5xl text-cyan-400"></i>
-                </div>
-                <div>
-                    <h2 class="text-4xl font-black mb-4 uppercase">The Architect</h2>
-                    <p class="text-sm text-gray-400 leading-relaxed mb-6 italic">"I don't just write scripts; I build ecosystems."</p>
-                    <p class="text-xs text-gray-500 mb-4">Specializing in high-concurrency Lua systems for FiveM. My philosophy is simple: 0.01ms resmon or it's not finished. Deeply experienced in TMC, QBCore, and QBox frameworks.</p>
-                    <div class="grid grid-cols-2 gap-4 text-[10px] font-bold">
-                        <div class="p-3 bg-white/5 rounded border border-white/5">CORE: LUA / C## / JS</div>
-                        <div class="p-3 bg-white/5 rounded border border-white/5">DB: SQL / REDIS</div>
+        <div class="win-body">
+            <h2 class="text-5xl font-black uppercase mb-6 font-sync">The Architect</h2>
+            <div class="space-y-6 text-sm text-gray-400 leading-relaxed">
+                <p>I engineer high-concurrency digital ecosystems. Specializing in <span class="text-white">FiveM Lua optimization</span>, I build frameworks that sustain 1000+ players with <span class="text-cyan-400">0.01ms</span> resource overhead.</p>
+                <div class="grid grid-cols-2 gap-4 mt-8">
+                    <div class="p-4 bg-white/5 border border-white/10 rounded">
+                        <div class="text-[9px] text-cyan-400 mb-1">CORE_SKILLS</div>
+                        <div class="font-bold text-xs uppercase">Lua 5.4 / React / C#</div>
+                    </div>
+                    <div class="p-4 bg-white/5 border border-white/10 rounded">
+                        <div class="text-[9px] text-cyan-400 mb-1">FRAMEWORKS</div>
+                        <div class="font-bold text-xs uppercase">TMC / QBox / QBCore</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="win-projects" class="window" style="top: 10%; left: 30%;">
-        <div class="window-header">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Database_Query.sys</span>
-            <button onclick="closeWindow('win-projects')" class="close-btn"><i class="fas fa-times-circle"></i></button>
+    <div id="win-projects" class="app-window w-[800px] h-[600px]" style="top: 10%; left: 30%;">
+        <div class="win-header">
+            <span class="text-[10px] font-bold text-cyan-400 tracking-widest uppercase">Project_Archives.db</span>
+            <button onclick="closeApp('win-projects')" class="text-red-500 text-lg"><i class="fas fa-times"></i></button>
         </div>
-        <div class="window-content">
-            <div class="grid grid-cols-1 gap-6">
-                <div class="project-card p-6 flex justify-between items-center group">
-                    <div>
-                        <h3 class="text-xl font-bold uppercase group-hover:text-cyan-400 transition">Zin_Multicharacter</h3>
-                        <p class="text-[10px] text-gray-500 mt-1">Cinematic UI / Metadata Optimized</p>
-                    </div>
-                    <i class="fas fa-external-link-alt text-white/20"></i>
+        <div class="win-body">
+            <div class="grid grid-cols-2 gap-8">
+                <div class="group border border-white/10 p-6 hover:border-cyan-400/50 transition bg-white/5 rounded-xl">
+                    <h3 class="text-xl font-bold mb-2 uppercase">Zin_Inventory</h3>
+                    <p class="text-[10px] text-gray-500 mb-4">Stateless metadata-driven inventory system.</p>
+                    <div class="flex gap-2"><span class="text-[8px] px-2 py-1 bg-cyan-400/10 text-cyan-400">TMC</span><span class="text-[8px] px-2 py-1 bg-white/10">STABLE</span></div>
                 </div>
-                <div class="project-card p-6 flex justify-between items-center group">
-                    <div>
-                        <h3 class="text-xl font-bold uppercase group-hover:text-cyan-400 transition">Sovereign_Garage</h3>
-                        <p class="text-[10px] text-gray-500 mt-1">Stateless Persistence / No SQL Hitch</p>
-                    </div>
-                    <i class="fas fa-external-link-alt text-white/20"></i>
+                <div class="group border border-white/10 p-6 hover:border-cyan-400/50 transition bg-white/5 rounded-xl">
+                    <h3 class="text-xl font-bold mb-2 uppercase">Sovereign_AC</h3>
+                    <p class="text-[10px] text-gray-500 mb-4">Heuristic server-side anti-cheat logic.</p>
+                    <div class="flex gap-2"><span class="text-[8px] px-2 py-1 bg-cyan-400/10 text-cyan-400">CORE</span><span class="text-[8px] px-2 py-1 bg-white/10">ENCRYPTED</span></div>
                 </div>
-                <div class="project-card p-6 flex justify-between items-center group">
+                <div class="col-span-2 group border border-white/10 p-6 hover:border-cyan-400/50 transition bg-white/5 rounded-xl flex items-center justify-between">
                     <div>
-                        <h3 class="text-xl font-bold uppercase group-hover:text-cyan-400 transition">Engine_Sync_V4</h3>
-                        <p class="text-[10px] text-gray-500 mt-1">Global Event Handler / High Load</p>
+                        <h3 class="text-2xl font-black mb-2 uppercase">Multicharacter_v4</h3>
+                        <p class="text-xs text-gray-500">Cinematic 3D identity selection with zero-latency framework switching.</p>
                     </div>
-                    <i class="fas fa-external-link-alt text-white/20"></i>
+                    <i class="fas fa-microchip text-4xl text-white/10 group-hover:text-cyan-400 transition"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="win-contact" class="window" style="top: 25%; left: 50%;">
-        <div class="window-header">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400">Uplink_Channel.com</span>
-            <button onclick="closeWindow('win-contact')" class="close-btn"><i class="fas fa-times-circle"></i></button>
+    <div id="win-game" class="app-window w-[500px] h-[550px]" style="top: 20%; left: 40%;">
+        <div class="win-header">
+            <span class="text-[10px] font-bold text-cyan-400 tracking-widest uppercase">Resource_Defense.exe</span>
+            <button onclick="closeApp('win-game')" class="text-red-500 text-lg"><i class="fas fa-times"></i></button>
         </div>
-        <div class="window-content flex flex-col items-center justify-center text-center">
-            <h2 class="text-3xl font-black mb-8">ESTABLISH CONNECTION</h2>
+        <div class="win-body text-center">
+            <p class="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">Maintain 0.01ms Resmon: Click Lag Nodes</p>
+            <canvas id="game-canvas"></canvas>
+            <div class="flex justify-between mt-6 font-mono text-xs">
+                <span>RESMON: <span id="res-val" class="text-cyan-400">0.01</span>ms</span>
+                <span>CLEARED: <span id="score-val">0</span></span>
+            </div>
+            <button id="start-btn" class="mt-6 w-full py-4 border border-cyan-400 text-cyan-400 font-bold hover:bg-cyan-400 hover:text-black transition uppercase text-[10px] tracking-widest">Initiate_Clean</button>
+        </div>
+    </div>
+
+    <div id="win-contact" class="app-window w-[450px] h-[400px]" style="top: 30%; left: 55%;">
+        <div class="win-header">
+            <span class="text-[10px] font-bold text-cyan-400 tracking-widest uppercase">Uplink.net</span>
+            <button onclick="closeApp('win-contact')" class="text-red-500 text-lg"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="win-body flex flex-col items-center justify-center space-y-10">
+            <h2 class="text-2xl font-black uppercase tracking-[0.5em]">Direct_Uplink</h2>
             <div class="flex gap-10">
-                <a href="#" class="text-4xl hover:text-cyan-400 transition transform hover:scale-125"><i class="fab fa-discord"></i></a>
-                <a href="#" class="text-4xl hover:text-cyan-400 transition transform hover:scale-125"><i class="fab fa-github"></i></a>
-                <a href="#" class="text-4xl hover:text-cyan-400 transition transform hover:scale-125"><i class="fas fa-envelope"></i></a>
+                <a href="#" class="text-3xl hover:text-cyan-400 transition hover:scale-125"><i class="fab fa-discord"></i></a>
+                <a href="#" class="text-3xl hover:text-cyan-400 transition hover:scale-125"><i class="fab fa-github"></i></a>
+                <a href="#" class="text-3xl hover:text-cyan-400 transition hover:scale-125"><i class="fas fa-envelope"></i></a>
             </div>
-            <div class="mt-12 w-full p-4 bg-cyan-400/5 border border-cyan-400/20 text-[10px] text-cyan-400">
-                ENCRYPTION_ACTIVE // 256-BIT RSA
-            </div>
+            <div class="text-[9px] font-bold text-white/20 uppercase tracking-widest">Waiting for handshake...</div>
         </div>
     </div>
 
-    <div class="taskbar">
-        <div class="nav-item" onclick="openWindow('win-about')">
-            <span class="nav-label">ABOUT_ME</span>
-            <i class="fas fa-user-circle"></i>
+    <div class="dock">
+        <div class="dock-item" onclick="openApp('win-about')">
+            <span class="dock-label">IDENTITY</span>
+            <i class="fas fa-dna text-white"></i>
         </div>
-        <div class="nav-item" onclick="openWindow('win-projects')">
-            <span class="nav-label">PROJECTS</span>
-            <i class="fas fa-project-diagram"></i>
+        <div class="dock-item" onclick="openApp('win-projects')">
+            <span class="dock-label">ARCHIVES</span>
+            <i class="fas fa-terminal text-white"></i>
         </div>
-        <div class="nav-item" onclick="openWindow('win-contact')">
-            <span class="nav-label">CONTACT</span>
-            <i class="fas fa-satellite-dish"></i>
+        <div class="dock-item" onclick="openApp('win-game')">
+            <span class="dock-label">OPTIMIZE</span>
+            <i class="fas fa-shield-virus text-white"></i>
         </div>
-        <div class="nav-item text-red-500" onclick="location.reload()">
-            <span class="nav-label">REBOOT</span>
-            <i class="fas fa-power-off"></i>
+        <div class="dock-item" onclick="openApp('win-contact')">
+            <span class="dock-label">UPLINK</span>
+            <i class="fas fa-satellite-dish text-white"></i>
         </div>
     </div>
 
     <script>
-        // 1. BOOT SEQUENCE
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('boot-loader').style.display = 'none';
-                openWindow('win-about');
-            }, 2500);
-            initBg();
-            startTime();
-        };
+        // 1. BOOT SEQUENCE LOGIC
+        const statusLines = ["LOADER_V3.0", "KERNEL_STABLE", "MAPPING_NEURAL_LAYERS", "UPLINK_ESTABLISHED"];
+        let sIdx = 0;
+        const bootInt = setInterval(() => {
+            document.getElementById('boot-status').innerText = statusLines[sIdx];
+            sIdx++;
+            if(sIdx >= statusLines.length) {
+                clearInterval(bootInt);
+                setTimeout(() => {
+                    document.getElementById('boot-seq').style.display = 'none';
+                    openApp('win-about');
+                }, 1000);
+            }
+        }, 500);
 
-        // 2. WINDOW LOGIC
-        function openWindow(id) {
+        // 2. BACKGROUND ANIMATION (SPATIAL GRID)
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let p = [];
+        for(let i=0; i<80; i++) p.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:Math.random()-0.5, vy:Math.random()-0.5});
+        
+        function animate() {
+            ctx.fillStyle = "rgba(3, 3, 3, 0.2)";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.strokeStyle = "rgba(0, 242, 255, 0.05)";
+            ctx.lineWidth = 1;
+            p.forEach((it, i) => {
+                it.x += it.vx; it.y += it.vy;
+                if(it.x<0 || it.x>canvas.width) it.vx *= -1;
+                if(it.y<0 || it.y>canvas.height) it.vy *= -1;
+                p.forEach((it2, j) => {
+                    let dist = Math.hypot(it.x-it2.x, it.y-it2.y);
+                    if(dist < 150) {
+                        ctx.beginPath(); ctx.moveTo(it.x, it.y); ctx.lineTo(it2.x, it2.y); ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // 3. WINDOW ENGINE
+        let activeWin = null;
+        function openApp(id) {
             const win = document.getElementById(id);
             win.style.display = 'flex';
-            bringToFront(win);
+            setTimeout(() => win.classList.add('active'), 10);
+            focusWin(win);
+        }
+        function closeApp(id) {
+            const win = document.getElementById(id);
+            win.classList.remove('active');
+            setTimeout(() => win.style.display = 'none', 300);
+        }
+        function focusWin(win) {
+            document.querySelectorAll('.app-window').forEach(w => w.style.zIndex = 100);
+            win.style.zIndex = 1000;
         }
 
-        function closeWindow(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        function bringToFront(clickedWin) {
-            document.querySelectorAll('.window').forEach(win => {
-                win.classList.remove('active-window');
-            });
-            clickedWin.classList.add('active-window');
-        }
-
-        // 3. DRAG LOGIC
-        document.querySelectorAll('.window').forEach(win => {
-            const header = win.querySelector('.window-header');
+        // Draggable Logic
+        document.querySelectorAll('.app-window').forEach(win => {
+            const header = win.querySelector('.win-header');
             header.onmousedown = (e) => {
-                bringToFront(win);
-                let shiftX = e.clientX - win.getBoundingClientRect().left;
-                let shiftY = e.clientY - win.getBoundingClientRect().top;
-
-                function moveAt(pageX, pageY) {
-                    win.style.left = pageX - shiftX + 'px';
-                    win.style.top = pageY - shiftY + 'px';
+                focusWin(win);
+                let offsetX = e.clientX - win.offsetLeft;
+                let offsetY = e.clientY - win.offsetTop;
+                function move(e) {
+                    win.style.left = (e.clientX - offsetX) + 'px';
+                    win.style.top = (e.clientY - offsetY) + 'px';
                 }
-
-                function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
-                document.addEventListener('mousemove', onMouseMove);
-                document.onmouseup = () => {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.onmouseup = null;
-                };
+                document.onmousemove = move;
+                document.onmouseup = () => document.onmousemove = null;
             };
         });
 
-        // 4. BACKGROUND 3D STARS
-        function initBg() {
-            const canvas = document.getElementById('bg-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            let stars = [];
-            for(let i=0; i<200; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2});
-            
-            function draw() {
-                ctx.clearRect(0,0,canvas.width,canvas.height);
-                ctx.fillStyle = "#fff";
-                stars.forEach(s => {
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
-                    ctx.fill();
-                    s.y += 0.2;
-                    if(s.y > canvas.height) s.y = 0;
-                });
-                requestAnimationFrame(draw);
-            }
-            draw();
+        // 4. MINIGAME: RESMON KILLER
+        const gCanvas = document.getElementById('game-canvas');
+        const gCtx = gCanvas.getContext('2d');
+        const sBtn = document.getElementById('start-btn');
+        let gActive = false, score = 0, resmon = 0.01, targets = [];
+
+        function gLoop() {
+            if(!gActive) return;
+            gCtx.clearRect(0,0,gCanvas.width,gCanvas.height);
+            if(Math.random() < 0.04) targets.push({x:Math.random()*(gCanvas.width-30), y:Math.random()*(gCanvas.height-30), age:0});
+            targets.forEach((t, i) => {
+                t.age += 1;
+                let alpha = (100 - t.age)/100;
+                gCtx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
+                gCtx.strokeRect(t.x, t.y, 25, 25);
+                if(t.age > 100) { resmon += 0.05; targets.splice(i,1); }
+            });
+            document.getElementById('res-val').innerText = resmon.toFixed(2);
+            document.getElementById('score-val').innerText = score;
+            if(resmon > 1.0) { alert("SYSTEM OVERLOAD: Server Crashed."); gActive = false; sBtn.style.display="block"; }
+            else requestAnimationFrame(gLoop);
         }
 
-        function startTime() {
-            const clock = document.getElementById('clock');
-            setInterval(() => {
-                clock.innerText = new Date().toLocaleTimeString();
-            }, 1000);
+        gCanvas.onmousedown = (e) => {
+            const rect = gCanvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            targets.forEach((t, i) => {
+                if(mx > t.x && mx < t.x+25 && my > t.y && my < t.y+25) { targets.splice(i,1); score++; if(resmon > 0.01) resmon -= 0.01; }
+            });
+        };
+        sBtn.onclick = () => { gActive=true; score=0; resmon=0.01; targets=[]; sBtn.style.display="none"; gLoop(); };
+
+        // Mouse Tracker
+        window.onmousemove = (e) => {
+            document.getElementById('mouse-x').innerText = e.clientX;
+            document.getElementById('mouse-y').innerText = e.clientY;
         }
     </script>
 </body>
