@@ -7,169 +7,193 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --bg: #010203; }
+        :root { --neon: #00f2ff; --bg: #000000; }
         body { 
             background: var(--bg); 
             color: #fff; 
             font-family: 'JetBrains Mono', monospace;
             height: 100vh;
             overflow: hidden;
-            perspective: 1000px; /* Essential for 3D */
+            perspective: 1200px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
+        /* Cinematic Intro Overlay */
+        #intro-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 1.5s cubic-bezier(0.8, 0, 0.2, 1);
+        }
+
+        .initiate-btn {
+            border: 1px solid var(--neon);
+            padding: 1rem 3rem;
+            color: var(--neon);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5em;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+            overflow: hidden;
+        }
+        .initiate-btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 50px var(--neon); }
 
         /* 3D Floating Shell */
         #main-shell {
             width: 90%;
             height: 85%;
             max-width: 1400px;
-            background: rgba(10, 10, 15, 0.8);
+            background: rgba(10, 10, 15, 0.85);
             border: 1px solid rgba(0, 242, 255, 0.2);
-            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            box-shadow: 0 50px 100px rgba(0,0,0,1);
             transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
+            transition: transform 0.1s ease-out, opacity 1s ease, scale 1.5s cubic-bezier(0.1, 0.8, 0.2, 1);
             display: flex;
             flex-direction: column;
-            backdrop-filter: blur(15px);
-            position: relative;
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            scale: 0.2; /* Starts small for the zoom effect */
+            transform: translateZ(-2000px); /* Starts far away */
         }
 
-        /* Holographic Offset Layer */
-        .holo-layer {
-            position: absolute;
-            inset: -20px;
-            border: 1px solid rgba(0, 242, 255, 0.1);
-            transform: translateZ(50px); /* Makes it float forward */
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        /* Parallax Background Stars */
+        /* Background Starfield */
         #stars {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; background: radial-gradient(circle, #111 0%, #000 100%);
+            z-index: -1;
         }
 
         .project-card-3d {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.3s;
+            transition: 0.4s;
             transform: translateZ(20px);
         }
         .project-card-3d:hover {
-            transform: translateZ(60px);
+            transform: translateZ(80px) rotateX(-5deg);
             border-color: var(--neon);
-            background: rgba(0, 242, 255, 0.05);
+            background: rgba(0, 242, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         .orbitron { font-family: 'Orbitron', sans-serif; }
         
-        /* CRT Scan Effect */
-        #main-shell::after {
-            content: " ";
-            position: absolute; inset: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            opacity: 0.3;
-        }
+        .active-glow { text-shadow: 0 0 10px var(--neon); color: var(--neon); }
     </style>
 </head>
 <body>
 
     <canvas id="stars"></canvas>
 
+    <div id="intro-overlay">
+        <div class="orbitron text-[10px] text-slate-700 mb-8 tracking-[1em]">SYSTEM_STANDBY</div>
+        <button class="initiate-btn" onclick="startUplink()">[ INITIATE_UPLINK ]</button>
+    </div>
+
     <div id="main-shell" class="rounded-xl overflow-hidden">
-        <div class="holo-layer rounded-xl"></div>
         
         <header class="p-6 border-b border-white/10 flex justify-between items-center bg-black/40">
-            <div class="orbitron text-2xl font-black italic tracking-tighter text-cyan-400">ZINTHYN.V6</div>
-            <div class="flex gap-4 text-[10px] orbitron text-slate-500">
-                <span class="animate-pulse">● SYSTEM_3D_ACTIVE</span>
-                <span>RESMON: 0.01ms</span>
+            <div class="orbitron text-2xl font-black italic tracking-tighter text-cyan-400">ZINTHYN.V6_3D</div>
+            <div class="flex gap-6 text-[9px] orbitron text-slate-500">
+                <span class="flex items-center gap-2"><div class="w-1 h-1 bg-cyan-500 rounded-full animate-ping"></div> UPLINK_STABLE</span>
+                <span>COORD: 34.0522° N, 118.2437° W</span>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-64 border-r border-white/5 p-8 flex flex-col gap-10">
-                <nav class="space-y-8">
-                    <div class="text-cyan-500 orbitron text-xs cursor-pointer hover:translate-x-2 transition">01 // CORE_ARCH</div>
-                    <div class="text-slate-500 orbitron text-xs cursor-pointer hover:text-white hover:translate-x-2 transition">02 // BLACK_LAB</div>
-                    <div class="text-slate-500 orbitron text-xs cursor-pointer hover:text-white hover:translate-x-2 transition">03 // NETWORK</div>
+            <aside class="w-20 md:w-64 border-r border-white/5 p-8 flex flex-col gap-10 bg-black/20">
+                <nav class="space-y-10">
+                    <div class="active-glow orbitron text-[10px] cursor-pointer tracking-widest flex items-center gap-3">
+                        <div class="w-1 h-4 bg-cyan-500 shadow-[0_0_10px_#00f2ff]"></div> CORE_SYS
+                    </div>
+                    <div class="text-slate-500 orbitron text-[10px] cursor-pointer hover:text-white transition tracking-widest">BLACK_LAB</div>
+                    <div class="text-slate-500 orbitron text-[10px] cursor-pointer hover:text-white transition tracking-widest">ENCRYPT_DATA</div>
                 </nav>
             </aside>
 
             <main class="flex-1 p-12 overflow-y-auto scroll-smooth">
-                <section class="mb-24">
-                    <h1 class="text-8xl font-black orbitron tracking-tighter mb-4">ZIN<span class="text-cyan-400">THYN</span></h1>
-                    <p class="text-slate-400 max-w-xl text-lg font-light leading-relaxed">
-                        Forging immersive 3D interfaces and optimized server architecture for the FiveM elite.
+                <section class="mb-32">
+                    <h2 class="text-cyan-500 text-[10px] orbitron tracking-[1em] mb-4 uppercase">Identity_Verified</h2>
+                    <h1 class="text-8xl font-black orbitron tracking-tighter mb-6 leading-none">THE <br><span class="text-transparent" style="-webkit-text-stroke: 1px #00f2ff;">ARCHITECT.</span></h1>
+                    <p class="text-slate-500 max-w-xl text-sm font-light leading-relaxed">
+                        Developer of high-concurrency systems and immersive 3D NUIs. Specializing in sub-tick optimization for elite FiveM environments.
                     </p>
                 </section>
 
-                <div class="grid grid-cols-2 gap-8 mb-24">
-                    <div class="project-card-3d p-8 rounded-lg group">
-                        <div class="text-cyan-500 text-[10px] orbitron mb-4">RESOURCE_04</div>
-                        <h3 class="orbitron text-xl mb-2">NEURAL_SYNC</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-6">Advanced sub-tick entity interpolation engine.</p>
-                        <div class="h-1 w-0 bg-cyan-500 group-hover:w-full transition-all duration-500"></div>
+                <div class="grid md:grid-cols-2 gap-8 mb-24">
+                    <div class="project-card-3d p-8 rounded-lg">
+                        <h3 class="orbitron text-lg mb-2">NEURAL_SYNC_V4</h3>
+                        <p class="text-[11px] text-slate-500 mb-6">Classified entity interpolation engine. Zero-latency prediction.</p>
+                        <div class="text-[9px] orbitron text-cyan-900 font-bold">LUA / C# / ASYNC</div>
                     </div>
-
-                    <div class="project-card-3d p-8 rounded-lg group">
-                        <div class="text-purple-500 text-[10px] orbitron mb-4">RESOURCE_09 [EXP]</div>
-                        <h3 class="orbitron text-xl mb-2">VOXEL_GRID</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed mb-6">Real-time procedural interior renderer.</p>
-                        <div class="h-1 w-0 bg-purple-500 group-hover:w-full transition-all duration-500"></div>
+                    <div class="project-card-3d p-8 rounded-lg">
+                        <h3 class="orbitron text-lg mb-2">ZIN_GUARD_AC</h3>
+                        <p class="text-[11px] text-slate-500 mb-6">Kernel-level resource monitoring and injection protection.</p>
+                        <div class="text-[9px] orbitron text-purple-900 font-bold">EXPERIMENTAL_BUILD</div>
                     </div>
                 </div>
             </main>
         </div>
 
-        <footer class="h-20 border-t border-white/5 bg-black/80 flex items-center px-8 text-[10px] font-mono text-emerald-500">
-            <span class="mr-4 text-emerald-900 font-bold">[READY]</span>
-            <div id="log-text">Initializing spatial data matrices...</div>
+        <footer class="h-16 border-t border-white/5 bg-black/95 flex items-center px-8 text-[9px] font-mono text-cyan-900 italic">
+            > [SYSTEM] Initializing spatial rendering... SUCCESS. Welcome, Zinthyn.
         </footer>
     </div>
 
     <script>
         const shell = document.getElementById('main-shell');
-        
-        // 3D Tilt Interaction
+        const overlay = document.getElementById('intro-overlay');
+
+        function startUplink() {
+            // Fade out button and overlay
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 1500);
+
+            // Fly-in the 3D Shell
+            shell.style.opacity = '1';
+            shell.style.scale = '1';
+            shell.style.transform = 'translateZ(0px)';
+        }
+
+        // 3D Tilt Interaction (Active after intro)
         document.addEventListener('mousemove', (e) => {
-            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-            shell.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            if(overlay.style.display === 'none') {
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 40;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
+                shell.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            }
         });
 
-        // Background Starfield
+        // Background Stars
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        const stars = Array(200).fill().map(() => ({
+        const stars = Array(300).fill().map(() => ({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            size: Math.random() * 2
+            z: Math.random() * canvas.width,
+            size: Math.random() * 1.5
         }));
 
         function drawStars() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "white";
             stars.forEach(s => {
+                const x = (s.x - canvas.width / 2) * (canvas.width / s.z) + canvas.width / 2;
+                const y = (s.y - canvas.height / 2) * (canvas.width / s.z) + canvas.height / 2;
+                const size = s.size * (canvas.width / s.z);
                 ctx.beginPath();
-                ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+                ctx.arc(x, y, size, 0, Math.PI * 2);
                 ctx.fill();
+                s.z -= 2;
+                if (s.z <= 0) s.z = canvas.width;
             });
+            requestAnimationFrame(drawStars);
         }
         drawStars();
-
-        // Footer Log Randomizer
-        const logs = ["Syncing 3D vertices...", "Optimizing NUI threads...", "Mapping global pings...", "V-Sync enabled."];
-        setInterval(() => {
-            document.getElementById('log-text').innerText = logs[Math.floor(Math.random() * logs.length)];
-        }, 3000);
     </script>
 </body>
 </html>
