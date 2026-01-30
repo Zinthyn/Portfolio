@@ -3,123 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // APEX_ARCHITECT_2026</title>
+    <title>ZINTHYN // MASTER_ARCHITECT_V18</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400;800&family=Plus+Jakarta+Sans:wght@300;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00ffcc; --purple: #a855f7; --bg: #030303; --darker: #010101; }
-        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        :root { --neon: #00ffcc; --purple: #a855f7; --bg: #030303; --darker: #080808; }
+        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; scroll-behavior: smooth; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
         
-        /* Centered HUD */
-        #hud-top { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 9999; font-size: 10px; background: rgba(0,0,0,0.9); padding: 12px 30px; border: 1px solid rgba(0,255,204,0.3); border-top: none; backdrop-filter: blur(20px); border-radius: 0 0 20px 20px; width: 500px; display: flex; justify-content: space-around; align-items: center; }
+        #hud-top { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 9999; font-size: 10px; background: rgba(0,0,0,0.9); padding: 12px 30px; border: 1px solid rgba(0,255,204,0.3); border-top: none; backdrop-filter: blur(20px); border-radius: 0 0 20px 20px; width: 500px; display: flex; justify-content: space-around; }
 
-        /* Scanning Line Effect */
-        .scanline { width: 100%; height: 2px; background: rgba(0, 255, 204, 0.1); position: fixed; top: 0; left: 0; z-index: 10000; pointer-events: none; animation: scan 8s linear infinite; }
-        @keyframes scan { from { top: -100px; } to { top: 100%; } }
+        /* Distinct Section backgrounds */
+        .section-about { background: linear-gradient(to bottom, #030303, #0a0a0a); position: relative; }
+        .section-vault { background: #030303; }
+        .section-exp { background: #050505; }
 
-        /* Project Cards */
-        .project-card { background: var(--darker); border: 1px solid rgba(255,255,255,0.05); transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1); position: relative; overflow: hidden; height: 350px; }
-        .project-card:hover { border-color: var(--neon); transform: translateY(-10px) scale(1.02); }
-        .project-overlay { position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 10%, transparent); z-index: 1; }
-        .project-img { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(0) brightness(0.5); transition: 0.8s; }
-        .project-card:hover .project-img { filter: saturate(1) brightness(0.8); transform: scale(1.1); }
+        .project-card { background: #010101; border: 1px solid rgba(255,255,255,0.05); transition: 0.6s; position: relative; overflow: hidden; height: 350px; }
+        .project-card:hover { border-color: var(--neon); transform: translateY(-10px); }
+        .project-img { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(0) brightness(0.3); transition: 0.8s; }
+        .project-card:hover .project-img { filter: saturate(1) brightness(0.6); }
 
-        /* Experimental Section */
-        .exp-card { background: repeating-linear-gradient(45deg, #050505, #050505 10px, #080808 10px, #080808 20px); border: 1px dashed rgba(168,85,247,0.3); }
-
-        /* Modal Architecture */
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(30px); }
-        .modal-body { width: 90%; max-width: 1200px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 50px; animation: modalIn 0.5s ease-out; }
-        @keyframes modalIn { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Entrance Animations */
+        section { opacity: 0; transform: translateY(50px); transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+        section.revealed { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
 
-    <div class="scanline"></div>
-
     <div id="hud-top" class="mono text-white/50 uppercase tracking-widest">
         <span>FPS: <span class="text-neon" id="fps">60</span></span>
-        <div class="h-3 w-[1px] bg-white/10"></div>
-        <span>ARCH_V: <span class="text-neon">16.0</span></span>
-        <div class="h-3 w-[1px] bg-white/10"></div>
-        <span>BUFFER: <span class="text-neon">0.00ms</span></span>
+        <span>ARCH_V: <span class="text-neon">18.0</span></span>
+        <span>STATUS: <span class="text-neon">READY</span></span>
     </div>
 
-    <section class="min-h-screen flex items-center px-10 md:px-32">
+    <section class="min-h-screen flex items-center px-10 md:px-32 revealed">
         <div class="w-full">
-            <p class="mono text-purple mb-4 tracking-[1em] text-xs font-bold uppercase animate-pulse">// NEURAL_SYNC_ESTABLISHED</p>
-            <h1 class="text-9xl md:text-[14rem] font-black orbitron italic mb-10 tracking-tighter leading-none text-white">ZINTHYN</h1>
-            <div class="flex flex-col md:flex-row gap-10 items-center">
-                <div class="bg-neon text-black px-10 py-5 font-black orbitron text-xs">ROOT@MASTER_ARCHITECT</div>
-                <p class="text-xl text-white/30 max-w-xl mono uppercase tracking-widest">Optimizing the digital landscape. One thread at a time.</p>
+            <h1 class="text-9xl md:text-[14rem] font-black orbitron italic mb-10 tracking-tighter leading-none">ZINTHYN</h1>
+            <div class="flex flex-col md:flex-row gap-10">
+                <div class="bg-neon text-black px-10 py-5 font-black orbitron text-xs">NEURAL_ARCHITECT</div>
+                <p class="text-xl text-white/30 max-w-xl mono uppercase tracking-widest leading-relaxed">Systematic Excellence. Procedural Innovation.</p>
             </div>
         </div>
     </section>
 
-    <section id="vault" class="py-40 px-10 md:px-32">
-        <div class="flex justify-between items-end mb-20 border-b border-white/5 pb-10">
-            <h2 class="orbitron text-7xl font-black italic tracking-tighter">CORE_<span class="text-neon">VAULT</span></h2>
-            <p class="mono text-white/20 text-xs mb-4">8_PRIMARY_DEPLOYMENTS</p>
+    <section id="about" class="section-about py-60 px-10 md:px-32 border-y border-white/5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+            <div class="relative">
+                <p class="mono text-neon text-xs tracking-[0.5em] mb-4 uppercase">// USER_PROFILE_LOG</p>
+                <h2 class="orbitron text-7xl font-black italic tracking-tighter text-white mb-8">ABOUT_<span class="text-neon">ME</span></h2>
+                <div class="h-[1px] w-full bg-gradient-to-r from-neon to-transparent mb-12"></div>
+                
+                <div class="flex gap-4">
+                    <button class="border border-neon text-neon px-8 py-3 mono text-[10px] tracking-widest hover:bg-neon hover:text-black transition-all">
+                        DOWNLOAD_CV.PDF
+                    </button>
+                    <button class="border border-white/10 text-white/40 px-8 py-3 mono text-[10px] tracking-widest hover:border-white hover:text-white transition-all">
+                        VERIFY_CREDENTIALS
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-white/[0.02] p-12 border border-white/5 relative">
+                <div class="absolute top-0 left-0 w-1 h-full bg-neon"></div>
+                <p class="text-3xl text-white/80 leading-relaxed mb-10 orbitron italic font-bold">
+                    "Crafting the invisible infrastructure that drives immersive worlds."
+                </p>
+                <p class="text-lg text-white/40 leading-loose mono uppercase tracking-wide">
+                    I am a <span class="text-white">Full-Stack Systems Architect</span> with 5+ years of deep-immersion development in the FiveM, alt:V, and RedM ecosystems. 
+                    <br><br>
+                    My expertise lies in the transition between high-level NUI design (Vue/React) and low-level kernel optimization (Lua/C++). I focus on the "Silent Performance" metric—ensuring that even with 1000+ entities, your server frame-time remains under <span class="text-neon">0.05ms</span>.
+                </p>
+            </div>
         </div>
+    </section>
 
+    <section class="py-24 px-10 md:px-32">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-12 opacity-30">
+            <div class="flex items-center gap-4 group hover:opacity-100 transition-opacity">
+                <img src="https://i.imgur.com/rNfV3nN.png" class="h-8"> <span class="orbitron font-bold text-xs">QBCORE</span>
+            </div>
+            <div class="flex items-center gap-4 group hover:opacity-100 transition-opacity">
+                <img src="https://i.imgur.com/8Qp4R3p.png" class="h-8"> <span class="orbitron font-bold text-xs">QBOX</span>
+            </div>
+            <div class="flex items-center gap-4 group hover:opacity-100 transition-opacity">
+                <img src="https://i.imgur.com/9v8Xp8S.png" class="h-12"> <span class="orbitron font-bold text-xs">TMC</span>
+            </div>
+            <div class="flex items-center gap-4 group hover:opacity-100 transition-opacity">
+                <img src="https://i.imgur.com/4QzKz1S.png" class="h-10"> <span class="orbitron font-bold text-xs">ESX</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="vault" class="section-vault py-40 px-10 md:px-32">
+        <div class="mb-20">
+            <h2 class="orbitron text-7xl font-black italic tracking-tighter mb-4">CORE_<span class="text-neon">VAULT</span></h2>
+            <div class="h-1 w-40 bg-neon"></div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div id="project-grid-anchor" class="contents"></div>
         </div>
     </section>
 
-    <section class="py-40 px-10 md:px-32 bg-[#050505]">
-        <div class="mb-20">
-            <h2 class="orbitron text-6xl font-black italic tracking-tighter text-purple">EXPERIMENTAL_LAB</h2>
-            <p class="mono text-white/20 text-xs mt-4">UNSTABLE_BUILDS // R&D</p>
-        </div>
+    <section id="experimental" class="section-exp py-40 px-10 md:px-32">
+        <h2 class="orbitron text-6xl font-black italic tracking-tighter text-purple mb-20">EXPERIMENTAL_LAB</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="exp-card p-10 group">
+            <div class="p-10 border border-purple/20 bg-purple/5 hover:border-purple transition-all group">
+                <p class="mono text-[9px] text-purple/40 mb-4 tracking-[0.5em]">// CLASSIFIED_01</p>
                 <h4 class="orbitron font-bold text-xl mb-4 text-purple">ZIN_AI_Traffic</h4>
-                <p class="text-white/40 text-sm leading-relaxed mb-6">Procedural driving behaviors for NPCs using neural pathfinding logic.</p>
-                <span class="mono text-[9px] text-purple/50 tracking-widest">STATUS: IN_TESTING</span>
+                <p class="text-white/40 text-sm leading-relaxed">Neural pathfinding for NPC driving logic.</p>
             </div>
-            <div class="exp-card p-10 group">
-                <h4 class="orbitron font-bold text-xl mb-4 text-purple">ZIN_DirectX_Shaders</h4>
-                <p class="text-white/40 text-sm leading-relaxed mb-6">Low-level reshade hooks to modify weather lighting variables at runtime.</p>
-                <span class="mono text-[9px] text-purple/50 tracking-widest">STATUS: PROTOTYPE</span>
+            <div class="p-10 border border-purple/20 bg-purple/5 hover:border-purple transition-all group">
+                <p class="mono text-[9px] text-purple/40 mb-4 tracking-[0.5em]">// CLASSIFIED_02</p>
+                <h4 class="orbitron font-bold text-xl mb-4 text-purple">ZIN_DirectX_Hooks</h4>
+                <p class="text-white/40 text-sm leading-relaxed">Lighting and weather runtime modulation.</p>
             </div>
-            <div class="exp-card p-10 group">
-                <h4 class="orbitron font-bold text-xl mb-4 text-purple">ZIN_Core_Sync</h4>
-                <p class="text-white/40 text-sm leading-relaxed mb-6">Experimental entity syncing for 2000+ player slot servers.</p>
-                <span class="mono text-[9px] text-purple/50 tracking-widest">STATUS: ALPHA</span>
+            <div class="p-10 border border-purple/20 bg-purple/5 hover:border-purple transition-all group">
+                <p class="mono text-[9px] text-purple/40 mb-4 tracking-[0.5em]">// CLASSIFIED_03</p>
+                <h4 class="orbitron font-bold text-xl mb-4 text-purple">ZIN_Entity_Sync</h4>
+                <p class="text-white/40 text-sm leading-relaxed">High-freq state sync for 2048 slots.</p>
             </div>
         </div>
     </section>
 
     <div id="modal-overlay" onclick="closeModal()">
-        <div class="modal-body" onclick="event.stopPropagation()">
-            <div id="modal-image" class="h-[600px] bg-cover bg-center border border-white/10 shadow-2xl"></div>
-            <div class="flex flex-col justify-center">
-                <button class="self-end mono text-neon mb-10 text-[10px] tracking-widest" onclick="closeModal()">// DISCONNECT_SESSION [X]</button>
-                <h2 id="modal-title" class="orbitron text-7xl font-black italic text-neon mb-6">PROJECT_TITLE</h2>
-                <p id="modal-desc" class="text-2xl text-white/50 leading-relaxed mb-10 font-light"></p>
-                <div class="p-8 bg-white/5 border border-white/10">
-                    <p class="mono text-[10px] text-neon/40 mb-4 uppercase">System_Specs</p>
-                    <div id="modal-stats" class="grid grid-cols-2 gap-4 mono text-[11px] text-white/30"></div>
-                </div>
+        <div class="modal-body bg-black p-10 border border-neon w-[90%] max-w-5xl flex gap-10" onclick="event.stopPropagation()">
+            <div id="modal-image" class="w-1/2 h-[500px] bg-cover bg-center"></div>
+            <div class="w-1/2 flex flex-col justify-center">
+                <h2 id="modal-title" class="orbitron text-5xl font-black italic text-neon mb-6 uppercase"></h2>
+                <p id="modal-desc" class="text-xl text-white/50 leading-relaxed mb-10"></p>
+                <div id="modal-stats" class="grid grid-cols-2 gap-4 mono text-[10px] text-white/30"></div>
+                <button class="mt-12 text-neon mono text-[10px] self-start" onclick="closeModal()">[ TERMINATE_CONNECTION ]</button>
             </div>
         </div>
     </div>
 
     <script>
         const projects = [
-            { id: 'ZIN_Multicharacter', title: 'Multicharacter', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'A cinematic character hub using 3D camera interpolation and dynamic SQL caching. Features real-time clothing previews and character lore integration.', stats: ['IDLE: 0.01ms', 'SYNC: Global'] },
-            { id: 'ZIN_AC', title: 'Anti-Cheat', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Heuristic detection system monitoring entity-state transitions. Blocks particle spam, event injection, and unauthorized speed modifications.', stats: ['LEVEL: Kernel', 'LOGS: Discord'] },
-            { id: 'ZIN_Hud', title: 'Neural Hud', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Vector-based NUI Hud with modular components. Highly customizable layout featuring dynamic stress and environment exposure bars.', stats: ['LATENCY: 0.00ms', 'NUI: Vue.js'] },
-            { id: 'ZIN_AirportJob', title: 'Airport Job', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Full-scale aviation industry module. Includes flight routes, cargo management, ATC communication systems, and pilot experience rankings.', stats: ['TASKS: 50+', 'TYPE: Economy'] },
-            { id: 'ZIN_FleecaRobbery', title: 'Fleeca Heist', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Synchronized bank robbery module. Features thermal drilling, custom laser mini-games, and tiered reward structures based on player skill.', stats: ['PLAYERS: 1-4', 'COOLDOWN: Dynamic'] },
-            { id: 'ZIN_OilRig', title: 'Oil Rig Heist', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'High-tier oceanic heist. Procedural AI guards, alarm levels, and custom escape vehicles for a high-intensity end-game experience.', stats: ['NPC_AI: Custom', 'LOOT: Rare'] },
-            { id: 'ZIN_Phone', title: 'Logic Phone', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Advanced smartphone simulation. Fully responsive messaging, banking, vehicle tracking, and an integrated crypto marketplace.', stats: ['APPS: 15+', 'DATA: Real-time'] },
-            { id: 'ZIN_Inventory', title: 'Grid Inventory', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Weight-based inventory with item metadata. Supports serial numbers, weapon attachments, and durability tracking with a clean, grid-based NUI.', stats: ['LOAD: 0.02ms', 'SAVE: JSON/SQL'] }
+            { id: 'ZIN_Multicharacter', title: 'Multicharacter', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Cinematic character hub with 3D interpolation.', stats: ['IDLE: 0.01ms', 'CACHE: Redis'] },
+            { id: 'ZIN_AC', title: 'Anti-Cheat', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Heuristic state monitoring and event protection.', stats: ['LEVEL: Kernel', 'SEC: AES-256'] },
+            { id: 'ZIN_Hud', title: 'Neural Hud', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Vector-based NUI with zero MS impact.', stats: ['UI: Vue.js', 'TYPE: Modular'] },
+            { id: 'ZIN_AirportJob', title: 'Airport Job', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Aviation industry and ATC simulation.', stats: ['TASKS: 50+', 'SYNC: Global'] },
+            { id: 'ZIN_FleecaRobbery', title: 'Fleeca Heist', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Synchronized bank robbery with mini-games.', stats: ['PLAYERS: 1-4', 'SYNC: StateBag'] },
+            { id: 'ZIN_OilRig', title: 'Oil Rig Heist', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'End-game oceanic heist with AI guards.', stats: ['NPC: Custom', 'LOOT: Tier-1'] },
+            { id: 'ZIN_Phone', title: 'Logic Phone', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Responsive smartphone simulation.', stats: ['APPS: 15+', 'DATA: SQL'] },
+            { id: 'ZIN_Inventory', title: 'Grid Inventory', img: 'https://r2.fivemanage.com/leWUyYzoYJQXwsZzNb8AI/1466415431240646898.webp', desc: 'Metadata-based grid inventory system.', stats: ['LOAD: 0.02ms', 'DB: MariaDB'] }
         ];
 
         const grid = document.getElementById('project-grid-anchor');
@@ -127,7 +159,7 @@
             grid.innerHTML += `
                 <div class="project-card cursor-pointer group" onclick="openProject('${p.id}')">
                     <div class="project-img" style="background-image: url('${p.img}')"></div>
-                    <div class="project-overlay"></div>
+                    <div class="project-overlay bg-gradient-to-t from-black via-transparent to-transparent absolute inset-0"></div>
                     <div class="absolute bottom-8 left-8 z-10">
                         <p class="mono text-neon text-[9px] mb-2 tracking-widest">MODULE_${p.id.split('_')[1]}</p>
                         <h4 class="orbitron text-2xl font-bold italic">${p.id}</h4>
@@ -141,21 +173,19 @@
             document.getElementById('modal-title').innerText = p.id;
             document.getElementById('modal-desc').innerText = p.desc;
             document.getElementById('modal-image').style.backgroundImage = `url(${p.img})`;
-            
-            const statsGrid = document.getElementById('modal-stats');
-            statsGrid.innerHTML = p.stats.map(s => `<div>${s.split(':')[0]}: <span class="text-white">${s.split(':')[1]}</span></div>`).join('');
-            
+            document.getElementById('modal-stats').innerHTML = p.stats.map(s => `<div>${s.split(':')[0]}: <span class="text-white">${s.split(':')[1]}</span></div>`).join('');
             document.getElementById('modal-overlay').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('modal-overlay').style.display = 'none';
-        }
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
-        // HUD Updates
-        setInterval(() => {
-            document.getElementById('fps').innerText = Math.floor(Math.random() * (62 - 58) + 58);
-        }, 800);
+        // Intersection Observer for scroll entrance
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('revealed'); });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('section').forEach(s => observer.observe(s));
+
+        setInterval(() => { document.getElementById('fps').innerText = Math.floor(Math.random() * (62 - 58) + 58); }, 800);
     </script>
 </body>
 </html>
