@@ -9,93 +9,101 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --neon: #00f2ff; --nuke: #ff0033; --bg: #010203; }
-        * { cursor: none !important; }
-        body { 
-            background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace;
-            height: 100vh; overflow: hidden; perspective: 2000px;
-            display: flex; align-items: center; justify-content: center;
-        }
+        
+        /* Hide default cursor but keep it functional */
+        html, body { cursor: none !important; background: var(--bg); overflow: hidden; height: 100vh; }
 
-        /* CURSOR */
+        /* CURSOR - FORCED VISIBILITY */
+        #cursor-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 999999;
+        }
         #cursor {
-            position: fixed; width: 40px; height: 40px; border: 1px solid var(--neon);
-            border-radius: 50%; pointer-events: none; z-index: 99999;
-            transform: translate(-50%, -50%); transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: absolute; width: 40px; height: 40px;
+            border: 2px solid var(--neon); border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px var(--neon), inset 0 0 5px var(--neon);
+            transition: width 0.2s, height 0.2s, background 0.2s;
             display: flex; align-items: center; justify-content: center;
         }
-        #cursor-dot { width: 4px; height: 4px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); }
+        #cursor::after { content: ''; width: 4px; height: 4px; background: var(--neon); border-radius: 50%; }
 
-        /* STATIC VIDEO OVERLAY */
-        #video-static {
-            position: fixed; inset: 0; opacity: 0.03; pointer-events: none; z-index: 5;
-            background: url('https://media.giphy.com/media/oEI9uWUeez9BK/giphy.gif'); background-size: cover;
+        /* SCANLINE PULSE */
+        .scan-pulse {
+            position: fixed; top: -100%; left: 0; width: 100%; height: 100px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.05), transparent);
+            z-index: 500; pointer-events: none;
+            animation: scan 8s linear infinite;
         }
+        @keyframes scan { 0% { top: -100%; } 100% { top: 200%; } }
 
-        /* BOOT SCREEN FIX */
+        /* BOOT SCREEN */
         #boot-screen {
             position: fixed; inset: 0; background: #000; z-index: 90000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 1s ease-in-out;
         }
 
         .boot-button {
             border: 2px solid var(--neon); padding: 1.5rem 4rem; color: var(--neon);
             font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 0.5em;
-            background: transparent; cursor: pointer !important; z-index: 90001;
+            background: rgba(0, 242, 255, 0.02); cursor: none; z-index: 90005;
             transition: 0.4s; pointer-events: auto;
         }
         .boot-button:hover { background: var(--neon); color: #000; box-shadow: 0 0 50px var(--neon); }
 
-        /* MAIN TERMINAL */
+        /* MAIN SHELL */
         #main-shell {
             width: 95%; height: 90%; max-width: 1700px;
-            background: rgba(5, 7, 10, 0.98); border: 1px solid rgba(0, 242, 255, 0.2);
-            transform-style: preserve-3d; transition: all 0.1s ease-out;
-            display: flex; flex-direction: column; opacity: 0; scale: 0.5; transform: translateZ(-2000px);
-            box-shadow: 0 0 100px rgba(0,0,0,1); z-index: 100;
+            background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 242, 255, 0.2);
+            transform-style: preserve-3d; transition: opacity 1s, scale 1.5s;
+            display: flex; flex-direction: column; opacity: 0; scale: 0.8; 
+            transform: translateZ(-1000px); box-shadow: 0 0 100px rgba(0,0,0,1);
         }
 
-        .view-content { display: none; animation: quantum-leap 0.5s ease-out; }
+        .view-content { display: none; animation: quantum 0.5s ease-out; }
         .view-content.active { display: block; }
-        @keyframes quantum-leap {
-            0% { opacity: 0; transform: scale(0.95) translateZ(-100px); filter: blur(10px); }
-            100% { opacity: 1; transform: scale(1) translateZ(0); filter: blur(0); }
-        }
+        @keyframes quantum { 0% { opacity: 0; filter: blur(10px); } 100% { opacity: 1; filter: blur(0); } }
 
         #stars { position: fixed; inset: 0; z-index: 1; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
+        
+        /* HOVER STATES FOR CURSOR */
+        .hovering #cursor { width: 60px; height: 60px; background: rgba(0, 242, 255, 0.1); border-width: 3px; }
     </style>
 </head>
-<body onmousemove="updateMouse(event)">
+<body onmousemove="moveCursor(event)">
 
-    <div id="cursor"><div id="cursor-dot"></div></div>
-    <div id="video-static"></div>
+    <div id="cursor-container"><div id="cursor"></div></div>
+    <div class="scan-pulse"></div>
     <canvas id="stars"></canvas>
 
     <div id="boot-screen">
-        <div class="orbitron text-cyan-900 text-[10px] mb-8 tracking-[2em] animate-pulse">ENCRYPTED_UPLINK_WAITING</div>
-        <button class="boot-button" onclick="launchSystem()">INITIALIZE OMEGA</button>
+        <div class="orbitron text-cyan-900 text-[10px] mb-8 tracking-[2em] animate-pulse">ENCRYPTION_LOCKED</div>
+        <button class="boot-button" 
+                onmouseenter="document.body.classList.add('hovering')" 
+                onmouseleave="document.body.classList.remove('hovering')"
+                onclick="launchSystem()">INITIALIZE_OMEGA</button>
     </div>
 
     <div id="main-shell" class="rounded-sm">
         <header class="h-16 border-b border-white/10 flex items-center justify-between px-8 bg-black">
-            <div class="orbitron text-2xl font-black italic text-cyan-400">ZINTHYN<span class="text-white/20">.OMEGA</span></div>
+            <div class="orbitron text-2xl font-black italic text-cyan-400">ZINTHYN<span class="text-white/20">.SYS</span></div>
             <div class="flex items-center gap-8">
-                <div id="nuke-timer" class="orbitron text-red-600 text-sm hidden font-bold">TERMINATION: 3.00s</div>
+                <div id="nuke-timer" class="orbitron text-red-600 text-sm hidden font-bold">CRITICAL_ERR: 3.00</div>
                 <div class="orbitron text-[10px] text-slate-500" id="clock">00:00:00</div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-20 lg:w-72 border-r border-white/5 flex flex-col p-8 gap-10 bg-black/40">
-                <nav class="space-y-8">
-                    <button onclick="changeTab('root')" class="w-full text-left orbitron text-[11px] text-slate-500 hover:text-cyan-400 transition flex items-center gap-4">
-                        <i class="fas fa-terminal"></i> <span class="hidden lg:block">ROOT_DIR</span>
+            <aside class="w-20 lg:w-72 border-r border-white/5 flex flex-col p-8 gap-8 bg-black/40">
+                <nav class="space-y-6">
+                    <button onclick="changeTab('root')" class="w-full text-left orbitron text-[11px] text-slate-500 hover:text-cyan-400 flex items-center gap-4 transition-all" onmouseenter="document.body.classList.add('hovering')" onmouseleave="document.body.classList.remove('hovering')">
+                        <i class="fas fa-box-open"></i> <span class="hidden lg:block">DATA_CORE</span>
                     </button>
-                    <button onclick="changeTab('labs')" class="w-full text-left orbitron text-[11px] text-slate-500 hover:text-cyan-400 transition flex items-center gap-4">
-                        <i class="fas fa-flask"></i> <span class="hidden lg:block">DEV_LABS</span>
+                    <button onclick="changeTab('dev')" class="w-full text-left orbitron text-[11px] text-slate-500 hover:text-cyan-400 flex items-center gap-4 transition-all" onmouseenter="document.body.classList.add('hovering')" onmouseleave="document.body.classList.remove('hovering')">
+                        <i class="fas fa-code"></i> <span class="hidden lg:block">MODULES</span>
                     </button>
-                    <button onclick="copyDiscord()" class="w-full text-left orbitron text-[11px] text-cyan-700 hover:text-cyan-400 transition flex items-center gap-4">
+                    <button onclick="copyDiscord()" class="w-full text-left orbitron text-[11px] text-cyan-800 hover:text-cyan-400 flex items-center gap-4 transition-all" onmouseenter="document.body.classList.add('hovering')" onmouseleave="document.body.classList.remove('hovering')">
                         <i class="fab fa-discord"></i> <span class="hidden lg:block">UPLINK</span>
                     </button>
                 </nav>
@@ -103,33 +111,45 @@
 
             <main class="flex-1 p-16 overflow-y-auto relative">
                 <div id="view-root" class="view-content active">
-                    <h1 class="text-8xl lg:text-9xl font-black orbitron italic tracking-tighter mb-8 leading-none">THE<br>ARCHITECT</h1>
-                    <p class="text-slate-500 max-w-2xl text-lg italic leading-relaxed">High-performance LUA & C# architecture. Pushing the limits of FiveM optimization.</p>
+                    <h1 class="text-7xl lg:text-9xl font-black orbitron italic tracking-tighter mb-8 leading-none">ARCHITECT</h1>
+                    <p class="text-slate-500 max-w-2xl text-lg italic border-l-2 border-cyan-900 pl-6">Building high-concurrency systems for the virtual frontier.</p>
                 </div>
 
-                <div id="view-labs" class="view-content">
+                <div id="view-dev" class="view-content">
                     <div class="grid lg:grid-cols-2 gap-8">
-                        <div class="p-10 border border-white/5 bg-white/[0.01] hover:border-cyan-500 transition-all">
-                            <h3 class="orbitron text-2xl mb-4">ZIN_FRAMEWORK</h3>
-                            <p class="text-xs text-slate-500">A modular bridge for ESX/QB-Core environments.</p>
+                        <div class="p-8 border border-white/5 bg-white/[0.01] hover:border-cyan-500 transition-all">
+                            <h3 class="orbitron text-xl text-cyan-500 mb-2">ZIN_ID</h3>
+                            <p class="text-xs text-slate-500">Multicharacter System // 0.0ms</p>
                         </div>
-                        <div class="p-10 border border-white/5 bg-white/[0.01] hover:border-cyan-500 transition-all">
-                            <h3 class="orbitron text-2xl mb-4">CORE_SHIELD</h3>
-                            <p class="text-xs text-slate-500">Anticheat logic built on predictive event monitoring.</p>
+                        <div class="p-8 border border-white/5 bg-white/[0.01] hover:border-cyan-500 transition-all">
+                            <h3 class="orbitron text-xl text-cyan-500 mb-2">ZIN_AC</h3>
+                            <p class="text-xs text-slate-500">Heuristic Anti-Cheat Engine</p>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
 
-        <footer class="h-12 border-t border-white/10 flex items-center px-8 justify-between bg-black/80">
-            <div class="text-[9px] orbitron text-cyan-900 tracking-[0.5em]">STATUS: SECURE // KEY: 0x77AF2</div>
+        <footer class="h-12 border-t border-white/10 flex items-center px-8 justify-between bg-black">
+            <div class="text-[9px] orbitron text-cyan-900 tracking-[1em]">SYSTEM_ENCRYPTED</div>
             <button class="text-red-900 border border-red-900 px-4 py-1 orbitron text-[9px] hover:bg-red-600 hover:text-white transition" onclick="selfDestruct()">[ DETONATE ]</button>
         </footer>
     </div>
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function moveCursor(e) {
+            const cursor = document.getElementById('cursor');
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            if(document.getElementById('boot-screen').style.display === 'none') {
+                const x = (window.innerWidth / 2 - e.pageX) / 60;
+                const y = (window.innerHeight / 2 - e.pageY) / 60;
+                document.getElementById('main-shell').style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+            }
+        }
 
         function playSound(f, t, d, v) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -152,7 +172,7 @@
         }
 
         function changeTab(id) {
-            playSound(300, 'square', 0.1, 0.05);
+            playSound(400, 'square', 0.1, 0.05);
             document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${id}`).classList.add('active');
         }
@@ -161,33 +181,21 @@
             const shell = document.getElementById('main-shell');
             const timer = document.getElementById('nuke-timer');
             timer.classList.remove('hidden');
-            shell.style.animation = 'shake 0.1s infinite';
             
             let count = 3.0;
             const int = setInterval(() => {
                 count -= 0.05;
-                timer.innerText = `TERMINATION: ${count.toFixed(2)}s`;
-                playSound(1200, 'sine', 0.05, 0.05);
+                timer.innerText = `CRITICAL_ERR: ${count.toFixed(2)}`;
+                playSound(1000, 'sine', 0.05, 0.05);
+                shell.style.transform = `translate(${Math.random()*10}px, ${Math.random()*10}px)`;
                 if(count <= 0) {
                     clearInterval(int);
-                    shell.style.transform = 'scale(0) rotate(720deg)';
+                    shell.style.scale = '0';
                     setTimeout(() => window.location.reload(), 1000);
                 }
             }, 50);
         }
 
-        function updateMouse(e) {
-            const cursor = document.getElementById('cursor');
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-            if(document.getElementById('boot-screen').style.display === 'none') {
-                const x = (window.innerWidth / 2 - e.pageX) / 50;
-                const y = (window.innerHeight / 2 - e.pageY) / 50;
-                document.getElementById('main-shell').style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
-            }
-        }
-
-        // STARFIELD
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -197,7 +205,7 @@
             stars.forEach(s => {
                 const px = (s.x - canvas.width/2) * (canvas.width/s.z) + canvas.width/2;
                 const py = (s.y - canvas.height/2) * (canvas.width/s.z) + canvas.height/2;
-                const sz = (1 - s.z/canvas.width) * 3;
+                const sz = (1 - s.z/canvas.width) * 2;
                 ctx.fillStyle = `rgba(0, 242, 255, ${1 - s.z/canvas.width})`;
                 ctx.beginPath(); ctx.arc(px,py,sz,0,Math.PI*2); ctx.fill();
                 s.z -= 4; if(s.z <= 0) s.z = canvas.width;
@@ -208,9 +216,5 @@
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
         function copyDiscord() { playSound(440, 'sine', 0.2, 0.1); navigator.clipboard.writeText("Zinthyn"); alert("UPLINK_COPIED"); }
     </script>
-
-    <style>
-        @keyframes shake { 0% { transform: translate(5px); } 100% { transform: translate(-5px); } }
-    </style>
 </body>
 </html>
