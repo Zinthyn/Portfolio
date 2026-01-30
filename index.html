@@ -10,40 +10,46 @@
     <style>
         :root { --neon: #00f2ff; --bg: #010203; }
         * { cursor: none !important; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; perspective: 1000px; }
+        body { background: var(--bg); color: #fff; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 
-        /* HIGHEST LAYER CURSOR */
+        /* CURSOR */
         #cursor {
-            position: fixed; width: 35px; height: 35px; border: 2px solid var(--neon);
+            position: fixed; width: 30px; height: 30px; border: 2px solid var(--neon);
             border-radius: 50%; pointer-events: none; z-index: 1000000;
-            transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s;
+            transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s, background 0.2s;
             box-shadow: 0 0 15px var(--neon);
         }
 
-        /* BOOT SCREEN */
-        #boot-screen {
-            position: fixed; inset: 0; background: #000; z-index: 90000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-
-        .boot-btn {
-            border: 2px solid var(--neon); padding: 20px 50px; color: var(--neon);
-            font-family: 'Orbitron', sans-serif; font-weight: 900; background: transparent;
-            z-index: 90001; transition: 0.3s; pointer-events: auto;
-        }
-        .boot-btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 50px var(--neon); }
-
-        /* THE TERMINAL - FIXED POSITIONING */
+        /* TERMINAL CHASSIS - STABILIZED */
         #main-shell {
             position: relative; width: 92vw; height: 88vh;
             background: rgba(2, 4, 6, 0.98); border: 1px solid rgba(0, 242, 255, 0.2);
             display: none; flex-direction: column; opacity: 0;
-            transform: translateZ(0); /* Start neutral */
             box-shadow: 0 0 100px rgba(0,0,0,1); z-index: 1000;
         }
 
-        .active-view { display: block; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* VIEW TRANSITIONS */
+        .view { display: none; animation: fadeIn 0.4s ease-out; }
+        .view.active-view { display: block; }
+        @keyframes fadeIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+
+        /* PROJECT CARDS */
+        .holo-card {
+            position: relative; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.05);
+            padding: 40px; transition: all 0.3s ease; overflow: hidden;
+        }
+        .holo-card:hover {
+            border-color: var(--neon); background: rgba(0, 242, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.1);
+        }
+        
+        .img-preview {
+            width: 100%; height: 150px; background: #050505; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(0, 242, 255, 0.1); transition: 0.3s;
+        }
+        .holo-card:hover .img-preview { border-color: var(--neon); color: var(--neon); }
 
         #stars { position: fixed; inset: 0; z-index: 1; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
@@ -54,44 +60,53 @@
     <div id="cursor"></div>
     <canvas id="stars"></canvas>
 
-    <div id="boot-screen">
-        <div class="orbitron text-cyan-900 text-[10px] mb-8 tracking-[2em] animate-pulse">UPLINK_READY</div>
-        <button class="boot-btn" onclick="launchSystem()">INITIALIZE_OMEGA</button>
+    <div id="boot-screen" class="fixed inset-0 bg-black z-[90000] flex flex-col items-center justify-center">
+        <div class="orbitron text-cyan-900 text-[10px] mb-8 tracking-[2em] animate-pulse">SYSTEM_IDLE</div>
+        <button class="border-2 border-cyan-500 py-4 px-12 orbitron text-cyan-500 font-black hover:bg-cyan-500 hover:text-black transition-all" onclick="launchSystem()">INITIALIZE_OMEGA</button>
     </div>
 
     <div id="main-shell" class="mx-auto my-auto">
-        <header class="h-16 border-b border-white/10 flex items-center justify-between px-8 bg-black">
-            <div class="orbitron text-xl font-black text-cyan-400 tracking-tighter">ZINTHYN // OMEGA</div>
-            <div class="orbitron text-[10px] text-slate-500" id="clock">00:00:00</div>
+        <header class="h-16 border-b border-white/10 flex items-center justify-between px-8 bg-black/60">
+            <div class="orbitron text-xl font-black text-cyan-400">ZINTHYN<span class="text-white/10">.OMEGA</span></div>
+            <div class="flex gap-6 items-center">
+                <span class="orbitron text-[8px] text-emerald-500">ENCRYPTION: ACTIVE</span>
+                <span class="orbitron text-[10px] text-slate-500" id="clock">00:00:00</span>
+            </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside class="w-20 lg:w-64 border-r border-white/5 p-6 space-y-8 bg-black/40">
-                <nav class="space-y-6">
-                    <button onclick="tab('home')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-xs flex gap-4">
-                        <i class="fas fa-home"></i> <span class="hidden lg:block">HOME</span>
+            <aside class="w-20 lg:w-64 border-r border-white/5 p-8 space-y-10 bg-black/40">
+                <nav class="space-y-8">
+                    <button onclick="tab('home')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[11px] flex gap-4 transition-colors">
+                        <i class="fas fa-terminal w-4"></i> <span class="hidden lg:block tracking-widest">ROOT_DIR</span>
                     </button>
-                    <button onclick="tab('projects')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-xs flex gap-4">
-                        <i class="fas fa-layer-group"></i> <span class="hidden lg:block">PROJECTS</span>
+                    <button onclick="tab('projects')" class="w-full text-left text-slate-500 hover:text-cyan-400 orbitron text-[11px] flex gap-4 transition-colors">
+                        <i class="fas fa-th-large w-4"></i> <span class="hidden lg:block tracking-widest">PROJECTS</span>
                     </button>
-                    <button onclick="copyDiscord()" class="w-full text-left text-cyan-800 hover:text-cyan-400 orbitron text-xs flex gap-4">
-                        <i class="fab fa-discord"></i> <span class="hidden lg:block">DISCORD</span>
+                    <button onclick="copyDiscord()" class="w-full text-left text-cyan-900 hover:text-cyan-400 orbitron text-[11px] flex gap-4 transition-colors">
+                        <i class="fab fa-discord w-4"></i> <span class="hidden lg:block tracking-widest">UPLINK</span>
                     </button>
                 </nav>
             </aside>
 
             <main class="flex-1 p-12 lg:p-20 overflow-y-auto">
-                <div id="view-home" class="view hidden active-view">
-                    <h1 class="text-7xl lg:text-9xl font-black orbitron italic mb-6">ARCHITECT</h1>
-                    <div id="kernel-log" class="text-cyan-600 font-mono text-sm leading-relaxed"></div>
+                <div id="view-home" class="view active-view">
+                    <h1 class="text-7xl lg:text-9xl font-black orbitron italic mb-6 leading-none">ARCHITECT.</h1>
+                    <div id="kernel-log" class="text-cyan-600 font-mono text-xs leading-loose"></div>
                 </div>
 
-                <div id="view-projects" class="view hidden">
-                    <h2 class="orbitron text-3xl mb-12 text-cyan-400">ACTIVE_EXPERIMENTS</h2>
-                    <div class="grid lg:grid-cols-2 gap-8">
-                        <div class="p-10 border border-white/5 bg-white/[0.02] hover:border-cyan-500 transition-all">
-                            <h3 class="orbitron text-xl mb-4">ZIN_MULTICHAR</h3>
-                            <p class="text-xs text-slate-500">Advanced 3D Character Selection Interface.</p>
+                <div id="view-projects" class="view">
+                    <h2 class="orbitron text-3xl mb-12 tracking-tighter text-cyan-500 underline decoration-cyan-900 underline-offset-8">DATA_MODULES</h2>
+                    <div class="grid lg:grid-cols-2 gap-10">
+                        <div class="holo-card group">
+                            <div class="img-preview"><i class="fas fa-users text-5xl opacity-20 group-hover:opacity-100 transition"></i></div>
+                            <h3 class="orbitron text-xl text-white mb-2">ZIN_MULTICHAR</h3>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-widest">Identity Management System</p>
+                        </div>
+                        <div class="holo-card group">
+                            <div class="img-preview"><i class="fas fa-shield-alt text-5xl opacity-20 group-hover:opacity-100 transition"></i></div>
+                            <h3 class="orbitron text-xl text-white mb-2">NEURAL_GUARD</h3>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-widest">Predictive Security Engine</p>
                         </div>
                     </div>
                 </div>
@@ -99,7 +114,7 @@
         </div>
 
         <footer class="h-10 border-t border-white/10 flex items-center px-8 justify-between bg-black text-[9px] orbitron text-cyan-900">
-            <span>KEY_AUTH: VERIFIED</span>
+            <span>© 2026 ZINTHYN_OFFICIAL</span>
             <span class="hover:text-red-500 transition cursor-pointer" onclick="location.reload()">[ REBOOT_SYSTEM ]</span>
         </footer>
     </div>
@@ -111,13 +126,6 @@
             const cursor = document.getElementById('cursor');
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
-
-            const shell = document.getElementById('main-shell');
-            if(shell.style.display === 'flex') {
-                const x = (window.innerWidth / 2 - e.pageX) / 80;
-                const y = (window.innerHeight / 2 - e.pageY) / 80;
-                shell.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
-            }
         }
 
         function playSound(f, d, v) {
@@ -130,7 +138,7 @@
         }
 
         function launchSystem() {
-            playSound(100, 0.5, 0.1);
+            playSound(120, 0.4, 0.1);
             document.getElementById('boot-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('boot-screen').style.display = 'none';
@@ -142,29 +150,29 @@
         }
 
         function tab(id) {
-            playSound(400, 0.1, 0.05);
-            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-            document.getElementById(`view-${id}`).classList.remove('hidden');
+            playSound(440, 0.05, 0.05);
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(`view-${id}`).classList.add('active-view');
         }
 
         function startTyping() {
             const log = document.getElementById('kernel-log');
             const lines = [
-                "> INITIALIZING KERNEL...",
-                "> SYNCING DATA_STREAM...",
-                "> SECURITY_OVERLAY: ACTIVE",
-                "> WELCOME, ZINTHYN."
+                "> BOOT_SEQUENCE_COMPLETE",
+                "> UPLINK: STABLE",
+                "> MASTER_KEY_ACCEPTED",
+                "> ACCESSING ROOT_DIR...",
+                "> WELCOME BACK, ZINTHYN."
             ];
             let i = 0;
             const interval = setInterval(() => {
                 log.innerHTML += lines[i] + "<br>";
-                playSound(600, 0.05, 0.01);
+                playSound(800, 0.02, 0.01);
                 i++;
                 if(i >= lines.length) clearInterval(interval);
-            }, 400);
+            }, 300);
         }
 
-        // STARFIELD
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -182,8 +190,9 @@
             requestAnimationFrame(draw);
         }
         draw();
+        
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
-        function copyDiscord() { navigator.clipboard.writeText("Zinthyn"); alert("COPIED"); }
+        function copyDiscord() { navigator.clipboard.writeText("Zinthyn"); alert("UPLINK_ESTABLISHED"); }
     </script>
 </body>
 </html>
