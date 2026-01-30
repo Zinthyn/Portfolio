@@ -37,15 +37,40 @@
         .view.active-view { display: flex; flex-direction: column; }
         @keyframes fadeIn { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
 
+        /* PROJECT CARDS */
+        .card-image-wrapper { width: 100%; height: 120px; background: #000; position: relative; overflow: hidden; }
+        .card-image-wrapper img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; transition: 0.5s; }
+        .holo-card:hover img { opacity: 0.8; transform: scale(1.1); }
+        
+        .card-image-wrapper::after {
+            content: ""; position: absolute; top: -100%; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.1), transparent);
+            animation: scan 4s infinite linear; pointer-events: none;
+        }
+        @keyframes scan { 0% { top: -100%; } 100% { top: 100%; } }
+
         .holo-card { background: var(--card); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; cursor: none !important; }
         .holo-card:hover { border-color: var(--neon); background: rgba(0, 242, 255, 0.05); }
 
-        /* FRAMEWORK LOGO STYLING */
-        .framework-logo { filter: grayscale(1) brightness(1.5); transition: 0.5s; opacity: 0.6; }
-        .holo-card:hover .framework-logo { filter: grayscale(0) brightness(1); opacity: 1; transform: scale(1.05); }
+        /* MODAL */
+        #project-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: none; z-index: 20000; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #05070a; border: 1px solid var(--neon);
+            width: 90%; max-width: 600px; padding: 2rem; position: relative;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1); animation: modalOpen 0.3s ease-out;
+        }
+        @keyframes modalOpen { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+        /* SKILLS */
         .skill-bar { height: 4px; background: rgba(255,255,255,0.05); position: relative; margin-top: 8px; }
         .skill-progress { height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); width: 0; transition: width 1.5s ease-in-out; }
+
+        .framework-logo { filter: grayscale(1) brightness(1.5); transition: 0.5s; opacity: 0.6; }
+        .holo-card:hover .framework-logo { filter: grayscale(0) brightness(1); opacity: 1; }
 
         #stars { position: fixed; inset: 0; z-index: 1; }
         .orbitron { font-family: 'Orbitron', sans-serif; }
@@ -57,6 +82,18 @@
 
     <div id="cursor"></div>
     <canvas id="stars"></canvas>
+
+    <div id="project-modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="absolute top-4 right-4 text-cyan-500 hover:text-white orbitron text-xs" onclick="closeModal()">[X] CLOSE</button>
+            <div id="modal-img-container" class="w-full h-48 mb-6 border border-white/10 overflow-hidden">
+                <img id="modal-img" src="" class="w-full h-full object-cover">
+            </div>
+            <h2 id="modal-title" class="orbitron text-2xl text-cyan-400 mb-2"></h2>
+            <p id="modal-tag" class="text-[10px] text-cyan-900 orbitron mb-4 tracking-widest uppercase"></p>
+            <div id="modal-desc" class="text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4"></div>
+        </div>
+    </div>
 
     <div id="boot-screen" class="fixed inset-0 bg-black z-[90000] flex flex-col items-center justify-center">
         <div class="orbitron text-cyan-950 text-[10px] mb-8 tracking-[2em] animate-pulse">TERMINAL_IDLE</div>
@@ -88,17 +125,15 @@
                 </div>
 
                 <div id="view-about" class="view overflow-y-auto custom-scroll pr-4">
-                    <h2 class="orbitron text-3xl font-black text-white mb-10 uppercase tracking-tighter">Biometric_ID</h2>
+                    <h2 class="orbitron text-3xl font-black text-white mb-10 uppercase">Biometric_ID</h2>
                     <div class="grid lg:grid-cols-2 gap-12">
                         <div class="space-y-8">
-                            <div class="p-6 bg-white/5 border-l-2 border-cyan-500">
-                                <p class="text-slate-400 leading-relaxed text-sm">
-                                    Systems Architect and Lead Developer based in Serbia. Specialized in high-performance infrastructure for the FiveM ecosystem, kernel-level optimizations, and immersive NUI design.
-                                </p>
+                            <div class="p-6 bg-white/5 border-l-2 border-cyan-500 text-slate-400 text-sm">
+                                Systems Architect based in Serbia. Specialized in FiveM infrastructure, NUI design, and high-performance LUA scripting.
                             </div>
                             <div class="space-y-6">
                                 <h3 class="orbitron text-xs text-cyan-800 uppercase tracking-widest">Skill_Matrix</h3>
-                                <div><div class="flex justify-between text-[10px] orbitron mb-1"><span>LUA ENGINE</span><span>98%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 98%"></div></div></div>
+                                <div><div class="flex justify-between text-[10px] orbitron mb-1"><span>LUA / KERNEL</span><span>98%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 98%"></div></div></div>
                                 <div><div class="flex justify-between text-[10px] orbitron mb-1"><span>NUI / REACT</span><span>92%</span></div><div class="skill-bar"><div class="skill-progress" style="width: 92%"></div></div></div>
                             </div>
                         </div>
@@ -106,61 +141,62 @@
                 </div>
 
                 <div id="view-frameworks" class="view">
-                    <h2 class="orbitron text-3xl font-black text-white mb-2">SYSTEM_CORE</h2>
+                    <h2 class="orbitron text-3xl font-black text-white mb-2 uppercase">Core_Systems</h2>
                     <p class="orbitron text-[10px] text-cyan-900 mb-10 tracking-[0.5em]">CERTIFIED_INTEGRATIONS</p>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="holo-card p-6 flex flex-col items-center justify-center text-center group">
-                            <img src="https://i.ibb.co/6R0pM7K/qbcore.jpg" class="framework-logo h-20 mb-6 object-contain">
-                            <h3 class="orbitron text-sm text-white mb-2">QBCORE</h3>
-                            <span class="text-[8px] text-cyan-500/50 orbitron">NATIVE_OPTIMIZATION</span>
-                        </div>
-
-                        <div class="holo-card p-6 flex flex-col items-center justify-center text-center group">
-                            <img src="https://i.ibb.co/3sX8tV6/tmc.png" class="framework-logo h-20 mb-6 object-contain">
-                            <h3 class="orbitron text-sm text-white mb-2">TMC</h3>
-                            <span class="text-[8px] text-cyan-500/50 orbitron">ADVANCED_SHIELD_V2</span>
-                        </div>
-
-                        <div class="holo-card p-6 flex flex-col items-center justify-center text-center group">
-                            <img src="https://i.ibb.co/F8Sg0zM/qbox.png" class="framework-logo h-20 mb-6 object-contain">
-                            <h3 class="orbitron text-sm text-white mb-2">QBOX</h3>
-                            <span class="text-[8px] text-cyan-500/50 orbitron">MODULAR_BACKEND</span>
-                        </div>
+                        <div class="holo-card p-6 flex flex-col items-center"><img src="https://i.ibb.co/6R0pM7K/qbcore.jpg" class="framework-logo h-16 mb-4 object-contain"><h3 class="orbitron text-xs">QBCORE</h3></div>
+                        <div class="holo-card p-6 flex flex-col items-center"><img src="https://i.ibb.co/3sX8tV6/tmc.png" class="framework-logo h-16 mb-4 object-contain"><h3 class="orbitron text-xs">TMC</h3></div>
+                        <div class="holo-card p-6 flex flex-col items-center"><img src="https://i.ibb.co/F8Sg0zM/qbox.png" class="framework-logo h-16 mb-4 object-contain"><h3 class="orbitron text-xs">QBOX</h3></div>
                     </div>
                 </div>
 
                 <div id="view-projects" class="view">
-                    <h2 class="orbitron text-2xl text-cyan-500 mb-8">PROJECT_LABS</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto custom-scroll pr-4">
-                        <div class="holo-card p-4"><h3 class="orbitron text-[10px] text-white">ZIN_SHIELD</h3></div>
-                        <div class="holo-card p-4"><h3 class="orbitron text-[10px] text-white">ZIN_GARAGE</h3></div>
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="orbitron text-2xl text-cyan-500 uppercase tracking-tighter">Project_Labs</h2>
+                        <span class="text-[8px] orbitron text-slate-600">CLICK_FOR_DATA_DECRYPT</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto custom-scroll pr-4 pb-10">
+                        <div class="holo-card p-2" onclick="openProject('shield')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_SHIELD</h3></div>
+                        </div>
+                        <div class="holo-card p-2" onclick="openProject('garage')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1493238792040-d710475a6d3b?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_GARAGE</h3></div>
+                        </div>
+                        <div class="holo-card p-2" onclick="openProject('multi')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_MULTICHARACTER</h3></div>
+                        </div>
+                        <div class="holo-card p-2" onclick="openProject('oilrig')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_OILRIG</h3></div>
+                        </div>
+                        <div class="holo-card p-2" onclick="openProject('fleeca')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_FLEECABANK</h3></div>
+                        </div>
+                        <div class="holo-card p-2" onclick="openProject('weed')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1536859355448-76f92ebff33d?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_WEEDGROWING</h3></div>
+                        </div>
+                        <div class="holo-card p-2" onclick="openProject('airport')">
+                            <div class="card-image-wrapper"><img src="https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=500&q=80"></div>
+                            <div class="p-3"><h3 class="orbitron text-[10px] text-white">ZIN_AIRPORTJOB</h3></div>
+                        </div>
                     </div>
                 </div>
 
                 <div id="view-socials" class="view">
-                    <h2 class="orbitron text-3xl font-black text-emerald-500 mb-2 uppercase">Social_Uplink</h2>
-                    <p class="orbitron text-[10px] text-emerald-900 mb-10 tracking-[0.5em]">DIRECT_CONNECT_ESTABLISHED</p>
-                    
-                    <div class="grid md:grid-cols-2 gap-8 max-w-4xl">
-                        <a href="#" class="holo-card p-8 flex items-center gap-6 group hover:border-emerald-500/50">
-                            <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-3xl group-hover:bg-emerald-500 group-hover:text-black transition-all">
-                                <i class="fab fa-discord"></i>
-                            </div>
-                            <div>
-                                <h3 class="orbitron text-lg text-white">DISCORD</h3>
-                                <p class="text-emerald-500 font-bold tracking-widest text-sm">ImZinthyn</p>
-                            </div>
-                        </a>
-
+                    <h2 class="orbitron text-3xl font-black text-emerald-500 mb-10 uppercase">Social_Uplink</h2>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="holo-card p-8 flex items-center gap-6 group hover:border-emerald-500/50">
+                            <i class="fab fa-discord text-4xl text-emerald-500"></i>
+                            <div><h3 class="orbitron text-white">DISCORD</h3><p class="text-emerald-500 font-bold">ImZinthyn</p></div>
+                        </div>
                         <a href="https://github.com/Zinthyn" target="_blank" class="holo-card p-8 flex items-center gap-6 group hover:border-emerald-500/50">
-                            <div class="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-3xl group-hover:bg-emerald-500 group-hover:text-black transition-all">
-                                <i class="fab fa-github"></i>
-                            </div>
-                            <div>
-                                <h3 class="orbitron text-lg text-white">GITHUB</h3>
-                                <p class="text-emerald-500 font-bold tracking-widest text-sm italic">/Zinthyn</p>
-                            </div>
+                            <i class="fab fa-github text-4xl text-emerald-500"></i>
+                            <div><h3 class="orbitron text-white">GITHUB</h3><p class="text-emerald-500 font-bold">/Zinthyn</p></div>
                         </a>
                     </div>
                 </div>
@@ -169,6 +205,16 @@
     </div>
 
     <script>
+        const projects = {
+            shield: { title: "ZIN_SHIELD", tag: "SECURITY_PROTOCOL", img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=500&q=80", desc: "A heuristic anti-cheat system designed for high-population FiveM servers. Monitors injection attempts and abnormal entity movement in real-time." },
+            garage: { title: "ZIN_GARAGE", tag: "LOGISTICS_MODULE", img: "https://images.unsplash.com/photo-1493238792040-d710475a6d3b?auto=format&fit=crop&w=500&q=80", desc: "Advanced vehicle management system featuring state tracking, customizable interiors, and persistent damage databases." },
+            multi: { title: "ZIN_MULTICHARACTER", tag: "IDENTITY_KERNEL", img: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=500&q=80", desc: "Selection interface for swapping biometric identities. Features live 3D preview and metadata loading." },
+            oilrig: { title: "ZIN_OILRIG", tag: "INDUSTRIAL_JOB", img: "https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&w=500&q=80", desc: "High-risk offshore activity involving complex drilling tasks, pressure management, and reward processing." },
+            fleeca: { title: "ZIN_FLEECABANK", tag: "ECONOMY_HEIST", img: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=500&q=80", desc: "Heist system overhaul with custom thermal charges, door synchronization, and hacking minigames." },
+            weed: { title: "ZIN_WEEDGROWING", tag: "CONTRA_SYSTEM", img: "https://images.unsplash.com/photo-1536859355448-76f92ebff33d?auto=format&fit=crop&w=500&q=80", desc: "Botanical system with soil quality tracking and real-time growth even while offline." },
+            airport: { title: "ZIN_AIRPORTJOB", tag: "CIVILIAN_WORK", img: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=500&q=80", desc: "Logistics career managing luggage, fuel, and taxiing via a custom tablet interface." }
+        };
+
         function moveCursor(e) {
             const c = document.getElementById('cursor');
             c.style.left = e.clientX + 'px'; c.style.top = e.clientY + 'px';
@@ -184,7 +230,6 @@
         function tab(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
             document.getElementById(`view-${id}`).classList.add('active-view');
-            
             if(id === 'about') {
                 document.querySelectorAll('.skill-progress').forEach(p => {
                     const w = p.style.width; p.style.width = '0';
@@ -193,9 +238,20 @@
             }
         }
 
+        function openProject(key) {
+            const data = projects[key];
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-tag').innerText = data.tag;
+            document.getElementById('modal-img').src = data.img;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('project-modal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('project-modal').style.display = 'none'; }
+
         function startTyping() {
             const log = document.getElementById('kernel-log');
-            const lines = ["> STATUS_READY", "> UPLINK_ZINTHYN", "> MODULES_ACTIVE"];
+            const lines = ["> STATUS_READY", "> PROJECT_LABS_LOADED", "> UPLINK_ZINTHYN"];
             let i = 0; const int = setInterval(() => {
                 log.innerHTML += lines[i] + "<br>";
                 i++; if(i >= lines.length) clearInterval(int);
