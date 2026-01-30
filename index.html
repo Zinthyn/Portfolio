@@ -3,276 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN | SOVEREIGN ARCHITECT</title>
+    <title>ZINTHYN // SINGULARITY PROTOCOL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@800&family=Space+Mono:wght@400;700&family=Outfit:wght@300;900&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@800&family=Space+Mono:wght@400;700&family=Inter:wght@900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --accent: #ff0055; --bg: #020202; }
-        * { cursor: crosshair; scroll-behavior: smooth; box-sizing: border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; overflow: hidden; }
-        
-        /* 1. BIOS BOOT LOADER */
-        #loader {
-            position: fixed; inset: 0; background: #000; z-index: 10000;
-            padding: 50px; font-family: 'Space Mono'; color: var(--neon); font-size: 11px;
+        :root { --neon: #00f2ff; --warn: #ff0055; --bg: #000000; }
+        * { cursor: crosshair; scroll-behavior: smooth; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Mono', monospace; overflow: hidden; }
+
+        /* 1. LAYERED 3D DEPTH */
+        .parallax-wrapper {
+            perspective: 1200px;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
-        /* 2. DYNAMIC NEURAL BACKGROUND */
-        #neural-bg { position: fixed; inset: 0; z-index: -1; opacity: 0.3; }
+        /* 2. THE MATRIX FALLOUT CANVAS */
+        #matrix-bg { position: fixed; inset: 0; z-index: -2; opacity: 0.15; }
 
-        /* 3. OS HUD ELEMENTS */
-        .hud-border { border: 1px solid rgba(0, 242, 255, 0.2); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
-        .glitch-text { font-family: 'Syncopate'; letter-spacing: -2px; text-shadow: 2px 0 var(--accent), -2px 0 var(--neon); }
-
-        /* 4. THE CORE 3D BOX */
-        .scene { width: 200px; height: 200px; perspective: 600px; }
-        .cube {
-            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-            animation: rotateCube 20s infinite linear;
-        }
-        .cube-face {
-            position: absolute; width: 200px; height: 200px; border: 2px solid var(--neon);
-            background: rgba(0, 242, 255, 0.05); display: flex; align-items: center; justify-content: center;
-            font-family: 'Space Mono'; font-size: 10px; color: var(--neon);
-        }
-        .front  { transform: rotateY(  0deg) translateZ(100px); }
-        .back   { transform: rotateY(180deg) translateZ(100px); }
-        .right  { transform: rotateY( 90deg) translateZ(100px); }
-        .left   { transform: rotateY(-90deg) translateZ(100px); }
-        .top    { transform: rotateX( 90deg) translateZ(100px); }
-        .bottom { transform: rotateX(-90deg) translateZ(100px); }
-        @keyframes rotateCube { from { transform: rotateX(0) rotateY(0); } to { transform: rotateX(360deg) rotateY(360deg); } }
-
-        /* 5. PROJECT CARDS - HIGH DETAIL */
-        .module-card {
-            transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            border-left: 4px solid #111;
-        }
-        .module-card:hover {
-            border-left: 4px solid var(--neon);
-            background: rgba(255,255,255,0.03);
-            transform: translateX(10px);
+        /* 3. FLOATING HUD ELEMENTS */
+        .hud-glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
-        #main-content { display: none; height: 100vh; overflow-y: auto; scrollbar-width: none; }
+        .glitch-heavy {
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: -5px;
+            position: relative;
+        }
+
+        /* 4. ANIMATED SCANLINES */
+        .scanline {
+            width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 242, 255, 0.02) 50%);
+            background-size: 100% 4px;
+            position: fixed; pointer-events: none; z-index: 1000;
+        }
+
+        /* 5. 3D HEXAGON GRID (THE TECH TREE) */
+        .hex-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            transform: rotateX(20deg) rotateZ(-5deg);
+        }
+
+        .hex-node {
+            height: 150px;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid var(--neon);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: 0.4s;
+        }
+
+        .hex-node:hover {
+            background: var(--neon);
+            color: #000;
+            transform: scale(1.1) translateZ(50px);
+            box-shadow: 0 0 50px var(--neon);
+        }
+
+        #main-ui { display: none; }
+
+        /* LOADER BOX */
+        #loading-screen {
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div id="boot-log"></div>
+    <div class="scanline"></div>
+    <canvas id="matrix-bg"></canvas>
+
+    <div id="loading-screen">
+        <div class="text-center">
+            <div id="load-status" class="text-cyan-400 text-xs tracking-[1em] mb-4">INITIALIZING_ARCHITECT_v9.4</div>
+            <div class="w-64 h-[2px] bg-white/10 relative">
+                <div id="load-bar" class="absolute top-0 left-0 h-full bg-cyan-400 w-0 transition-all duration-300"></div>
+            </div>
+        </div>
     </div>
 
-    <div id="main-content">
-        <canvas id="neural-bg"></canvas>
-
-        <nav class="fixed top-0 w-full z-50 p-6 flex justify-between items-center hud-border border-t-0 border-x-0">
-            <div class="flex items-center gap-4">
-                <div class="glitch-text text-2xl font-black">ZINTHYN</div>
-                <div class="h-4 w-[1px] bg-white/20"></div>
-                <div class="text-[9px] font-mono text-cyan-400">UID: 001-ARCHITECT</div>
+    <div id="main-ui" class="parallax-wrapper">
+        
+        <div class="fixed left-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-4">
+            <div class="hud-glass p-4 rounded-sm border-l-4 border-l-cyan-400">
+                <div class="text-[8px] text-gray-500 uppercase">Framework_Priority</div>
+                <div class="text-xs font-bold text-cyan-400">TMC / QBOX / QB</div>
             </div>
-            <div class="flex gap-8 text-[10px] font-bold uppercase tracking-[0.3em]">
-                <a href="#projects" class="hover:text-cyan-400">Database</a>
-                <a href="#skills" class="hover:text-cyan-400">Kernel</a>
-                <a href="#terminal" class="px-4 py-1 border border-cyan-400 text-cyan-400">Override</a>
-            </div>
-        </nav>
-
-        <div class="fixed right-6 top-32 z-50 w-48 space-y-4 font-mono text-[9px] text-white/40">
-            <div class="hud-border p-4">
-                <div class="text-cyan-400 mb-2">RESOURCE MONITOR</div>
-                <div class="flex justify-between"><span>CPU_LOAD</span><span id="cpu-val">2.4%</span></div>
-                <div class="flex justify-between"><span>NET_PING</span><span>12ms</span></div>
-                <div class="flex justify-between"><span>RESMON</span><span class="text-green-500">0.01ms</span></div>
-            </div>
-            <div class="hud-border p-4">
-                <div class="text-cyan-400 mb-2">FRAMEWORKS</div>
-                <div class="flex items-center gap-2"><img src="https://i.imgur.com/uG9pY1K.png" class="h-3 opacity-50"> TMC_DRV</div>
-                <div class="flex items-center gap-2"><img src="https://i.imgur.com/6tVvI3m.png" class="h-3 opacity-50"> QB_CORE</div>
-                <div class="flex items-center gap-2"><img src="https://i.imgur.com/8qf8S7z.png" class="h-3 opacity-50"> QBOX_SYS</div>
+            <div class="hud-glass p-4 rounded-sm">
+                <div class="text-[8px] text-gray-500 uppercase">Resmon_Target</div>
+                <div class="text-xs font-bold text-green-500">0.01ms_STABLE</div>
             </div>
         </div>
 
-        <section class="min-h-screen flex flex-col justify-center px-10 md:px-32">
-            <div class="flex flex-col md:flex-row items-center gap-20">
-                <div class="flex-1">
-                    <h4 class="font-mono text-cyan-400 text-xs mb-4 tracking-[0.5em] uppercase">System Overlord // Lead Architect</h4>
-                    <h1 class="text-6xl md:text-[8rem] font-black leading-none mb-8">ENGINEERING<br><span class="text-transparent" style="-webkit-text-stroke: 1.5px white">PERFECTION</span></h1>
-                    <p class="max-w-xl text-gray-500 font-light leading-relaxed text-sm">
-                        I specialize in high-concurrency Lua backend systems and reactive NUI design. 
-                        My code is benchmarked at <span class="text-white">0.01ms resmon</span>, ensuring maximum server uptime and player capacity.
-                    </p>
+        <section class="h-screen flex flex-col justify-center items-center relative overflow-hidden">
+            <div class="absolute text-[25vw] font-black opacity-[0.02] select-none pointer-events-none glitch-heavy">ZINTHYN</div>
+            
+            <div class="relative z-10 text-center">
+                <h1 class="glitch-heavy text-[10vw] leading-none mb-4" id="hero-title">ZINTHYN</h1>
+                <div class="flex items-center justify-center gap-6">
+                    <span class="h-[1px] w-20 bg-cyan-400"></span>
+                    <span class="text-xs tracking-[1.5em] text-cyan-400 uppercase">Lead Systems Architect</span>
+                    <span class="h-[1px] w-20 bg-cyan-400"></span>
                 </div>
-                <div class="scene hidden lg:block">
-                    <div class="cube">
-                        <div class="cube-face front">LUA 5.4</div>
-                        <div class="cube-face back">REACT</div>
-                        <div class="cube-face right">C##</div>
-                        <div class="cube-face left">PYTHON</div>
-                        <div class="cube-face top">SQL</div>
-                        <div class="cube-face bottom">ZINTHYN</div>
+            </div>
+            
+            <div class="mt-20 flex gap-12 grayscale hover:grayscale-0 transition-all duration-1000">
+                <img src="https://i.imgur.com/uG9pY1K.png" class="h-8 animate-pulse" title="TMC">
+                <img src="https://i.imgur.com/6tVvI3m.png" class="h-8 animate-pulse" style="animation-delay: 0.5s">
+                <img src="https://i.imgur.com/8qf8S7z.png" class="h-8 animate-pulse" style="animation-delay: 1s">
+            </div>
+        </section>
+
+        <section class="py-40 px-10 max-w-7xl mx-auto">
+            <h2 class="font-sync text-3xl mb-20 text-cyan-400 italic">SYSTEM_DEPLOYS.exe</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 hud-glass p-12 rounded-3xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-8 text-6xl opacity-10 group-hover:opacity-100 group-hover:text-cyan-400 transition">01</div>
+                    <h3 class="text-5xl font-black mb-6 uppercase">Zin_Inventory_OS</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed max-w-md">Multi-threaded inventory system utilizing stateless metadata caching. Built to handle 50,000 unique item instances with zero database hitching.</p>
+                    <div class="mt-10 flex gap-4">
+                        <span class="px-4 py-1 border border-cyan-400/30 text-cyan-400 text-[10px]">LUA_OPTIMIZED</span>
+                        <span class="px-4 py-1 border border-cyan-400/30 text-cyan-400 text-[10px]">TMC_COMPATIBLE</span>
                     </div>
+                </div>
+
+                <div class="hud-glass p-8 rounded-3xl flex flex-col justify-between border-t-4 border-t-cyan-400">
+                    <div class="text-4xl text-cyan-400"><i class="fas fa-microchip"></i></div>
+                    <div>
+                        <h4 class="text-2xl font-black uppercase mb-2">Multichar_3D</h4>
+                        <p class="text-xs text-gray-500 font-mono">Cinematic character interpolation logic.</p>
+                    </div>
+                </div>
+
+                <div class="hud-glass p-8 rounded-3xl flex flex-col justify-between border-b-4 border-b-cyan-400">
+                    <div class="text-4xl text-cyan-400"><i class="fas fa-shield-alt"></i></div>
+                    <div>
+                        <h4 class="text-2xl font-black uppercase mb-2">Anti-Trigger</h4>
+                        <p class="text-xs text-gray-500 font-mono">Server-side heuristic encryption.</p>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 hud-glass p-12 rounded-3xl flex items-center justify-between">
+                    <div>
+                        <h3 class="text-3xl font-black uppercase">Stateless_Persistence</h3>
+                        <p class="text-xs text-gray-500 mt-2 font-mono">Redis-based data caching for ultra-low latency.</p>
+                    </div>
+                    <div class="text-6xl text-white/5 font-black uppercase">CORE</div>
                 </div>
             </div>
         </section>
 
-        <section id="projects" class="py-40 px-10 md:px-32">
-            <h2 class="font-sync text-4xl mb-20">DEPLOYED_MODULES</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                
-                <div class="module-card hud-border p-10 flex flex-col gap-6">
-                    <div class="flex justify-between items-start">
-                        <h3 class="text-3xl font-black uppercase">ZIN_Multicharacter</h3>
-                        <span class="font-mono text-[10px] bg-cyan-400/10 text-cyan-400 px-2">v4.2.0</span>
-                    </div>
-                    <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800" class="w-full h-48 object-cover grayscale opacity-50">
-                    <div class="grid grid-cols-3 gap-4 font-mono text-[9px] uppercase text-white/40">
-                        <div>Load: 0.00ms</div>
-                        <div>Framework: TMC</div>
-                        <div>Type: NUI/3D</div>
-                    </div>
-                    <p class="text-xs text-gray-400 leading-loose">A high-fidelity identity selection suite featuring real-time metadata syncing and dynamic camera interpolation for immersive player entry.</p>
+        <section class="py-40 px-10">
+            <h2 class="text-center font-sync text-3xl mb-32 tracking-[1em]">KERNEL_ACCESS</h2>
+            <div class="max-w-4xl mx-auto hex-grid">
+                <div class="hex-node">
+                    <span class="font-black text-xl">LUA</span>
+                    <span class="text-[8px] opacity-50 uppercase">Architecture</span>
                 </div>
-
-                <div class="module-card hud-border p-10 flex flex-col gap-6">
-                    <div class="flex justify-between items-start">
-                        <h3 class="text-3xl font-black uppercase">ZIN_Sovereign_AC</h3>
-                        <span class="font-mono text-[10px] bg-red-400/10 text-red-400 px-2">v1.0.1</span>
-                    </div>
-                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800" class="w-full h-48 object-cover grayscale opacity-50">
-                    <div class="grid grid-cols-3 gap-4 font-mono text-[9px] uppercase text-white/40">
-                        <div>Heuristic: Active</div>
-                        <div>Logic: Server</div>
-                        <div>State: Hardened</div>
-                    </div>
-                    <p class="text-xs text-gray-400 leading-loose">Proprietary anti-injection and resource-scrambling logic designed to neutralize 99.9% of NUI and Trigger exploits.</p>
+                <div class="hex-node">
+                    <span class="font-black text-xl">C##</span>
+                    <span class="text-[8px] opacity-50 uppercase">Performance</span>
                 </div>
-
-            </div>
-        </section>
-
-        <section class="py-40 px-6 flex flex-col items-center">
-            <div class="hud-border p-12 max-w-4xl w-full text-center">
-                <h2 class="font-sync text-3xl mb-4">OPTIMIZER_SIM</h2>
-                <p class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest mb-10">SQUASH BUGS BEFORE THE SERVER CRASHES</p>
-                <canvas id="game-canvas" width="600" height="300" class="border border-white/5 bg-black/40 mb-8 w-full"></canvas>
-                <div class="flex justify-center gap-10 font-mono text-xs">
-                    <div>BUGS_REMOVED: <span id="g-score" class="text-cyan-400">0</span></div>
-                    <div>SERVER_STABILITY: <span id="g-stable" class="text-green-500">100%</span></div>
+                <div class="hex-node">
+                    <span class="font-black text-xl">SQL</span>
+                    <span class="text-[8px] opacity-50 uppercase">Optimization</span>
                 </div>
-                <button id="start-game" class="mt-8 px-12 py-4 border border-white hover:bg-white hover:text-black font-sync text-[10px] transition">INITIATE_SCRUB</button>
-            </div>
-        </section>
-
-        <section id="terminal" class="py-40 px-10 md:px-32 max-w-5xl mx-auto">
-            <div class="hud-border overflow-hidden">
-                <div class="p-4 bg-white/5 font-mono text-[9px] flex justify-between">
-                    <span>SYSTEM_CONSOLE // root@zinthyn</span>
-                    <span class="animate-pulse">● LIVE</span>
+                <div class="hex-node">
+                    <span class="font-black text-xl">NUI</span>
+                    <span class="text-[8px] opacity-50 uppercase">React/Tailwind</span>
                 </div>
-                <div id="term-body" class="p-10 h-64 overflow-y-auto font-mono text-xs text-cyan-500/80 space-y-2">
-                    <div>> System Online. Ready for architectural input.</div>
+                <div class="hex-node">
+                    <span class="font-black text-xl">PYTHON</span>
+                    <span class="text-[8px] opacity-50 uppercase">Tooling</span>
                 </div>
-                <div class="p-6 bg-white/5 flex gap-4 border-t border-white/5">
-                    <span class="text-white">$</span>
-                    <input type="text" id="term-input" class="bg-transparent border-none outline-none text-white w-full uppercase" placeholder="Input Command..." autocomplete="off">
+                <div class="hex-node">
+                    <span class="font-black text-xl">JS</span>
+                    <span class="text-[8px] opacity-50 uppercase">Interface</span>
                 </div>
             </div>
         </section>
 
-        <footer class="py-20 text-center opacity-20 hover:opacity-100 transition duration-1000">
-            <div class="font-sync text-[10px] tracking-[2em]">ZINTHYN.SOVEREIGN</div>
+        <section class="py-40 px-10 text-center">
+            <div class="hud-glass p-16 max-w-5xl mx-auto rounded-[3rem] border-2 border-cyan-400/20">
+                <h2 class="font-sync text-4xl mb-4">OPTIMIZATION_PROTOCOL_v2</h2>
+                <div class="flex justify-center gap-10 mb-8 font-mono text-xs">
+                    <div>LOAD: <span id="game-resmon" class="text-cyan-400">0.01</span>ms</div>
+                    <div>THREATS_NEUTRALIZED: <span id="game-score" class="text-cyan-400">0</span></div>
+                </div>
+                <canvas id="game-canvas" width="800" height="400" class="mx-auto bg-black/80 rounded-2xl mb-8 w-full border border-white/5"></canvas>
+                <button id="start-btn" class="px-20 py-4 bg-cyan-400 text-black font-black uppercase tracking-[1em] hover:bg-white transition">Initialize_Scrub</button>
+            </div>
+        </section>
+
+        <section class="py-40 px-10 max-w-3xl mx-auto">
+            <div class="hud-glass rounded-xl overflow-hidden shadow-2xl">
+                <div class="bg-white/5 p-4 flex justify-between items-center text-[10px] font-bold">
+                    <span>ZINTHYN_CONSOLE // STABLE</span>
+                    <span class="text-cyan-400">ACCESS: LEVEL_5</span>
+                </div>
+                <div id="term-body" class="p-8 h-64 overflow-y-auto font-mono text-xs text-cyan-400/80 space-y-2">
+                    <div>> BOOT COMPLETE. ARCHITECT READY.</div>
+                </div>
+                <div class="p-4 bg-black/40 flex gap-4 items-center">
+                    <span class="text-white font-bold">$</span>
+                    <input type="text" id="term-input" class="bg-transparent outline-none w-full uppercase font-bold text-xs" placeholder="Input sequence..." autocomplete="off">
+                </div>
+            </div>
+        </section>
+
+        <footer class="py-20 text-center opacity-10">
+            <div class="font-sync text-[10px] tracking-[3em]">ZINTHYN_OVERLORD</div>
         </footer>
+
     </div>
 
     <script>
-        // 1. BOOT SEQUENCE
-        const logs = [
-            "KERNEL_INIT... OK", "LOADING_LUA_V5.4... OK", "CHECKING_FRAMEWORKS...", 
-            "TMC_DETECTED", "QBCORE_DETECTED", "QBOX_DETECTED", 
-            "OPTIMIZING_RESOURCES...", "0.01ms LATENCY ACHIEVED", "WELCOME_ARCHITECT."
-        ];
-        let i = 0;
+        // 1. MATRIX BACKGROUND
+        const mCanvas = document.getElementById('matrix-bg');
+        const mCtx = mCanvas.getContext('2d');
+        mCanvas.width = window.innerWidth;
+        mCanvas.height = window.innerHeight;
+        const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ$#@&";
+        const drops = Array(Math.floor(mCanvas.width/20)).fill(1);
+        function drawMatrix() {
+            mCtx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
+            mCtx.fillStyle = "#00f2ff";
+            mCtx.font = "15px monospace";
+            drops.forEach((y, i) => {
+                const text = chars[Math.floor(Math.random()*chars.length)];
+                mCtx.fillText(text, i*20, y*20);
+                if (y*20 > mCanvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(drawMatrix, 50);
+
+        // 2. LOADING SEQUENCE
+        const bootLogs = ["KERNEL_INIT", "DECRYPTING_ZIN_OS", "MOUNTING_DRIVES", "SYNCING_FRAMEWORKS", "STABILIZING_RESMON", "ARCHITECT_READY"];
+        let logI = 0;
+        const progBar = document.getElementById('load-bar');
+        const statusText = document.getElementById('load-status');
         function boot() {
-            if (i < logs.length) {
-                const p = document.createElement('div');
-                p.innerText = `> ${logs[i]}`;
-                document.getElementById('boot-log').appendChild(p);
-                i++;
-                setTimeout(boot, 400);
+            if (logI < bootLogs.length) {
+                statusText.innerText = `> ${bootLogs[logI]}`;
+                progBar.style.width = `${(logI+1)*16.6}%`;
+                logI++;
+                setTimeout(boot, 400 + Math.random()*400);
             } else {
                 setTimeout(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('main-content').style.display = 'block';
-                    initNeuralBg();
-                }, 1000);
+                    document.getElementById('loading-screen').style.display = 'none';
+                    document.getElementById('main-ui').style.display = 'block';
+                }, 800);
             }
         }
-        window.onload = boot;
+        boot();
 
-        // 2. NEURAL BACKGROUND
-        function initNeuralBg() {
-            const canvas = document.getElementById('neural-bg');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            let particles = [];
-            for(let j=0; j<50; j++) particles.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: Math.random()*2-1, vy: Math.random()*2-1});
-            
-            function animate() {
-                ctx.clearRect(0,0,canvas.width,canvas.height);
-                ctx.fillStyle = "#00f2ff";
-                particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy;
-                    if(p.x<0 || p.x>canvas.width) p.vx*=-1;
-                    if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI*2); ctx.fill();
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        }
-
-        // 3. MINIGAME
+        // 3. THE MINIGAME
         const gCanvas = document.getElementById('game-canvas');
         const gCtx = gCanvas.getContext('2d');
-        const sBtn = document.getElementById('start-game');
-        let gActive = false, score = 0, health = 100, bugs = [];
+        const sBtn = document.getElementById('start-btn');
+        let gActive = false, score = 0, resmon = 0.01, threats = [];
 
-        function spawnBug() {
+        function spawnThreat() {
             if(gActive) {
-                bugs.push({x: Math.random()*(gCanvas.width-50), y: -20, s: 2+Math.random()*3});
-                setTimeout(spawnBug, 1000);
+                threats.push({x: Math.random()*(gCanvas.width-50), y: -20, v: 2+Math.random()*4});
+                setTimeout(spawnThreat, 800);
             }
         }
 
-        function gLoop() {
+        function gameLoop() {
             if(!gActive) return;
             gCtx.clearRect(0,0,gCanvas.width,gCanvas.height);
-            bugs.forEach((b, idx) => {
-                b.y += b.s;
+            threats.forEach((t, i) => {
+                t.y += t.v;
                 gCtx.fillStyle = "#ff0055";
-                gCtx.fillRect(b.x, b.y, 40, 10);
-                if(b.y > gCanvas.height) { health -= 10; bugs.splice(idx,1); }
+                gCtx.fillRect(t.x, t.y, 40, 4);
+                gCtx.fillStyle = "rgba(255, 0, 85, 0.2)";
+                gCtx.fillRect(t.x, t.y-10, 40, 20);
+                if(t.y > gCanvas.height) { resmon += 0.08; threats.splice(i,1); }
             });
-            document.getElementById('g-score').innerText = score;
-            document.getElementById('g-stable').innerText = health + "%";
-            if(health <= 0) { alert("SERVER OVERLOAD!"); gActive = false; sBtn.style.display = "block"; }
-            else requestAnimationFrame(gLoop);
+            document.getElementById('game-score').innerText = score;
+            document.getElementById('game-resmon').innerText = resmon.toFixed(2);
+            if(resmon > 1.0) { alert("SERVER CRASHED. SCORE: " + score); gActive = false; sBtn.style.display="block"; }
+            else requestAnimationFrame(gameLoop);
         }
 
         gCanvas.onmousedown = (e) => {
             const r = gCanvas.getBoundingClientRect();
             const mx = e.clientX - r.left, my = e.clientY - r.top;
-            bugs.forEach((b, idx) => {
-                if(mx > b.x && mx < b.x+40 && my > b.y && my < b.y+10) { bugs.splice(idx,1); score++; }
+            threats.forEach((t, i) => {
+                if(mx > t.x && mx < t.x+40 && my > t.y-10 && my < t.y+10) { 
+                    threats.splice(i,1); score++; 
+                    if(resmon > 0.01) resmon -= 0.01;
+                }
             });
         };
 
-        sBtn.onclick = () => { gActive = true; score = 0; health = 100; bugs = []; sBtn.style.display="none"; spawnBug(); gLoop(); };
+        sBtn.onclick = () => { gActive=true; score=0; resmon=0.01; threats=[]; sBtn.style.display="none"; spawnThreat(); gameLoop(); };
 
         // 4. TERMINAL
         const tIn = document.getElementById('term-input');
@@ -280,20 +320,16 @@
         tIn.onkeydown = (e) => {
             if(e.key === 'Enter') {
                 const cmd = tIn.value.toLowerCase().trim();
-                const l = document.createElement('div'); l.innerHTML = `<span class="text-white">$ ${cmd}</span>`;
+                const l = document.createElement('div');
+                l.innerHTML = `<span class="text-white">$ ${cmd}</span>`;
                 tBody.appendChild(l);
-                let res = cmd === 'help' ? "status, database, fetch_meta, clear" : cmd === 'status' ? "ARCHITECT_CORE: ONLINE | LATENCY: 0.01ms" : "UNAUTHORIZED.";
+                let res = cmd === 'help' ? "status, fetch_metadata, frameworks, clear" : cmd === 'status' ? "ARCHITECT_CORE: ONLINE | STABILITY: 99.9%" : "COMMAND_NOT_FOUND";
                 if(cmd === 'clear') { tBody.innerHTML = ""; tIn.value = ""; return; }
                 const r = document.createElement('div'); r.innerText = `> ${res}`;
                 tBody.appendChild(r);
                 tIn.value = ""; tBody.scrollTop = tBody.scrollHeight;
             }
         };
-
-        // Live HUD Fake Update
-        setInterval(() => {
-            document.getElementById('cpu-val').innerText = (Math.random()*5 + 1).toFixed(1) + "%";
-        }, 3000);
     </script>
 </body>
 </html>
