@@ -3,209 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Systems & Simulation | Portfolio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <title>GHOST_SHELL // TERMINAL</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&display=swap');
+
         :root {
-            --bg-color: #050505;
-            --terminal-green: #00ff41;
-            --alert-amber: #ffb000;
-            --ui-gray: #333;
-            --glass: rgba(255, 255, 255, 0.05);
-            --font-main: 'Courier New', Courier, monospace;
+            --bg-color: #0a0a0a;
+            --phosphor-main: #ffb000; /* Amber for retro feel, change to #0f0 for green */
+            --phosphor-dim: #996a00;
+            --scanline: rgba(0, 0, 0, 0.5);
+            --glass: rgba(20, 20, 20, 0.9);
+            --border: #ffb000;
         }
 
         * {
+            box-sizing: border-box;
+            cursor: text; /* Always text cursor */
+        }
+
+        body, html {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
+            height: 100%;
+            width: 100%;
             background-color: var(--bg-color);
-            color: #fff;
-            font-family: var(--font-main);
-            overflow-x: hidden;
-            height: 100vh;
-        }
-
-        /* --- 3D CANVAS BACKGROUND --- */
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.6;
-        }
-
-        /* --- UI OVERLAY --- */
-        .ui-layer {
-            position: relative;
-            z-index: 10;
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* --- HEADER / HUD --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--ui-gray);
-            padding-bottom: 1rem;
-            margin-bottom: 4rem;
-        }
-
-        .status-light {
-            width: 10px;
-            height: 10px;
-            background-color: var(--terminal-green);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 10px;
-            box-shadow: 0 0 10px var(--terminal-green);
-            animation: pulse 2s infinite;
-        }
-
-        /* --- HERO SECTION --- */
-        .hero {
-            height: 60vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 4rem;
-            text-transform: uppercase;
-            letter-spacing: -2px;
-            margin-bottom: 1rem;
-            mix-blend-mode: exclusion;
-        }
-
-        .glitch-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: var(--terminal-green);
-            border-left: 2px solid var(--terminal-green);
-            padding-left: 1rem;
-            max-width: 600px;
-        }
-
-        /* --- PROJECTS GRID --- */
-        .section-title {
-            font-size: 2rem;
-            border-bottom: 1px solid var(--ui-gray);
-            margin-bottom: 2rem;
-            padding-top: 4rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: var(--glass);
-            border: 1px solid var(--ui-gray);
-            padding: 2rem;
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
-            cursor: pointer;
-            position: relative;
+            color: var(--phosphor-main);
+            font-family: 'Fira Code', monospace;
             overflow: hidden;
+            font-size: 14px;
         }
 
-        .card:hover {
-            border-color: var(--terminal-green);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.1);
-        }
-
-        .card h3 {
-            margin-bottom: 1rem;
-            color: var(--alert-amber);
-        }
-
-        .tags {
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .tag {
-            font-size: 0.8rem;
-            padding: 2px 8px;
-            border: 1px solid var(--ui-gray);
-            border-radius: 4px;
-        }
-
-        /* --- SKILLS DATA VISUALIZATION --- */
-        .stats-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .stat-bar {
-            margin-bottom: 1rem;
-        }
-
-        .bar-outer {
-            width: 100%;
-            height: 10px;
-            background: var(--ui-gray);
-            margin-top: 5px;
+        /* --- CRT SCREEN EFFECTS --- */
+        #screen {
             position: relative;
+            width: 100vw;
+            height: 100vh;
+            padding: 2rem;
+            overflow-y: auto;
+            text-shadow: 0 0 5px var(--phosphor-dim);
         }
 
-        .bar-inner {
-            height: 100%;
-            background: var(--terminal-green);
-            width: 0%; /* Animate this */
-            position: relative;
-        }
-
-        /* --- CONTACT --- */
-        .contact-btn {
-            background: transparent;
-            border: 1px solid var(--terminal-green);
-            color: var(--terminal-green);
-            padding: 1rem 2rem;
-            font-family: inherit;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin-top: 2rem;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .contact-btn:hover {
-            background: var(--terminal-green);
-            color: #000;
-        }
-
-        /* --- ANIMATIONS --- */
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        /* SCANLINE EFFECT */
-        body::after {
+        /* Scanlines */
+        #screen::before {
             content: " ";
             display: block;
             position: absolute;
@@ -218,201 +57,412 @@
             background-size: 100% 2px, 3px 100%;
             pointer-events: none;
         }
+
+        /* CRT Flicker */
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            5% { opacity: 0.95; }
+            10% { opacity: 0.9; }
+            15% { opacity: 0.95; }
+            20% { opacity: 0.99; }
+            50% { opacity: 0.95; }
+            100% { opacity: 0.98; }
+        }
+
+        #crt-overlay {
+            animation: flicker 0.15s infinite;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
+            z-index: 101;
+        }
+
+        /* --- LAYOUT --- */
+        .hidden { display: none; }
+        
+        #boot-sequence {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .terminal-line {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+            opacity: 0; /* Hidden by default for animation */
+        }
+
+        #main-interface {
+            display: none; /* Hidden until boot finishes */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #output-log {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--phosphor-dim);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .prompt {
+            color: var(--phosphor-main);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        #cmd-input {
+            background: transparent;
+            border: none;
+            color: var(--phosphor-main);
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            flex-grow: 1;
+            outline: none;
+            text-shadow: 0 0 5px var(--phosphor-dim);
+        }
+
+        /* --- UI ELEMENTS --- */
+        .response-block {
+            margin-bottom: 2rem;
+            border-left: 2px solid var(--phosphor-dim);
+            padding-left: 1rem;
+        }
+
+        .highlight {
+            color: #fff;
+            background: var(--phosphor-dim);
+            padding: 0 5px;
+        }
+
+        .clickable {
+            border-bottom: 1px dashed var(--phosphor-main);
+            cursor: pointer;
+        }
+        .clickable:hover {
+            background: var(--phosphor-main);
+            color: #000;
+        }
+
+        /* --- ASCII ART & GRIDS --- */
+        .ascii-art {
+            font-size: 10px;
+            line-height: 10px;
+            white-space: pre;
+            margin-bottom: 20px;
+            color: var(--phosphor-dim);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .grid-item {
+            border: 1px solid var(--phosphor-dim);
+            padding: 1rem;
+        }
+        
+        .grid-item h3 { margin-top: 0; border-bottom: 1px solid var(--phosphor-dim); padding-bottom: 5px;}
+
+        /* --- SCROLLBAR --- */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--phosphor-dim); border: 1px solid var(--phosphor-main); }
+
+        /* --- MOBILE --- */
+        @media (max-width: 600px) {
+            .ascii-art { font-size: 6px; line-height: 6px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="canvas-container"></div>
+    <div id="crt-overlay"></div>
 
-    <div class="ui-layer">
-        <header>
-            <div class="logo">
-                <span class="status-light"></span>
-                SYSTEM: ONLINE
-            </div>
-            <div class="coords">
-                LAT: 25.357 | LON: 55.403 (SHJ)
-            </div>
-        </header>
+    <div id="screen">
+        
+        <div id="boot-sequence">
+            <div class="terminal-line" id="line1">INITIALIZING KERNEL... OK</div>
+            <div class="terminal-line" id="line2">LOADING MEMORY MODULES... [32GB OK]</div>
+            <div class="terminal-line" id="line3">MOUNTING FILESYSTEM... /dev/sda1</div>
+            <div class="terminal-line" id="line4">LOADING USER PROFILE... "THE ARCHITECT"</div>
+            <div class="terminal-line" id="line5">CONNECTING TO SHARJAH_ATC_NET... SUCCESS</div>
+            <div class="terminal-line" id="line6">STARTING GUI INTERFACE...</div>
+        </div>
 
-        <section class="hero">
-            <div class="glitch-wrapper">
-                <h1 id="main-title">THE ARCHITECT</h1>
+        <div id="main-interface" class="hidden">
+            <div class="ascii-art">
+  _____  _____  _____  _____  _____  _      _____  _____ 
+ |  _  ||  _  ||  _  ||  _  ||  _  || |    |  _  ||  _  |
+ |   __|| |_| ||     ||  |  || |_| || |__  | |_| ||     |
+ |__|   |_____||__|__||_____||_____||____| |_____||__|__|
             </div>
-            <div class="subtitle">
-                <p id="typewriter-text"></p>
-            </div>
-        </section>
-
-        <section id="projects">
-            <h2 class="section-title">PROJECT_MANIFEST //</h2>
             
-            <div class="grid">
-                <div class="card">
-                    <h3>[01] THE LIVING CITY</h3>
-                    <p>High-fidelity character rigging and asset optimization for GTA V / FiveM. Utilizing blender and Sollumz for seamless integration.</p>
-                    <div class="tags">
-                        <span class="tag">Blender</span>
-                        <span class="tag">Codewalker</span>
-                        <span class="tag">.YDD Optimiz.</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>[02] SAFETY PROTOCOL SMS</h3>
-                    <p>Development of critical Safety Management Systems training modules. Bridging human factors with rigid compliance standards.</p>
-                    <div class="tags">
-                        <span class="tag">Risk Analysis</span>
-                        <span class="tag">Systems Logic</span>
-                        <span class="tag">Training Dev</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>[03] SILICON TUNING</h3>
-                    <p>Advanced performance tuning for AMD Ryzen architecture. Pushing hardware limits for optimal render and compute speeds.</p>
-                    <div class="tags">
-                        <span class="tag">Overclocking</span>
-                        <span class="tag">Hardware Logic</span>
-                        <span class="tag">Benchmarking</span>
-                    </div>
-                </div>
+            <div id="output-log">
+                <p>WELCOME TO SYSTEM V1.0.</p>
+                <p>CURRENT DATE: <span id="date-display"></span></p>
+                <p>STATUS: ONLINE</p>
+                <p>TYPE <span class="clickable" onclick="runCmd('help')">'help'</span> TO VIEW COMMANDS.</p>
+                <br>
             </div>
-        </section>
 
-        <section id="skills">
-            <h2 class="section-title">SYSTEM_CAPABILITIES //</h2>
-            <div class="stats-container">
-                <div>
-                    <h4>3D & VISUALS (Blender/Sollumz)</h4>
-                    <div class="bar-outer">
-                        <div class="bar-inner" style="width: 90%"></div>
-                    </div>
-                </div>
-                <div>
-                    <h4>SAFETY OPERATIONS (SMS/ATC)</h4>
-                    <div class="bar-outer">
-                        <div class="bar-inner" style="width: 95%"></div>
-                    </div>
-                </div>
-                <div>
-                    <h4>TECHNICAL MODDING</h4>
-                    <div class="bar-outer">
-                        <div class="bar-inner" style="width: 85%"></div>
-                    </div>
-                </div>
-                <div>
-                    <h4>WEB & ANIMATION</h4>
-                    <div class="bar-outer">
-                        <div class="bar-inner" style="width: 75%"></div>
-                    </div>
-                </div>
+            <div class="input-line">
+                <span class="prompt">guest@portfolio:~$</span>
+                <input type="text" id="cmd-input" autocomplete="off" autofocus>
             </div>
-        </section>
+        </div>
 
-        <section style="padding-bottom: 5rem;">
-            <h2 class="section-title">COMMS_UPLINK //</h2>
-            <p style="margin-bottom: 2rem; max-width: 500px;">
-                Available for complex system reviews, custom asset creation, and technical consultation. 
-            </p>
-            <a href="mailto:your-email@example.com" class="contact-btn">INITIATE TRANSMISSION</a>
-        </section>
     </div>
 
     <script>
-        // --- 1. THREE.JS BACKGROUND ANIMATION ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        // --- CONFIG & STATE ---
+        const bootDelay = 300;
+        const typeSpeed = 20;
+        const outputLog = document.getElementById('output-log');
+        const inputField = document.getElementById('cmd-input');
+        const bootLines = document.querySelectorAll('.terminal-line');
+        const mainInterface = document.getElementById('main-interface');
+        const bootScreen = document.getElementById('boot-sequence');
 
-        // Create a "Wireframe Terrain" representing your modding/mapping work
-        const geometry = new THREE.PlaneGeometry(100, 100, 40, 40);
-        const material = new THREE.MeshBasicMaterial({ 
-            color: 0x00ff41, 
-            wireframe: true, 
-            transparent: true, 
-            opacity: 0.2 
-        });
-        const plane = new THREE.Mesh(geometry, material);
-        scene.add(plane);
-
-        // Position the plane
-        plane.rotation.x = Math.PI / 2; // Flat
-        camera.position.z = 10;
-        camera.position.y = 5;
-        camera.rotation.x = -0.5;
-
-        // Animation Loop
-        let time = 0;
-        function animate() {
-            requestAnimationFrame(animate);
-            time += 0.002;
+        // --- DATA OBJECTS (EDIT YOUR INFO HERE) ---
+        const database = {
+            about: `
+<div class="response-block">
+    <h3>>> USER PROFILE: THE ARCHITECT</h3>
+    <p><strong>ROLE:</strong> Safety Systems Specialist & Technical Artist</p>
+    <p><strong>LOCATION:</strong> Sharjah, UAE (ATC Sector)</p>
+    <p><strong>BIO:</strong> Operating at the intersection of high-stakes aviation safety and creative game development. I manage Air Traffic Safety Management Systems (SMS) by day, and engineer high-fidelity virtual worlds by night.</p>
+    <br>
+    <p><em>"Precision is the only standard."</em></p>
+</div>`,
             
-            // Make the terrain move like you are flying over it
-            plane.position.z = (time * 100) % 2; 
-            
-            // Gentle rotation to feel "alive"
-            plane.rotation.z = Math.sin(time) * 0.05;
+            frameworks: `
+<div class="response-block">
+    <h3>>> INSTALLED MODULES</h3>
+    <div class="grid-container">
+        <div class="grid-item">
+            <strong>[VISUAL CORE]</strong><br>
+            > Blender 3D<br>
+            > Sollumz Plugin<br>
+            > Codewalker<br>
+            > Adobe Creative Suite
+        </div>
+        <div class="grid-item">
+            <strong>[SYSTEM LOGIC]</strong><br>
+            > Safety Management (SMS)<br>
+            > Risk Analysis<br>
+            > Incident Investigation<br>
+            > Compliance Auditing
+        </div>
+        <div class="grid-item">
+            <strong>[HARDWARE]</strong><br>
+            > AMD Ryzen Architecture<br>
+            > Overclocking / Undervolting<br>
+            > Thermal Optimization
+        </div>
+    </div>
+</div>`,
 
-            // Waving effect on vertices (Simulating data flow)
-            const positions = plane.geometry.attributes.position.array;
-            for(let i = 0; i < positions.length; i += 3) {
-                // simple vertex displacement based on sine wave
-                positions[i+2] = Math.sin(positions[i] + time * 5) * 0.5;
-            }
-            plane.geometry.attributes.position.needsUpdate = true;
+            projects: `
+<div class="response-block">
+    <h3>>> PROJECT MANIFEST</h3>
+    <div class="grid-container">
+        <div class="grid-item">
+            <h3>IVY CROWN MAFIA</h3>
+            <p><strong>TYPE:</strong> Virtual Community & Asset Dev</p>
+            <p>Full brand identity and custom in-game assets for a roleplay organization. Includes custom ped rigging and video production.</p>
+        </div>
+        <div class="grid-item">
+            <h3>SAFETY PROTOCOL A3</h3>
+            <p><strong>TYPE:</strong> Visual Communication</p>
+            <p>Designed critical safety posters for slip/fall prevention in high-traffic zones, translating incident data into visual warnings.</p>
+        </div>
+        <div class="grid-item">
+            <h3>RYZEN MASTER TUNING</h3>
+            <p><strong>TYPE:</strong> Hardware Optimization</p>
+            <p>Achieved top 5% benchmark scores via custom voltage curves and memory timing adjustments on Ryzen architecture.</p>
+        </div>
+    </div>
+</div>`,
 
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Handle Resize
-        window.addEventListener('resize', () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-        });
-
-
-        // --- 2. GSAP TEXT ANIMATION ---
-        // Typewriter effect logic
-        const text = "> SPECIALIST IN: SAFETY SYSTEMS // GAME MODDING // PERFORMANCE TUNING";
-        const typeContainer = document.getElementById("typewriter-text");
-        let i = 0;
-
-        function typeWriter() {
-            if (i < text.length) {
-                typeContainer.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(typeWriter, 50); // Speed of typing
-            }
-        }
-
-        // Trigger animations on load
-        window.onload = () => {
-            typeWriter();
-            
-            // Animate cards staggering in
-            gsap.from(".card", {
-                duration: 1,
-                y: 50,
-                opacity: 0,
-                stagger: 0.2,
-                ease: "power3.out",
-                delay: 1
-            });
-
-            // Animate Skill bars
-            gsap.to(".bar-inner", {
-                duration: 2,
-                width: (index, target) => target.style.width,
-                ease: "power2.out",
-                delay: 1.5
-            });
+            contact: `
+<div class="response-block">
+    <h3>>> COMMS UPLINK</h3>
+    <p>Frequency Open. Transmission Ready.</p>
+    <br>
+    <p>> EMAIL: <a href="mailto:your-email@example.com" style="color:white; text-decoration:none;">SEND_PACKET</a></p>
+    <p>> DISCORD: <span style="color:white;">User#0000</span></p>
+    <p>> LOCATION: Sharjah Airport Freezone</p>
+</div>`
         };
+
+        // --- AUDIO SYSTEM (Synthesized Beeps) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'key') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'enter') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'boot') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.5);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            }
+        }
+
+        // --- BOOT SEQUENCE ---
+        function runBootSequence() {
+            let delay = 0;
+            playSound('boot');
+            
+            bootLines.forEach((line, index) => {
+                setTimeout(() => {
+                    line.style.opacity = 1;
+                    playSound('key');
+                }, delay);
+                delay += bootDelay + (Math.random() * 500);
+            });
+
+            setTimeout(() => {
+                bootScreen.style.display = 'none';
+                mainInterface.style.display = 'flex';
+                mainInterface.classList.remove('hidden');
+                document.getElementById('date-display').innerText = new Date().toLocaleString();
+                inputField.focus();
+            }, delay + 500);
+        }
+
+        // --- TERMINAL LOGIC ---
+        
+        // Handle User Input
+        inputField.addEventListener('keydown', function(e) {
+            playSound('key'); // Typing sound
+            
+            if (e.key === 'Enter') {
+                playSound('enter');
+                const cmd = this.value.toLowerCase().trim();
+                processCommand(cmd);
+                this.value = ''; // Clear input
+            }
+        });
+
+        // Click anywhere to focus input
+        document.addEventListener('click', () => {
+            inputField.focus();
+        });
+
+        function addToLog(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            outputLog.appendChild(div);
+            // Scroll to bottom
+            outputLog.scrollTop = outputLog.scrollHeight;
+        }
+
+        function runCmd(cmd) {
+            inputField.value = cmd;
+            processCommand(cmd);
+            inputField.value = '';
+        }
+        
+        // Expose to window for onclick events
+        window.runCmd = runCmd;
+
+        function processCommand(cmd) {
+            // Print user command to log
+            addToLog(`<p style="color:#fff; margin-top:10px;">guest@portfolio:~$ ${cmd}</p>`);
+
+            switch(cmd) {
+                case 'help':
+                case '?':
+                    addToLog(`
+<div class="response-block">
+    <p>AVAILABLE COMMANDS:</p>
+    <p><span class="clickable" onclick="runCmd('about')">about</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display user profile and bio.</p>
+    <p><span class="clickable" onclick="runCmd('frameworks')">frameworks</span> - List technical skills and software.</p>
+    <p><span class="clickable" onclick="runCmd('projects')">projects</span>&nbsp;&nbsp;&nbsp;- Show project manifest.</p>
+    <p><span class="clickable" onclick="runCmd('contact')">contact</span>&nbsp;&nbsp;&nbsp;&nbsp;- Open communication channels.</p>
+    <p><span class="clickable" onclick="runCmd('clear')">clear</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Clear the terminal screen.</p>
+</div>`);
+                    break;
+
+                case 'about':
+                    addToLog(database.about);
+                    break;
+                
+                case 'frameworks':
+                    addToLog(database.frameworks);
+                    break;
+
+                case 'projects':
+                    addToLog(database.projects);
+                    break;
+
+                case 'contact':
+                    addToLog(database.contact);
+                    break;
+
+                case 'clear':
+                    outputLog.innerHTML = '';
+                    break;
+                
+                case 'sudo':
+                case 'admin':
+                    addToLog(`<p style="color:red;">> ACCESS DENIED. YOU ARE NOT AUTHORIZED.</p>`);
+                    break;
+
+                default:
+                    if (cmd !== '') {
+                        addToLog(`<p style="color:#ff5555;">> Command not found: '${cmd}'. Type 'help' for list.</p>`);
+                    }
+                    break;
+            }
+        }
+
+        // Start everything
+        window.onload = runBootSequence;
+
     </script>
 </body>
 </html>
