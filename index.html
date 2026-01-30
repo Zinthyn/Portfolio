@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZINTHYN // LEAD ARCHITECT</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700;800&family=Space+Mono:wght@400;700&family=Inter:wght@900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root { --neon: #00f2ff; --bg: #000000; --card: #080808; }
+        
+        * { cursor: crosshair; scroll-behavior: smooth; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Space Mono', monospace; overflow-x: hidden; }
+
+        .font-sync { font-family: 'Syncopate', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+
+        /* Bolder Background Grid */
+        .bg-grid {
+            background-size: 60px 60px;
+            background-image: linear-gradient(to right, rgba(0, 242, 255, 0.04) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 242, 255, 0.04) 1px, transparent 1px);
+            position: fixed; inset: 0; z-index: -1;
+        }
+
+        /* Bold Hero Text */
+        .hero-text {
+            font-size: clamp(4rem, 18vw, 16rem);
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Skill Tree RPG Style */
+        .tree-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 600px;
+            margin: 0 auto;
+        }
+
+        .node {
+            position: absolute;
+            background: var(--card);
+            border: 2px solid #222;
+            padding: 15px 25px;
+            border-radius: 0px;
+            font-weight: bold;
+            transition: 0.3s;
+            z-index: 2;
+        }
+
+        .node:hover {
+            border-color: var(--neon);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+            transform: translateY(-5px);
+            color: var(--neon);
+        }
+
+        .connector-line {
+            position: absolute;
+            background: rgba(0, 242, 255, 0.1);
+            z-index: 1;
+        }
+
+        /* Bold Project Cards */
+        .project-card {
+            background: var(--card);
+            border: 1px solid #111;
+            transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card:hover {
+            border-color: var(--neon);
+            background: #0c0c0c;
+        }
+
+        .project-card img {
+            filter: grayscale(1) brightness(0.5);
+            transition: 0.5s;
+        }
+
+        .project-card:hover img {
+            filter: grayscale(0) brightness(1);
+            transform: scale(1.05);
+        }
+
+        .btn-bold {
+            border: 2px solid #fff;
+            padding: 15px 40px;
+            text-transform: uppercase;
+            font-weight: 900;
+            transition: 0.3s;
+            font-size: 12px;
+        }
+
+        .btn-bold:hover {
+            background: var(--neon);
+            border-color: var(--neon);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+
+    <nav class="fixed top-0 w-full z-50 p-8 flex justify-between items-center mix-blend-difference">
+        <div class="font-sync text-2xl font-black italic">ZINTHYN.</div>
+        <div class="hidden md:flex gap-12 text-[10px] font-bold uppercase tracking-[0.5em]">
+            <a href="#work" class="hover:text-cyan-400">Inventory</a>
+            <a href="#tree" class="hover:text-cyan-400">Tech-Tree</a>
+            <a href="#terminal" class="hover:text-cyan-400 text-cyan-400">Console_Access</a>
+        </div>
+    </nav>
+
+    <section class="h-screen flex flex-col justify-center px-6 md:px-20">
+        <div class="flex gap-10 mb-10 items-center opacity-60">
+            <img src="https://i.imgur.com/uG9pY1K.png" class="h-6" title="TMC Compatible">
+            <img src="https://i.imgur.com/6tVvI3m.png" class="h-6" title="QBCore Compatible">
+            <img src="https://i.imgur.com/8qf8S7z.png" class="h-6" title="QBox Compatible">
+        </div>
+        <h1 class="hero-text font-inter font-black">
+            ZIN<br><span class="text-transparent" style="-webkit-text-stroke: 2px white;">THYN</span>
+        </h1>
+        <div class="mt-12 flex flex-col md:flex-row gap-10 items-start md:items-center">
+            <p class="max-w-md text-gray-500 text-sm font-bold uppercase tracking-widest leading-loose">
+                Architecting high-performance Lua ecosystems. Optimized for 0.01ms resmon at scale.
+            </p>
+            <a href="#work" class="btn-bold">View Archive</a>
+        </div>
+    </section>
+
+    <section id="work" class="py-32 px-6 max-w-7xl mx-auto">
+        <h2 class="font-sync text-5xl mb-24 uppercase italic text-cyan-400">Developed_Systems</h2>
+        
+        <div class="grid md:grid-cols-3 gap-10">
+            <div class="project-card group">
+                <div class="h-64 overflow-hidden bg-black">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover">
+                </div>
+                <div class="p-10">
+                    <span class="text-cyan-400 text-[10px] font-bold tracking-widest mb-4 block">01 / LUA / NUI</span>
+                    <h3 class="text-3xl font-black uppercase mb-4">ZIN_Multicharacter</h3>
+                    <p class="text-gray-500 text-xs leading-relaxed mb-6">Interactive 3D character hubs for high-end servers. Zero-lag metadata parsing.</p>
+                </div>
+            </div>
+
+            <div class="project-card group">
+                <div class="h-64 overflow-hidden bg-black">
+                    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover">
+                </div>
+                <div class="p-10">
+                    <span class="text-cyan-400 text-[10px] font-bold tracking-widest mb-4 block">02 / DATABASE / PERSISTENCE</span>
+                    <h3 class="text-3xl font-black uppercase mb-4">ZIN_Garage</h3>
+                    <p class="text-gray-500 text-xs leading-relaxed mb-6">Persistent asset management. Handles 1000+ vehicle states without SQL hitching.</p>
+                </div>
+            </div>
+
+            <div class="project-card group">
+                <div class="h-64 overflow-hidden bg-black">
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover">
+                </div>
+                <div class="p-10">
+                    <span class="text-cyan-400 text-[10px] font-bold tracking-widest mb-4 block">03 / WORLD_EVENT</span>
+                    <h3 class="text-3xl font-black uppercase mb-4">ZIN_OilRig</h3>
+                    <p class="text-gray-500 text-xs leading-relaxed mb-6">Large-scale synced events. Dynamic loot, NPC logic, and custom animations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tree" class="py-32 px-6">
+        <h2 class="font-sync text-4xl text-center mb-32 uppercase italic">Skill_Evolution</h2>
+        
+        <div class="tree-container">
+            <div class="node left-1/2 -translate-x-1/2 top-0 border-white">ARCHITECT</div>
+            
+            <div class="connector-line w-[2px] h-20 left-1/2 top-10"></div>
+            
+            <div class="node left-[20%] top-[120px]">LUA (FIVEM)</div>
+            <div class="node left-[50%] -translate-x-1/2 top-[120px]">HTML / CSS</div>
+            <div class="node right-[20%] top-[120px]">C# (.NET)</div>
+
+            <div class="node left-[10%] top-[250px]">PYTHON</div>
+            <div class="node left-[40%] top-[250px]">JAVASCRIPT (NUI)</div>
+            <div class="node right-[40%] top-[250px]">C## / C++</div>
+            <div class="node right-[10%] top-[250px]">MYSQL / REDIS</div>
+
+            <div class="node left-1/2 -translate-x-1/2 bottom-[50px] border-cyan-400 text-cyan-400 text-xl">FULL STACK MASTERY</div>
+        </div>
+    </section>
+
+    <section id="terminal" class="py-32 px-6 max-w-4xl mx-auto">
+        <div class="bg-black border-2 border-white/10 p-1">
+            <div class="bg-white/5 p-4 border-b border-white/10 flex justify-between">
+                <span class="text-[10px] font-bold uppercase">System_Console_v5.0</span>
+                <span class="text-[10px] animate-pulse">● CONNECTED</span>
+            </div>
+            <div id="term-body" class="p-8 h-80 overflow-y-auto font-mono text-xs text-cyan-500 space-y-2">
+                <div>> SYSTEM: ZINTHYN_CORE INITIALIZED.</div>
+                <div>> READY FOR COMMANDS. TYPE 'HELP'.</div>
+            </div>
+            <div class="p-6 flex gap-4 bg-white/5 border-t border-white/10">
+                <span class="font-bold">></span>
+                <input type="text" id="term-input" class="bg-transparent outline-none w-full uppercase font-bold text-white placeholder-gray-700" placeholder="ENTER COMMAND..." autocomplete="off">
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 border-t border-white/10 text-center">
+        <h3 class="font-sync text-sm mb-6 opacity-20">Zinthyn Systems // 2026</h3>
+        <div class="flex justify-center gap-10 font-bold text-[10px] tracking-[0.4em] text-gray-600">
+            <a href="#" class="hover:text-cyan-400 transition">DISCORD</a>
+            <a href="#" class="hover:text-cyan-400 transition">GITHUB</a>
+            <a href="#" class="hover:text-white transition">EMAIL</a>
+        </div>
+    </footer>
+
+    <script>
+        const input = document.getElementById('term-input');
+        const body = document.getElementById('term-body');
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = input.value.toLowerCase().trim();
+                const line = document.createElement('div');
+                line.innerHTML = `<span class="text-white">> ${cmd}</span>`;
+                body.appendChild(line);
+
+                let res = "";
+                if(cmd === 'help') res = "AVAILABLE: ABOUT, STATUS, CLEAR, CONTACT, PROJECTS";
+                else if(cmd === 'about') res = "ZINTHYN: LEAD FIVEM ARCHITECT. EXPERT IN OPTIMIZATION AND HIGH-LOAD SYSTEMS.";
+                else if(cmd === 'status') res = "RESMON: 0.01MS | UPTIME: 99.9% | SECURITY: LEVEL 5";
+                else if(cmd === 'projects') res = "ACTIVE: MULTICHARACTER, GARAGE, OILRIG, ANTICHEAT, WEED, HEISTS.";
+                else if(cmd === 'clear') { body.innerHTML = ""; input.value = ""; return; }
+                else if(cmd === 'contact') res = "DISCORD: ZINTHYN_OFFICIAL";
+                else res = "COMMAND NOT RECOGNIZED. ACCESS DENIED.";
+
+                const resLine = document.createElement('div');
+                resLine.innerHTML = `> ${res}`;
+                body.appendChild(resLine);
+                input.value = "";
+                body.scrollTop = body.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
