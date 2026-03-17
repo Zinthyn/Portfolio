@@ -1,357 +1,314 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZINTHYN // NEURAL_ARCHITECT_V24</title>
+    <title>Zinthyn | Technical Artist & Architect</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400;800&family=Plus+Jakarta+Sans:wght@300;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            500: '#00f0ff', // Cyan
+                            600: '#7000ff', // Deep Purple
+                            900: '#050511', // Midnight Background
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root { --neon: #00ffcc; --purple: #a855f7; --bg: #030303; }
-        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; scroll-behavior: smooth; cursor: none; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .orbitron { font-family: 'Orbitron', sans-serif; }
-
-        /* --- THE ATMOSPHERE --- */
-        .scanlines { position: fixed; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 204, 0.02) 50%); background-size: 100% 4px; z-index: 10001; pointer-events: none; }
-        .noise { position: fixed; inset: 0; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.05; z-index: 10000; pointer-events: none; }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, black 150%); z-index: 9999; pointer-events: none; }
-
-        /* --- CUSTOM CURSOR --- */
-        #cursor { width: 20px; height: 20px; border: 1px solid var(--neon); position: fixed; pointer-events: none; z-index: 99999; transition: transform 0.1s, background 0.3s; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
-        #cursor::after { content: ''; width: 2px; height: 2px; background: var(--neon); }
-        .cursor-hover { transform: translate(-50%, -50%) scale(2) rotate(45deg) !important; background: rgba(0, 255, 204, 0.2); }
-
-        /* --- HUD --- */
-        #hud-top { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 9998; font-size: 10px; background: rgba(0,0,0,0.9); padding: 12px 30px; border: 1px solid rgba(0,255,204,0.2); border-top: none; backdrop-filter: blur(20px); border-radius: 0 0 20px 20px; width: 800px; display: flex; justify-content: space-around; align-items: center; }
+        body { background-color: #050511; color: #e2e8f0; overflow-x: hidden; }
         
-        .bars { display: flex; gap: 2px; align-items: flex-end; height: 10px; }
-        .bar { width: 2px; background: var(--neon); animation: pulse 0.5s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { height: 4px; } 50% { height: 10px; } }
+        /* Ambient Animated Background */
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: #050511;
+        }
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6; animation: float 20s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 600px; height: 600px; background: rgba(112, 0, 255, 0.4); top: -200px; left: -100px; }
+        .orb-2 { width: 500px; height: 500px; background: rgba(0, 240, 255, 0.3); bottom: -100px; right: -100px; animation-delay: -5s; }
+        .orb-3 { width: 400px; height: 400px; background: rgba(255, 0, 128, 0.2); top: 40%; left: 40%; animation-duration: 25s; }
 
-        /* --- GLITCH EFFECT --- */
-        .glitch-text:hover { text-shadow: 2px 0 var(--neon), -2px 0 var(--purple); animation: glitch-anim 0.3s infinite; }
-        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(100px, 50px) scale(1.2); }
+        }
 
-        /* --- PROJECT CARDS --- */
-        .project-card { background: #010101; border: 1px solid rgba(255,255,255,0.05); transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1); position: relative; overflow: hidden; height: 350px; }
-        .project-card:hover { border-color: var(--neon); box-shadow: 0 0 30px rgba(0,255,204,0.1); }
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
         
-        #entry-lock { position: fixed; inset: 0; background: #000; z-index: 10005; display: flex; align-items: center; justify-content: center; }
-        
-        section { opacity: 0; transform: translateY(50px); transition: 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
-        section.revealed { opacity: 1; transform: translateY(0); }
+        .glass-card { transition: transform 0.4s ease, border-color 0.4s ease; }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(0, 240, 255, 0.4); }
 
-        .skill-tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 4px; font-size: 11px; transition: 0.3s; }
-        .skill-tag:hover { border-color: var(--neon); color: var(--neon); background: rgba(0,255,204,0.05); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050511; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f0ff; }
 
-        #game-container { position: fixed; bottom: 20px; right: 20px; width: 200px; height: 250px; background: rgba(0,0,0,0.8); border: 1px solid var(--neon); z-index: 999; border-radius: 10px; display: none; flex-direction: column; overflow: hidden; }
+        /* Project Image Hover */
+        .project-img-wrapper { overflow: hidden; border-radius: 0.5rem; }
+        .project-img { transition: transform 0.7s ease, filter 0.7s ease; filter: grayscale(40%); }
+        .glass-card:hover .project-img { transform: scale(1.05); filter: grayscale(0%); }
 
-        /* --- MODAL FIXES --- */
-        #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 100000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-body { border: 2px solid var(--neon); box-shadow: 0 0 50px rgba(0, 255, 204, 0.1); }
+        /* Text Gradients */
+        .text-gradient {
+            background: linear-gradient(to right, #00f0ff, #7000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
     </style>
 </head>
-<body>
+<body class="antialiased selection:bg-brand-500 selection:text-black">
 
-    <div id="cursor"></div>
-    <div class="scanlines"></div>
-    <div class="noise"></div>
-    <div class="vignette"></div>
-
-    <div id="entry-lock">
-        <div class="text-center">
-            <h2 class="orbitron text-white text-[10px] tracking-[0.8em] mb-8 animate-pulse">ESTABLISHING_NEURAL_LINK</h2>
-            <button onclick="unlockPortfolio()" class="px-16 py-5 border border-neon text-neon orbitron text-xs tracking-widest hover:bg-neon hover:text-black transition-all duration-700">
-                SYNC_INTERFACE
-            </button>
-        </div>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
 
-    <div id="music-player" class="absolute pointer-events-none opacity-0">
-        <div id="player"></div>
-    </div>
+    <nav class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 glass rounded-full px-8 py-4 flex items-center gap-8 text-sm font-medium">
+        <a href="#home" class="hover:text-brand-500 transition-colors">Home</a>
+        <a href="#about" class="hover:text-brand-500 transition-colors">About</a>
+        <a href="#experience" class="hover:text-brand-500 transition-colors">Experience</a>
+        <a href="#projects" class="hover:text-brand-500 transition-colors">Projects</a>
+    </nav>
 
-    <div id="hud-top" class="mono text-white/50 uppercase tracking-widest">
-        <div class="flex items-center gap-3">
-            <span class="text-neon">ZIN_OS</span>
-            <span class="opacity-20">|</span>
-            <span>FPS: <span class="text-neon" id="fps">60</span></span>
-        </div>
-        <div class="flex items-center gap-4 border-x border-white/10 px-8">
-            <div class="bars">
-                <div class="bar" style="animation-delay: 0.1s"></div>
-                <div class="bar" style="animation-delay: 0.3s"></div>
-                <div class="bar" style="animation-delay: 0.2s"></div>
-                <div class="bar" style="animation-delay: 0.4s"></div>
+    <section id="home" class="min-h-screen flex flex-col justify-center items-center text-center px-6 relative pt-20">
+        <div class="gsap-hero">
+            <div class="inline-block glass rounded-full px-4 py-1.5 mb-6 text-xs tracking-widest uppercase text-brand-500 font-semibold shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                System Architect & 3D Artist
             </div>
-            <input type="range" min="0" max="100" value="40" oninput="setVolume(this.value)" class="w-24 h-1 bg-white/10 appearance-none cursor-pointer accent-neon">
+            <h1 class="text-6xl md:text-8xl font-display font-bold mb-6 leading-tight tracking-tight">
+                Crafting High-Tier <br>
+                <span class="text-gradient">Digital Ecosystems.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+                I am Zinthyn. Bridging the gap between beautiful 3D art and hyper-optimized technical scripting for FiveM, Alt:V, and RedM.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#projects" class="bg-white text-black px-8 py-4 rounded-full font-semibold hover:bg-gray-200 transition-colors">
+                    View My Work
+                </a>
+                <a href="https://www.patreon.com/c/zinthyn/shop" target="_blank" class="glass px-8 py-4 rounded-full font-semibold hover:border-brand-500 transition-colors flex items-center gap-2">
+                    <i class="fa-brands fa-patreon text-brand-500"></i> Graphics Presets
+                </a>
+            </div>
         </div>
-        <div class="flex gap-6">
-            <button onclick="toggleGame()" class="hover:text-neon transition-all">[ MINIGAME ]</button>
-            <span id="clock" class="text-neon/60">00:00:00</span>
-        </div>
-    </div>
+    </section>
 
-    <section class="min-h-screen flex items-center px-10 md:px-32 revealed">
-        <div class="w-full">
-            <p class="mono text-neon text-xs tracking-[1em] mb-4 opacity-50">WELCOME_USER_TOBII</p>
-            <h1 class="text-9xl md:text-[14rem] font-black orbitron italic mb-10 tracking-tighter leading-none glitch-text">ZINTHYN</h1>
-            <div class="flex flex-col md:flex-row gap-10">
-                <div class="bg-neon text-black px-10 py-5 font-black orbitron text-xs">SYSTEM_ARCHITECT</div>
-                <div class="flex flex-wrap gap-2 max-w-xl">
-                    <span class="skill-tag">LUA</span>
-                    <span class="skill-tag">C++</span>
-                    <span class="skill-tag">PYTHON</span>
-                    <span class="skill-tag">BLENDER</span>
-                    <span class="skill-tag">3DS MAX</span>
+    <section id="about" class="py-32 px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="gsap-fade-up">
+                <h2 class="text-4xl font-display font-bold mb-6">Redefining <span class="text-brand-500">Immersion.</span></h2>
+                <p class="text-slate-400 leading-relaxed mb-6 text-lg">
+                    Based in Serbia, I operate as a multi-disciplinary developer with years of immersion in top-tier roleplay ecosystems. My philosophy is simple: achieve total visual and functional synergy without ever compromising on performance.
+                </p>
+                <div class="flex flex-wrap gap-3 mt-8">
+                    <span class="glass px-4 py-2 rounded-lg text-sm font-semibold text-brand-500">LUA</span>
+                    <span class="glass px-4 py-2 rounded-lg text-sm font-semibold text-brand-500">C++</span>
+                    <span class="glass px-4 py-2 rounded-lg text-sm font-semibold text-brand-500">PYTHON</span>
+                    <span class="glass px-4 py-2 rounded-lg text-sm font-semibold text-brand-500">BLENDER</span>
+                    <span class="glass px-4 py-2 rounded-lg text-sm font-semibold text-brand-500">3DS MAX</span>
+                </div>
+            </div>
+            <div class="relative gsap-fade-up">
+                <div class="glass p-2 rounded-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <img src="https://r2.fivemanage.com/image/USK05K8RPzzm.png" alt="Zinthyn Work" class="rounded-xl w-full object-cover">
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-40 px-10 md:px-32">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <a href="https://www.patreon.com/c/zinthyn/shop" target="_blank" class="relative group block overflow-hidden border border-neon/20">
-                <img src="https://r2.fivemanage.com/image/USK05K8RPzzm.png" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700">
-                <div class="absolute bottom-10 left-10">
-                    <h3 class="orbitron text-4xl font-black italic">GRAPHICS_<span class="text-neon">PRESETS</span></h3>
-                    <p class="mono text-xs mt-2 text-white/60">ACCESS PREMIUM SHADERS ON PATREON</p>
+    <section id="experience" class="py-32 px-6 max-w-7xl mx-auto relative">
+        <div class="text-center mb-20 gsap-fade-up">
+            <h2 class="text-4xl font-display font-bold">Deployment <span class="text-gradient">History</span></h2>
+            <p class="text-slate-400 mt-4">Where my code and assets live.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass glass-card p-8 rounded-2xl gsap-fade-up">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-2xl font-display font-bold text-white">NoPixel</h3>
+                        <p class="text-brand-500 text-sm mt-1">Backend Services / 3D Modeller</p>
+                    </div>
+                    <span class="bg-white/10 px-3 py-1 rounded-full text-xs text-slate-300">Contract</span>
                 </div>
-            </a>
-            <div>
-                <h2 class="orbitron text-7xl font-black italic mb-10 text-white glitch-text">ABOUT_<span class="text-neon">ME</span></h2>
-                <p class="text-xl text-white/40 mono leading-loose">
-                    Hello, I am <span class="text-white">Zinthyn (Tobii)</span>. Based in Serbia, I operate as a multi-disciplinary developer with over 2 years of immersion in high-tier ecosystems & worlds in FiveM, Alt/V & RedM.
-                    <br><br>
-                    I specialize in bridging the gap between <span class="text-purple">3D Art (Blender/3ds Max)</span> and <span class="text-neon">Technical Scripting</span>. My goal is total visual and functional synergy while keeping all performance to a maximum.
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Integrating high-fidelity assets and managing core architectural service layers for one of the most demanding servers globally.
+                </p>
+            </div>
+
+            <div class="glass glass-card p-8 rounded-2xl border border-brand-500/30 relative overflow-hidden gsap-fade-up">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 blur-3xl rounded-full"></div>
+                <div class="flex justify-between items-start mb-6 relative z-10">
+                    <div>
+                        <h3 class="text-2xl font-display font-bold text-white">Liquid RP</h3>
+                        <p class="text-brand-500 text-sm mt-1">Lead Developer</p>
+                    </div>
+                    <span class="bg-brand-500/20 text-brand-500 px-3 py-1 rounded-full text-xs font-bold shadow-[0_0_10px_rgba(0,240,255,0.2)]">Active</span>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed relative z-10">
+                    Full-stack development leadership. Overseeing script synergy and proprietary 3D modeling pipelines from the ground up.
+                </p>
+            </div>
+
+            <div class="glass glass-card p-8 rounded-2xl gsap-fade-up">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-2xl font-display font-bold text-white">Happy Days</h3>
+                        <p class="text-brand-500 text-sm mt-1">Root Optimization / Detailer</p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Refining base logic to drastically reduce latency. Detailed scripting for immersion-heavy features and interactions.
+                </p>
+            </div>
+
+            <div class="glass glass-card p-8 rounded-2xl gsap-fade-up">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-2xl font-display font-bold text-white">British Life RP</h3>
+                        <p class="text-brand-500 text-sm mt-1">Backend Optimizations</p>
+                    </div>
+                    <span class="bg-white/5 px-3 py-1 rounded-full text-xs text-slate-500">Legacy</span>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Managed backend stability and executed deep performance audits for large-scale player synchronization.
                 </p>
             </div>
         </div>
     </section>
 
-    <section class="py-40 px-10 md:px-32 bg-white/[0.02] border-y border-white/5">
-        <h2 class="orbitron text-6xl font-black italic mb-20 tracking-tighter uppercase glitch-text"><span class="text-neon">Deployment</span>_History</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter uppercase">NoPixel</h3>
-                    <span class="mono text-[10px] text-neon/50">SYSTEM_CONTRACT</span>
-                </div>
-                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Backend Services / 3D Modeller</span></p>
-                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
-                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Integrating high-fidelity assets and managing core architectural service layers.</p>
-            </div>
-
-            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group border-l-neon/40 border-l-2">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter text-neon uppercase">Liquid RP</h3>
-                    <span class="mono text-[10px] text-neon">ACTIVE_LEAD</span>
-                </div>
-                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Lead Developer (Scripting & 3D)</span></p>
-                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
-                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Full-stack development leadership. Overseeing script synergy and proprietary 3D modeling pipelines.</p>
-            </div>
-
-            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter uppercase">Happy Days</h3>
-                    <span class="mono text-[10px] text-purple/50">ROOT_OPTIMIZATION</span>
-                </div>
-                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Backend Root Optimization / Script Detailer</span></p>
-                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
-                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Refining base logic to reduce latency. Detailed scripting for immersion-heavy features.</p>
-            </div>
-
-            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter uppercase">British Life RP</h3>
-                    <span class="mono text-[10px] text-white/20">LEGACY_MODULE</span>
-                </div>
-                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Developer / Backend Optimisations</span></p>
-                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
-                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Managed backend stability and performance audits for large-scale player synchronization.</p>
-            </div>
+    <section id="projects" class="py-32 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-20 gsap-fade-up">
+            <h2 class="text-4xl font-display font-bold">Featured <span class="text-gradient">Architectures</span></h2>
+            <p class="text-slate-400 mt-4">A selection of my finest scripts and systems.</p>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="project-grid">
+            </div>
     </section>
 
-    <section id="vault" class="py-40 px-10 md:px-32">
-        <h2 class="orbitron text-7xl font-black italic tracking-tighter mb-20 border-b border-white/5 pb-10 uppercase glitch-text">Script_Archive</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="project-grid-anchor"></div>
-    </section>
-
-    <section class="py-40 px-10 md:px-32 bg-white/[0.01]">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-20">
-            <div class="lg:col-span-2">
-                <h2 class="orbitron text-5xl font-black italic mb-12 glitch-text">FUTURE_<span class="text-neon">ROADMAP</span></h2>
-                <div class="space-y-12 border-l border-white/5 pl-8">
-                    <div class="relative"><div class="absolute -left-[41px] top-2 w-5 h-5 bg-neon shadow-[0_0_15px_#00ffcc]"></div>
-                        <h4 class="orbitron text-white text-xl">2026_Q1: NEURAL_LOGIC_INTEGRATION</h4>
-                        <p class="mono text-sm text-white/40 mt-3">Developing AI-driven NPC interaction modules for enhanced server immersion.</p>
+    <footer class="border-t border-white/10 mt-20 relative overflow-hidden">
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-brand-600/20 blur-[120px] rounded-t-full pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-6 py-20 text-center relative z-10">
+            <h2 class="text-3xl font-display font-bold mb-8">Ready to initiate a new protocol?</h2>
+            <div class="flex justify-center gap-8 mb-12">
+                <a href="#" class="text-slate-400 hover:text-white transition-colors flex flex-col items-center gap-2 group">
+                    <div class="w-12 h-12 glass rounded-full flex items-center justify-center group-hover:bg-brand-500/20 transition-all">
+                        <i class="fa-brands fa-discord text-xl"></i>
                     </div>
-                    <div class="relative"><div class="absolute -left-[41px] top-2 w-5 h-5 bg-white/10"></div>
-                        <h4 class="orbitron text-white/50 text-xl tracking-tighter">2026_Q2: REDM_EXPANSION_PACK</h4>
-                        <p class="mono text-sm text-white/20 mt-3">Bridging custom 3D architecture into the RedM ecosystem with optimized asset streaming.</p>
+                    <span class="text-sm">@imzinthyn</span>
+                </a>
+                <a href="mailto:zinthyn@gmail.com" class="text-slate-400 hover:text-white transition-colors flex flex-col items-center gap-2 group">
+                    <div class="w-12 h-12 glass rounded-full flex items-center justify-center group-hover:bg-brand-500/20 transition-all">
+                        <i class="fa-solid fa-envelope text-xl"></i>
                     </div>
-                </div>
+                    <span class="text-sm">Email Me</span>
+                </a>
             </div>
-
-            <div class="bg-black border border-neon/30 p-10 relative overflow-hidden h-fit shadow-[0_0_30px_rgba(0,255,204,0.05)]">
-                <div class="absolute top-0 right-0 p-4 mono text-[8px] text-neon/20">UPLINK_STATUS: READY</div>
-                <h3 class="orbitron text-2xl font-bold mb-10 tracking-tighter italic">SECURE_<span class="text-neon">CONTACT</span></h3>
-                <div class="space-y-8 mono text-xs">
-                    <div class="group cursor-pointer">
-                        <p class="text-white/20 mb-2">DISCORD_COMMUNICATIONS</p>
-                        <p class="text-white text-lg group-hover:text-neon transition-colors">@imzinthyn</p>
-                    </div>
-                    <div class="group cursor-pointer">
-                        <p class="text-white/20 mb-2">ENCRYPTED_MAIL</p>
-                        <p class="text-white text-lg group-hover:text-neon transition-colors">zinthyn@gmail.com</p>
-                    </div>
-                    <div class="pt-10 border-t border-white/5">
-                        <p class="text-[9px] text-neon animate-pulse mb-4 italic">// SYSTEM_AWAITING_INPUT</p>
-                        <div class="w-full bg-white/5 h-[2px]"><div class="bg-neon h-full w-[65%]"></div></div>
-                    </div>
-                </div>
-            </div>
+            <p class="text-slate-600 text-sm">© 2026 Zinthyn. All systems operational.</p>
         </div>
-    </section>
-
-    <div id="modal-overlay" onclick="closeModal()">
-        <div class="modal-body bg-[#050505] p-0 w-[95%] max-w-6xl flex flex-col md:flex-row gap-0 overflow-hidden" onclick="event.stopPropagation()">
-            <div id="modal-image" class="w-full md:w-1/2 h-[300px] md:h-[600px] bg-cover bg-center border-b md:border-b-0 md:border-r border-neon/30"></div>
-            <div class="w-full md:w-1/2 p-12 flex flex-col justify-center bg-black">
-                <div class="mono text-[10px] text-neon mb-4 tracking-[0.5em]">// PROJECT_INTEL_LOADED</div>
-                <h2 id="modal-title" class="orbitron text-6xl font-black italic text-white mb-6 uppercase tracking-tighter"></h2>
-                <p id="modal-desc" class="text-lg text-white/50 mono leading-relaxed mb-10 border-l-2 border-neon/20 pl-6"></p>
-                <div id="modal-stats" class="grid grid-cols-2 gap-8 mono text-[11px] text-white/30 border-t border-white/10 pt-8 mb-10"></div>
-                <button class="px-8 py-4 border border-neon text-neon orbitron text-[10px] font-bold self-start hover:bg-neon hover:text-black transition-all" onclick="closeModal()">[ DISCONNECT_SESSION ]</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="game-container">
-        <div class="p-2 text-[9px] mono text-neon flex justify-between bg-white/5">
-            <span>NEURAL_DEFENDER</span>
-            <button onclick="toggleGame()">[X]</button>
-        </div>
-        <canvas id="gameCanvas" width="200" height="200"></canvas>
-    </div>
-
-    <footer class="py-10 px-10 md:px-32 border-t border-white/5 text-center md:text-left">
-        <p class="mono text-[10px] text-white/20 uppercase tracking-[0.8em]">© 2026 ZINTHYN_ARCHITECTS // ALL_LOGS_RETAINED</p>
     </footer>
 
     <script>
-        // Cursor Logic
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-        
-        function cursorHover(isHovering) {
-            if(isHovering) cursor.classList.add('cursor-hover');
-            else cursor.classList.remove('cursor-hover');
-        }
-
-        // Clock
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + 
-                now.getMinutes().toString().padStart(2, '0') + ":" + 
-                now.getSeconds().toString().padStart(2, '0');
-        }
-        setInterval(updateClock, 1000);
-
-        // YouTube API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        var player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '0', width: '0', videoId: 'kAlIi0iN0Ek',
-                playerVars: { 'autoplay': 1, 'loop': 1, 'playlist': 'kAlIi0iN0Ek', 'controls': 0 },
-                events: { 'onReady': (e) => e.target.setVolume(40) }
-            });
-        }
-        function unlockPortfolio() {
-            if(player) player.playVideo();
-            gsap.to("#entry-lock", { opacity: 0, duration: 1, onComplete: () => document.getElementById('entry-lock').style.display = 'none' });
-        }
-        function setVolume(val) { if(player) player.setVolume(val); }
-
-        // Projects
+        // Project Data
         const projects = [
-            { id: 'ZIN_Multicharacter', title: 'Multicharacter', img: 'https://r2.fivemanage.com/image/vl8SWC9V0t20.png', desc: 'Cinematic character selection with 3D camera lerping and custom transition states.', stats: ['LUA: 90%', 'NUI: Vue'] },
-            { id: 'ZIN_AC', title: 'Anti-Cheat', img: 'https://r2.fivemanage.com/image/woZ2j0QrQkQB.png', desc: 'Heuristic security for event-based exploits and memory injection detection.', stats: ['LEVEL: Kernel', 'DB: MariaDB'] },
-            { id: 'ZIN_Hud', title: 'Neural Hud', img: 'https://r2.fivemanage.com/image/2pp2Zy3njUBG.png', desc: 'Minimalist performance HUD with vector assets and SVG animation.', stats: ['FPS: 144+', 'MS: 0.00ms'] },
-            { id: 'ZIN_AirportJob', title: 'Airport Job', img: 'https://r2.fivemanage.com/image/PvrWfhddFE3b.png', desc: 'Full pilot career and cargo system with dynamic world objects.', stats: ['TASKS: 50+', 'TYPE: Jobs'] },
-            { id: 'ZIN_FleecaRobbery', title: 'Fleeca Heist', img: 'https://r2.fivemanage.com/image/47C7Dq0f4XE7.png', desc: 'Sync-heavy heist with custom mini-games and thermal breaching logic.', stats: ['LUA: 100%', 'MINIGAMES: 3'] },
-            { id: 'ZIN_OilRig', title: 'Oil Rig Heist', img: 'https://r2.fivemanage.com/image/iYXxMxaHC86L.png', desc: 'End-game maritime robbery experience with customized MLO and routing.', stats: ['NPC: Custom', 'LOOT: Dynamic'] },
-            { id: 'ZIN_Phone', title: 'Logic Phone', img: 'https://r2.fivemanage.com/image/mLJoXKdRgZ8L.png', desc: 'Fully responsive smartphone simulation with real-time app notifications.', stats: ['APPS: 12', 'SYNC: Real-time'] },
-            { id: 'ZIN_Inventory', title: 'Grid Inventory', img: 'https://r2.fivemanage.com/image/47C7Dq0f4XE7.png', desc: 'Metadata-driven weight inventory featuring item attachments and crafting.', stats: ['SQL: Optimized', 'UI: React'] }
+            { title: 'Multicharacter', img: 'https://r2.fivemanage.com/image/vl8SWC9V0t20.png', desc: 'Cinematic character selection with 3D camera lerping.', tag: 'LUA / Vue', span: 'lg:col-span-2' },
+            { title: 'Anti-Cheat Engine', img: 'https://r2.fivemanage.com/image/woZ2j0QrQkQB.png', desc: 'Heuristic security for event-based exploits.', tag: 'Kernel Level', span: 'col-span-1' },
+            { title: 'Neural Hud', img: 'https://r2.fivemanage.com/image/2pp2Zy3njUBG.png', desc: 'Minimalist performance HUD with SVG animation.', tag: '0.00ms', span: 'col-span-1' },
+            { title: 'Airport Career', img: 'https://r2.fivemanage.com/image/PvrWfhddFE3b.png', desc: 'Full pilot career and cargo system.', tag: 'Jobs System', span: 'col-span-1' },
+            { title: 'Fleeca Heist', img: 'https://r2.fivemanage.com/image/47C7Dq0f4XE7.png', desc: 'Sync-heavy heist with custom thermal breaching.', tag: 'Minigames', span: 'col-span-1' },
+            { title: 'Oil Rig Incursion', img: 'https://r2.fivemanage.com/image/iYXxMxaHC86L.png', desc: 'End-game maritime robbery experience.', tag: 'Custom MLO', span: 'lg:col-span-2' },
+            { title: 'Grid Inventory', img: 'https://r2.fivemanage.com/image/47C7Dq0f4XE7.png', desc: 'Metadata-driven weight inventory featuring item attachments and crafting.', tag: 'React / SQL', span: 'lg:col-span-3' }
         ];
 
-        const grid = document.getElementById('project-grid-anchor');
+        // Render Projects
+        const grid = document.getElementById('project-grid');
         projects.forEach(p => {
             grid.innerHTML += `
-                <div class="project-card cursor-pointer group" onclick="openProject('${p.id}')" onmouseenter="cursorHover(true)" onmouseleave="cursorHover(false)">
-                    <div class="project-img absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('${p.img}')"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
-                    <div class="absolute bottom-8 left-8 z-10">
-                        <p class="mono text-neon text-[9px] mb-2 tracking-widest opacity-0 group-hover:opacity-100 transition-all">SYSTEM_DATA_LOADED</p>
-                        <h4 class="orbitron text-2xl font-bold italic">${p.title}</h4>
+                <div class="glass glass-card rounded-2xl p-2 ${p.span} group cursor-pointer flex flex-col">
+                    <div class="project-img-wrapper h-48 md:h-64 w-full mb-4 relative">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#050511] to-transparent opacity-60 z-10"></div>
+                        <img src="${p.img}" alt="${p.title}" class="project-img w-full h-full object-cover">
+                        <div class="absolute bottom-4 left-4 z-20">
+                            <span class="bg-brand-500/20 backdrop-blur-md text-brand-500 px-3 py-1 rounded-full text-xs font-bold border border-brand-500/30">
+                                ${p.tag}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 flex-grow flex flex-col justify-center">
+                        <h4 class="text-xl font-display font-bold text-white mb-2">${p.title}</h4>
+                        <p class="text-slate-400 text-sm">${p.desc}</p>
                     </div>
                 </div>
             `;
         });
 
-        function openProject(id) {
-            const p = projects.find(item => item.id === id);
-            document.getElementById('modal-title').innerText = p.title;
-            document.getElementById('modal-desc').innerText = p.desc;
-            document.getElementById('modal-image').style.backgroundImage = `url(${p.img})`;
-            document.getElementById('modal-stats').innerHTML = p.stats.map(s => `<div>${s.split(':')[0]}: <span class="text-neon">${s.split(':')[1]}</span></div>`).join('');
-            
-            const modal = document.getElementById('modal-overlay');
-            modal.style.display = 'flex';
-        }
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
 
-        function closeModal() { 
-            document.getElementById('modal-overlay').style.display = 'none'; 
-        }
+        // Hero Intro Animation
+        gsap.from(".gsap-hero > *", {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+            delay: 0.2
+        });
 
-        // Game Logic
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let playerObj = { x: 100, y: 180 };
-        let bullets = []; let enemies = [];
-        canvas.addEventListener('mousedown', (e) => bullets.push({ x: e.offsetX, y: playerObj.y }));
-        function toggleGame() {
-            const c = document.getElementById('game-container');
-            c.style.display = c.style.display === 'flex' ? 'none' : 'flex';
-            if(c.style.display === 'flex') updateGame();
-        }
-        function updateGame() {
-            ctx.fillStyle = '#111'; ctx.fillRect(0,0,200,200);
-            ctx.fillStyle = '#00ffcc'; ctx.fillRect(playerObj.x - 10, playerObj.y, 20, 5);
-            bullets.forEach((b, i) => { b.y -= 5; ctx.fillRect(b.x, b.y, 2, 5); if(b.y < 0) bullets.splice(i, 1); });
-            if(Math.random() < 0.05) enemies.push({ x: Math.random() * 200, y: 0 });
-            enemies.forEach((en, i) => { en.y += 1; ctx.fillStyle = '#a855f7'; ctx.fillRect(en.x, en.y, 10, 10); if(en.y > 200) enemies.splice(i, 1); });
-            if(document.getElementById('game-container').style.display === 'flex') requestAnimationFrame(updateGame);
-        }
+        // Scroll Reveal Animations
+        gsap.utils.toArray('.gsap-fade-up').forEach(element => {
+            gsap.from(element, {
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 40,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power2.out"
+            });
+        });
 
-        // Intersection Observer
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('revealed'); });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('section').forEach(s => observer.observe(s));
-        setInterval(() => { document.getElementById('fps').innerText = Math.floor(Math.random() * (62 - 58) + 58); }, 800);
+        // Stagger Project Cards
+        gsap.from("#project-grid > div", {
+            scrollTrigger: {
+                trigger: "#projects",
+                start: "top 75%",
+            },
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "back.out(1.2)"
+        });
     </script>
 </body>
 </html>
