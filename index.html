@@ -3,496 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tobii | Tactical Dev @ Redpanda</title>
+    <title>Tobii | Tactical Dev Game</title>
     <style>
-        :root {
-            --redpanda: #ff4a36;
-            --electric-blue: #00ffff;
-            --bg-color: #080a10;
-            --terminal-green: #39ff14;
-            --terminal-dim: #1a5a1a;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: var(--bg-color);
-            color: white;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
-            user-select: none;
-            cursor: crosshair;
-        }
-
-        /* CRT Scanline & Flicker Effects */
-        body::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 998;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-
-        @keyframes flicker {
-            0% { opacity: 0.95; }
-            5% { opacity: 0.85; }
-            10% { opacity: 0.95; }
-            15% { opacity: 1; }
-            100% { opacity: 1; }
-        }
-        .crt-flicker { animation: flicker 0.15s infinite; }
-
-        /* BOOT SEQUENCE SCREEN */
-        #boot-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000;
-            color: var(--terminal-green);
-            z-index: 3000;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .boot-text { margin-bottom: 10px; font-size: 1.2rem; text-shadow: 0 0 5px var(--terminal-green); }
-        .hidden { display: none !important; }
+        body { overflow: hidden; background-color: #72db8c; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
         
-        #init-btn {
-            margin-top: 30px;
-            background: transparent;
-            color: var(--redpanda);
-            border: 2px solid var(--redpanda);
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            font-family: inherit;
-            cursor: crosshair;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px var(--redpanda);
-            transition: 0.2s;
-            opacity: 0;
-        }
-        #init-btn:hover { background: var(--redpanda); color: #000; }
+        /* Start Screen */
+        #start-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #2c3e50; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; color: white; transition: 0.5s; }
+        #start-screen h1 { font-size: 3rem; margin-bottom: 10px; color: #ff4a36; }
+        #start-screen p { font-size: 1.2rem; margin-bottom: 30px; color: #ecf0f1; }
+        .btn { padding: 15px 30px; font-size: 1.2rem; background: #ff4a36; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; text-transform: uppercase; box-shadow: 0 5px 0 #c0392b; }
+        .btn:hover { transform: translateY(2px); box-shadow: 0 3px 0 #c0392b; }
+        .btn:active { transform: translateY(5px); box-shadow: none; }
 
-        /* BACKGROUND CANVAS */
-        canvas { position: absolute; top: 0; left: 0; z-index: 0; }
+        /* Instructions */
+        #ui-layer { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
+        .instruction-card { background: rgba(255, 255, 255, 0.9); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: #333; }
+        .instruction-card h2 { margin-bottom: 5px; color: #ff4a36; }
+        .keys { display: inline-block; background: #eee; padding: 3px 8px; border-radius: 4px; border: 1px solid #ccc; font-weight: bold; margin-top: 5px; }
 
-        /* MAIN CONTENT LAYOUT */
-        .main-grid {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            z-index: 10;
-            pointer-events: none;
-            padding: 40px;
-            gap: 40px;
-        }
+        /* Game Canvas */
+        canvas { display: block; width: 100vw; height: 100vh; }
 
-        /* HUD PANEL */
-        .hud-container {
-            background: rgba(10, 12, 20, 0.85);
-            border: 1px solid var(--electric-blue);
-            padding: 40px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
-            pointer-events: auto;
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border-left: 5px solid var(--redpanda);
-        }
+        /* Popups (Modals) */
+        .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); opacity: 0; transition: 0.3s; }
+        .modal-content { background: #fff; width: 80%; max-width: 900px; max-height: 80vh; border-radius: 15px; padding: 30px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; transform: scale(0.9); transition: 0.3s; }
+        .modal.active { display: flex; opacity: 1; }
+        .modal.active .modal-content { transform: scale(1); }
+        .close-btn { position: absolute; top: 20px; right: 20px; background: #e74c3c; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 #c0392b; }
+        .close-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        .glitch { font-size: 5rem; font-weight: bold; position: relative; color: white; text-shadow: 0 0 10px white; margin-bottom: 10px; letter-spacing: 5px; }
-        .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 12, 20, 0); }
-        .glitch::before { left: 4px; text-shadow: -2px 0 var(--redpanda); clip: rect(24px, 550px, 90px, 0); animation: glitch-anim-2 3s infinite linear alternate-reverse; }
-        .glitch::after { left: -4px; text-shadow: -2px 0 var(--electric-blue); clip: rect(85px, 550px, 140px, 0); animation: glitch-anim 2.5s infinite linear alternate-reverse; }
+        /* Modal Typography & Layout */
+        .modal-header { border-bottom: 3px solid #ff4a36; padding-bottom: 10px; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 2.5rem; color: #2c3e50; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; text-align: center; transition: 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #ff4a36; }
+        .card img { width: 50px; height: 50px; margin-bottom: 10px; }
+        .card h3 { color: #2c3e50; margin-bottom: 10px; }
+        .card p { color: #666; font-size: 0.9rem; line-height: 1.4; }
 
-        @keyframes glitch-anim { 0% { clip: rect(10px, 9999px, 44px, 0); } 20% { clip: rect(80px, 9999px, 12px, 0); } 40% { clip: rect(33px, 9999px, 88px, 0); } 60% { clip: rect(98px, 9999px, 34px, 0); } 80% { clip: rect(12px, 9999px, 78px, 0); } 100% { clip: rect(66px, 9999px, 22px, 0); } }
-        @keyframes glitch-anim-2 { 0% { clip: rect(65px, 9999px, 100px, 0); } 20% { clip: rect(15px, 9999px, 34px, 0); } 40% { clip: rect(89px, 9999px, 12px, 0); } 60% { clip: rect(22px, 9999px, 66px, 0); } 80% { clip: rect(78px, 9999px, 33px, 0); } 100% { clip: rect(44px, 9999px, 88px, 0); } }
-
-        h2 { font-size: 1.5rem; color: #aaa; margin-bottom: 10px; text-transform: uppercase;}
-        .neon-text { color: var(--redpanda); text-decoration: none; text-shadow: 0 0 8px var(--redpanda); transition: 0.3s; }
-        .neon-text:hover { color: white; text-shadow: 0 0 15px var(--redpanda); }
-        p.location { color: var(--electric-blue); margin-bottom: 40px; font-size: 1.2rem; text-shadow: 0 0 5px var(--electric-blue); }
-
-        .controls { display: flex; gap: 15px; flex-wrap: wrap; }
-        .action-btn { background: rgba(0, 255, 255, 0.05); color: white; border: 1px solid var(--electric-blue); padding: 12px 24px; font-family: inherit; font-size: 1rem; cursor: crosshair; position: relative; overflow: hidden; transition: 0.3s; text-transform: uppercase; font-weight: bold; }
-        .action-btn:hover { background: var(--electric-blue); color: #000; box-shadow: 0 0 15px var(--electric-blue); }
-
-        /* TERMINAL PANEL */
-        .terminal-container { background: rgba(0, 0, 0, 0.8); border: 1px solid var(--terminal-green); padding: 20px; box-shadow: 0 0 20px rgba(57, 255, 20, 0.1); pointer-events: auto; display: flex; flex-direction: column; overflow: hidden; }
-        .terminal-header { border-bottom: 1px solid var(--terminal-dim); padding-bottom: 10px; margin-bottom: 15px; color: var(--terminal-dim); font-size: 0.9rem; display: flex; justify-content: space-between; }
-        .terminal-output { flex-grow: 1; overflow-y: auto; color: var(--terminal-green); font-size: 1rem; line-height: 1.5; display: flex; flex-direction: column; gap: 5px; }
-        .terminal-output::-webkit-scrollbar { width: 5px; } .terminal-output::-webkit-scrollbar-thumb { background: var(--terminal-green); }
-        .terminal-input-line { display: flex; margin-top: 15px; color: var(--terminal-green); }
-        .terminal-prompt { margin-right: 10px; }
-        .terminal-input { background: transparent; border: none; color: white; font-family: inherit; font-size: 1rem; flex-grow: 1; outline: none; text-shadow: 0 0 5px white; }
-
-        /* --- VISUAL OVERLAYS (VAULT & SKILLS) --- */
-        .overlay-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(8, 10, 16, 0.95); z-index: 2000; display: none; flex-direction: column; padding: 50px 10%; overflow-y: auto; backdrop-filter: blur(15px); pointer-events: auto; opacity: 0; transition: opacity 0.5s ease; }
-        .overlay-screen::-webkit-scrollbar { width: 8px; } .overlay-screen::-webkit-scrollbar-thumb { background: var(--electric-blue); }
-
-        .vault-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--redpanda); padding-bottom: 20px; margin-bottom: 40px; }
-        .vault-title { font-size: 2.5rem; color: white; text-transform: uppercase; text-shadow: 0 0 10px var(--redpanda); }
-        .close-vault-btn { background: transparent; border: 1px solid var(--redpanda); color: var(--redpanda); padding: 10px 20px; font-family: inherit; font-weight: bold; cursor: crosshair; transition: 0.3s; }
-        .close-vault-btn:hover { background: var(--redpanda); color: black; box-shadow: 0 0 15px var(--redpanda); }
-        .section-title { font-size: 1.8rem; color: var(--electric-blue); margin-bottom: 20px; border-left: 5px solid var(--electric-blue); padding-left: 15px; }
-
-        .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-bottom: 60px; }
-        .project-card { background: rgba(20, 20, 30, 0.8); border: 1px solid #333; border-radius: 4px; overflow: hidden; transition: all 0.3s ease; cursor: crosshair; position: relative; }
-        .project-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 20px rgba(0, 255, 255, 0); transition: 0.3s; pointer-events: none; }
-        .project-card:hover { border-color: var(--electric-blue); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 255, 255, 0.15); }
-        .project-card:hover::before { box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.2); }
-        .project-image { width: 100%; height: 180px; object-fit: cover; filter: grayscale(80%) contrast(1.2) sepia(20%) hue-rotate(180deg); transition: 0.4s ease; border-bottom: 1px solid #333; }
-        .project-card:hover .project-image { filter: grayscale(0%) contrast(1.1); border-color: var(--electric-blue); }
-        .project-info { padding: 20px; } .project-info h3 { color: white; margin-bottom: 10px; font-size: 1.2rem; } .project-info p { color: #aaa; font-size: 0.9rem; line-height: 1.4; }
-
-        /* SKILL TREE SPECIFICS */
-        .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-bottom: 60px; }
-        .skill-card { background: rgba(20, 20, 30, 0.6); border: 1px solid #444; padding: 25px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: 0.3s; cursor: crosshair; }
-        .skill-card:hover { border-color: var(--terminal-green); box-shadow: 0 0 20px rgba(57, 255, 20, 0.2); transform: scale(1.05); }
-        .skill-icon { width: 60px; height: 60px; margin-bottom: 15px; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); transition: 0.3s; }
-        .skill-card:hover .skill-icon { filter: drop-shadow(0 0 15px var(--terminal-green)); }
-        .skill-card h3 { color: white; font-size: 1.5rem; margin-bottom: 10px; }
-        .skill-card p { color: #aaa; font-size: 0.85rem; line-height: 1.5; }
-
+        /* Audio hidden */
         audio { display: none; }
     </style>
 </head>
-<body class="crt-flicker">
+<body>
 
     <audio id="bgm" loop>
-        <source src="https://assets.mixkit.co/music/preview/mixkit-cyberpunk-city-126.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="boot-screen">
-        <div id="boot-text-container"></div>
-        <button id="init-btn" class="hidden">Connect to Mainframe</button>
+    <div id="start-screen">
+        <h1>TOBII'S WORLD</h1>
+        <p>Tactical Dev @ Redpanda Data</p>
+        <button class="btn" id="start-btn">Start Engine</button>
     </div>
 
-    <div id="skills-vault" class="overlay-screen">
-        <div class="vault-header">
-            <h1 class="vault-title" style="color: var(--terminal-green); text-shadow: 0 0 10px var(--terminal-green);">Neural Pathways // Tech Stack</h1>
-            <button class="close-vault-btn" style="border-color: var(--terminal-green); color: var(--terminal-green);" onclick="closeOverlay('skills-vault')">[X] CLOSE TREE</button>
+    <div id="ui-layer">
+        <div class="instruction-card">
+            <h2>Tobii | Portfolio</h2>
+            <p>Drive into the buildings to view databanks.</p>
+            <p>Controls: <span class="keys">W A S D</span> or <span class="keys">Arrows</span></p>
         </div>
+    </div>
 
-        <div class="skills-grid">
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/lua/lua-original.svg" class="skill-icon" alt="Lua">
-                <h3>Lua</h3>
-                <p>The backbone of Zinthyn scripts. Used for heavy server-side logic, client-side rendering, and complex FiveM framework architecture.</p>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" class="skill-icon" alt="C++">
-                <h3>C++</h3>
-                <p>High-performance memory manipulation, heuristic scanning for the AntiCheat module, and low-level system integrations.</p>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" class="skill-icon" alt="Python">
-                <p>Automated data scrubbing, rapid prototyping, and backend API interactions for massive Redpanda data pipelines.</p>
-                <h3>Python</h3>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/c/c-original.svg" class="skill-icon" alt="C+">
-                <h3>C+</h3>
-                <p>System-level tactical development, optimizing raw performance, and bridging engine-level integrations.</p>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" class="skill-icon" alt="JavaScript">
-                <h3>JavaScript</h3>
-                <p>Powering interactive NUI for FiveM, real-time terminal logic, and dynamic DOM manipulation for immersive web experiences.</p>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" class="skill-icon" alt="TypeScript">
-                <h3>TypeScript</h3>
-                <p>Type-safe, scalable frontend development for mission-critical web applications and visualizers.</p>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" class="skill-icon" alt="HTML">
-                <h3>HTML</h3>
-                <p>Structuring the architectural layer of tactical web interfaces, including responsive FiveM UI designs.</p>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/php/php-original.svg" class="skill-icon" alt="PHP">
-                <h3>PHP</h3>
-                <p>Server-side web logic, legacy API maintenance, and fast backend processing for telemetry dashboards.</p>
-            </div>
-            <div class="skill-card">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" class="skill-icon" alt="SQL">
-                <h3>SQL</h3>
-                <p>Database architecture. Writing highly optimized queries for seamless MultiChar data persistence and inventory states.</p>
+    <div class="modal" id="modal-profile">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">X</button>
+            <div class="modal-header"><h2>Profile & Comm-Link</h2></div>
+            <h3>Tobii</h3>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 15px;">Tactical Dev @ Redpanda Data | Loc: Serbia</p>
+            <p>Specializing in high-throughput data streaming, system architecture, and FiveM Server frameworks.</p>
+            <br>
+            <h3>Links:</h3>
+            <p>Email: tobii@redpanda.com</p>
+            <p>GitHub: github.com/Tobii</p>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-skills">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">X</button>
+            <div class="modal-header"><h2>Tech Stack / Languages</h2></div>
+            <div class="grid">
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/lua/lua-original.svg"><h3>Lua</h3><p>Backbone of Zinthyn scripts for heavy server-side logic and FiveM frameworks.</p></div>
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg"><h3>C++</h3><p>High-performance memory manipulation and AntiCheat heuristic scanning.</p></div>
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg"><h3>Python</h3><p>Automated data pipelines and API interactions.</p></div>
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg"><h3>JavaScript</h3><p>Interactive UIs and real-time DOM manipulation.</p></div>
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg"><h3>TypeScript</h3><p>Type-safe, scalable frontend development.</p></div>
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/php/php-original.svg"><h3>PHP</h3><p>Server-side web logic and API maintenance.</p></div>
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg"><h3>SQL</h3><p>Database architecture for player data persistence.</p></div>
+                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg"><h3>HTML</h3><p>Structuring the architectural layer of tactical web interfaces.</p></div>
             </div>
         </div>
     </div>
 
-    <div id="data-vault" class="overlay-screen">
-        <div class="vault-header">
-            <h1 class="vault-title">Project Databanks</h1>
-            <button class="close-vault-btn" onclick="closeOverlay('data-vault')">[X] CLOSE VAULT</button>
-        </div>
-        <h2 class="section-title">Redpanda // Tactical Ops</h2>
-        <div class="vault-grid">
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/12016192769026402767_0" class="project-image" alt="RP Stream Visualizer">
-                <div class="project-info"><h3>RP-Stream-Visualizer</h3><p>Real-time node graph representation of Redpanda cluster health. Built with WebGL for rendering millions of events per second.</p></div>
-            </div>
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/12016192769026402767_1" class="project-image" alt="Tactical CLI">
-                <div class="project-info"><h3>Tactical-CLI</h3><p>A blazing fast Rust-based command-line interface for topic management and partition scaling on the fly.</p></div>
-            </div>
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/12016192769026402767_2" class="project-image" alt="Wasm Scrubber">
-                <div class="project-info"><h3>Wasm Data Scrubber</h3><p>Inline WebAssembly data transformation pipelines executing at wire speed, stripping PII before it hits the disk.</p></div>
-            </div>
-        </div>
-        <h2 class="section-title" style="border-left-color: var(--redpanda); color: var(--redpanda);">FiveM // Framework Development</h2>
-        <div class="vault-grid">
-            <div class="project-card" style="border-color: #444;">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_0" class="project-image" alt="Admin Menu">
-                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-AdminMenu</h3><p>Fully featured administrative suite with live player tracking, dynamic punishment scaling, and spectator tools.</p></div>
-            </div>
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_1" class="project-image" alt="MultiChar">
-                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-MultiChar</h3><p>Sleek character selection screen with support for infinite slots, custom ped rendering, and database integration.</p></div>
-            </div>
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_2" class="project-image" alt="AntiCheat">
-                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-AntiCheat</h3><p>Aggressive heuristic memory scanning script. Prevents lua injections and autobans mod-menu users with high accuracy.</p></div>
-            </div>
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_3" class="project-image" alt="Radio">
-                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-Radio</h3><p>Tactical communication HUD with private frequencies, dispatch integration, and voice-proximity adjustments.</p></div>
-            </div>
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/3675985160874573204_0" class="project-image" alt="Stress">
-                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-Stress</h3><p>Dynamic stress system affecting player vision and weapon recoil based on environment. Curable through RP actions.</p></div>
-            </div>
-            <div class="project-card">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/3675985160874573204_1" class="project-image" alt="Inventory">
-                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-Inventory</h3><p>Next-gen slot-based drag-and-drop inventory UI. Features weight systems, weapon attachments, and metadata persistence.</p></div>
+    <div class="modal" id="modal-redpanda">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">X</button>
+            <div class="modal-header"><h2>Redpanda Tactical Ops</h2></div>
+            <div class="grid">
+                <div class="card"><h3>RP-Stream-Visualizer</h3><p>Real-time node graph representation of Redpanda cluster health built with WebGL.</p></div>
+                <div class="card"><h3>Tactical-CLI</h3><p>A fast Rust-based command line interface for topic management.</p></div>
+                <div class="card"><h3>Wasm Data Scrubber</h3><p>Inline WebAssembly data transformation pipelines executing at wire speed.</p></div>
             </div>
         </div>
     </div>
 
-    <div id="main-ui" class="hidden">
-        <canvas id="electric-canvas"></canvas>
-
-        <div class="main-grid">
-            <div class="hud-container">
-                <h1 class="glitch" data-text="TOBII">TOBII</h1>
-                <h2>Tactical Dev @ <a href="https://www.redpanda.com" target="_blank" class="neon-text">Redpanda Data</a></h2>
-                <p class="location">>> UPLINK: SERBIA [ONLINE]</p>
-                
-                <div class="controls">
-                    <button class="action-btn" onclick="executeCommand('projects')">Data Streams (Projects)</button>
-                    <button class="action-btn" onclick="executeCommand('skills')">Tech Stack (Skills)</button>
-                    <button class="action-btn" onclick="executeCommand('about')">Profile</button>
-                    <button class="action-btn" onclick="executeCommand('contact')">Establish Comm</button>
-                </div>
-            </div>
-
-            <div class="terminal-container">
-                <div class="terminal-header">
-                    <span>root@tobii-mainframe:~</span>
-                    <span>v2.6.0 [ENCRYPTED]</span>
-                </div>
-                <div class="terminal-output" id="terminal-output">
-                    <div>> Terminal initialized. Type 'help' for available commands.</div>
-                </div>
-                <div class="terminal-input-line">
-                    <span class="terminal-prompt">tobii@rp-tactical:~$</span>
-                    <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" autofocus>
-                </div>
+    <div class="modal" id="modal-fivem">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">X</button>
+            <div class="modal-header"><h2 style="color: #8e44ad;">Zinthyn FiveM Scripts</h2></div>
+            <div class="grid">
+                <div class="card"><h3>Zinthyn-AdminMenu</h3><p>Fully featured admin suite with live player tracking and telemetry.</p></div>
+                <div class="card"><h3>Zinthyn-MultiChar</h3><p>Sleek character selection with infinite slots and ped rendering.</p></div>
+                <div class="card"><h3>Zinthyn-AntiCheat</h3><p>Heuristic memory scanning script preventing injections and menus.</p></div>
+                <div class="card"><h3>Zinthyn-Radio</h3><p>Tactical comms HUD with private frequencies and voice-proximity.</p></div>
+                <div class="card"><h3>Zinthyn-Stress</h3><p>Dynamic stress system affecting player vision and recoil.</p></div>
+                <div class="card"><h3>Zinthyn-Inventory</h3><p>Slot-based drag-and-drop inventory with weight systems.</p></div>
             </div>
         </div>
     </div>
+
+    <canvas id="gameCanvas"></canvas>
 
     <script>
-        // --- BOOT SEQUENCE ---
-        const bootLines = [
-            "Initializing kernel...",
-            "Loading tactical dev modules: [OK]",
-            "Mounting Redpanda data streams: [OK]",
-            "Fetching Zinthyn FiveM resources: [OK]",
-            "Compiling Tech Stack Neural Pathways: [OK]",
-            "Bypassing geo-restrictions (Serbia): [OK]",
-            "Establishing neural link...",
-            "System Audio: STANDBY for user initiation.",
-            "Ready."
-        ];
-
-        const bootContainer = document.getElementById('boot-text-container');
-        const initBtn = document.getElementById('init-btn');
-        const bootScreen = document.getElementById('boot-screen');
-        const mainUi = document.getElementById('main-ui');
+        // --- Game Setup & Audio ---
+        const startBtn = document.getElementById('start-btn');
+        const startScreen = document.getElementById('start-screen');
         const bgm = document.getElementById('bgm');
-        const terminalInput = document.getElementById('terminal-input');
+        let gameRunning = false;
 
-        let bootIndex = 0;
-        function printBootLine() {
-            if (bootIndex < bootLines.length) {
-                const line = document.createElement('div');
-                line.className = 'boot-text';
-                line.textContent = '> ' + bootLines[bootIndex];
-                bootContainer.appendChild(line);
-                bootIndex++;
-                setTimeout(printBootLine, Math.random() * 200 + 50); 
-            } else {
-                initBtn.classList.remove('hidden');
-                setTimeout(() => { initBtn.style.opacity = 1; }, 100);
-            }
-        }
-        window.onload = printBootLine;
-
-        initBtn.addEventListener('click', () => {
-            bgm.volume = 0.4;
-            bgm.play().catch(e => console.log("Audio play failed:", e));
-            bootScreen.classList.add('hidden');
-            mainUi.classList.remove('hidden');
-            initParticles(); 
-            terminalInput.focus();
+        startBtn.addEventListener('click', () => {
+            bgm.volume = 0.3;
+            bgm.play().catch(e => console.log(e));
+            startScreen.style.opacity = '0';
+            setTimeout(() => { startScreen.style.display = 'none'; gameRunning = true; update(); }, 500);
         });
 
-        // --- TERMINAL & OVERLAY LOGIC ---
-        const termOutput = document.getElementById('terminal-output');
+        // --- Canvas Engine ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-        function printToTerminal(htmlContent, isCommand = false) {
-            const div = document.createElement('div');
-            if (isCommand) { div.innerHTML = `<span style="color: white;">tobii@rp-tactical:~$</span> ${htmlContent}`; } 
-            else { div.innerHTML = htmlContent; }
-            termOutput.appendChild(div);
-            termOutput.scrollTop = termOutput.scrollHeight; 
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Input handling
+        const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
+        window.addEventListener('keydown', (e) => { if (keys.hasOwnProperty(e.key)) keys[e.key] = true; });
+        window.addEventListener('keyup', (e) => { if (keys.hasOwnProperty(e.key)) keys[e.key] = false; });
+
+        // Modals
+        let activeModal = false;
+        function openModal(id) {
+            if (activeModal) return;
+            activeModal = true;
+            keys.w = keys.a = keys.s = keys.d = keys.ArrowUp = keys.ArrowLeft = keys.ArrowDown = keys.ArrowRight = false; // Stop movement
+            document.getElementById(id).classList.add('active');
+        }
+        window.closeModal = function() { // Attach to window so HTML button can read it
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+            setTimeout(() => { activeModal = false; }, 200); // Small delay to prevent instant re-trigger
+            
+            // Push player slightly away from building so they don't instantly re-trigger
+            player.y += 20; 
         }
 
-        function openOverlay(id, message) {
-            printToTerminal(`> ${message}`);
-            const overlay = document.getElementById(id);
-            overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.opacity = '1'; }, 10);
-        }
-
-        function closeOverlay(id) {
-            const overlay = document.getElementById(id);
-            overlay.style.opacity = '0';
-            setTimeout(() => { overlay.style.display = 'none'; terminalInput.focus(); }, 500);
-        }
-
-        const commands = {
-            'help': `Available commands:<br>
-                     - <b>about</b>: View operative profile<br>
-                     - <b>skills</b>: View programming languages & tech stack<br>
-                     - <b>projects</b>: Access visual Data Vault (Redpanda & Zinthyn)<br>
-                     - <b>contact</b>: Get communication protocols<br>
-                     - <b>clear</b>: Purge terminal history`,
-            'about': `<b>Name:</b> Tobii<br>
-                      <b>Role:</b> Tactical Dev<br>
-                      <b>Faction:</b> Redpanda Data<br>
-                      <b>Location:</b> Serbia<br>
-                      <b>Specialty:</b> High-throughput data streaming, FiveM Server Architecture (Zinthyn Scripts), making things electric.`,
-            'projects': 'vault', 
-            'skills': 'skills',
-            'contact': `> Comm-link protocols:<br>
-                        > Email: user@domain.com<br>
-                        > GitHub: <a href="#" class="neon-text">github.com/Tobii</a><br>
-                        > Discord: Tobii#0000`
+        // --- Game Objects ---
+        const player = {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2 + 100,
+            width: 30,
+            height: 40,
+            speed: 5,
+            angle: 0,
+            color: '#ff4a36' // Redpanda color
         };
 
-        function executeCommand(cmd) {
-            const cleanCmd = cmd.trim().toLowerCase();
-            printToTerminal(cleanCmd, true);
-            if (cleanCmd === '') return;
-            if (cleanCmd === 'clear') { termOutput.innerHTML = ''; return; }
+        const buildings = [
+            { id: 'modal-profile', x: window.innerWidth/2 - 300, y: window.innerHeight/2 - 200, w: 150, h: 120, color: '#3498db', label: 'Profile' },
+            { id: 'modal-skills', x: window.innerWidth/2 + 150, y: window.innerHeight/2 - 200, w: 150, h: 120, color: '#f1c40f', label: 'Tech Stack' },
+            { id: 'modal-redpanda', x: window.innerWidth/2 - 300, y: window.innerHeight/2 + 100, w: 150, h: 120, color: '#e74c3c', label: 'Redpanda Ops' },
+            { id: 'modal-fivem', x: window.innerWidth/2 + 150, y: window.innerHeight/2 + 100, w: 150, h: 120, color: '#9b59b6', label: 'FiveM Scripts' }
+        ];
 
-            if (commands[cleanCmd] === 'vault') {
-                openOverlay('data-vault', "Bypassing security... Opening high-resolution Data Vault.");
-            } else if (commands[cleanCmd] === 'skills') {
-                openOverlay('skills-vault', "Accessing Neural Pathways... Mapping Tech Stack.");
-            } else if (commands[cleanCmd]) {
-                setTimeout(() => printToTerminal(commands[cleanCmd]), 200);
-            } else {
-                setTimeout(() => printToTerminal(`<span style="color: var(--redpanda);">Error: command not found: ${cleanCmd}</span>`), 200);
-            }
-        }
+        // --- Game Loop ---
+        function update() {
+            if (!gameRunning) return;
 
-        terminalInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') { executeCommand(this.value); this.value = ''; }
-        });
-        document.querySelector('.terminal-container').addEventListener('click', () => { terminalInput.focus(); });
+            // Move Player if no modal is active
+            if (!activeModal) {
+                let dx = 0; let dy = 0;
+                if (keys.w || keys.ArrowUp) dy -= player.speed;
+                if (keys.s || keys.ArrowDown) dy += player.speed;
+                if (keys.a || keys.ArrowLeft) dx -= player.speed;
+                if (keys.d || keys.ArrowRight) dx += player.speed;
 
-        // --- INTERACTIVE CANVAS (ELECTRIC NODES) ---
-        const canvas = document.getElementById('electric-canvas');
-        const ctx = canvas.getContext('2d');
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas); resizeCanvas();
-
-        let particlesArray = [];
-        let mouse = { x: null, y: null, radius: 120 };
-        window.addEventListener('mousemove', (event) => { mouse.x = event.x; mouse.y = event.y; });
-        window.addEventListener('mouseout', () => { mouse.x = undefined; mouse.y = undefined; });
-
-        class Particle {
-            constructor(x, y, directionX, directionY, size, color) {
-                this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY;
-                this.size = size; this.color = color; this.baseX = this.x; this.baseY = this.y;
-            }
-            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
-            update() {
-                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
-                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
-                let dx = mouse.x - this.x; let dy = mouse.y - this.y; let distance = Math.sqrt(dx*dx + dy*dy);
-                if (distance < mouse.radius) {
-                    const forceDirectionX = dx / distance; const forceDirectionY = dy / distance;
-                    const force = (mouse.radius - distance) / mouse.radius;
-                    this.x += forceDirectionX * force * 3; this.y += forceDirectionY * force * 3;
-                } else {
-                    if (this.x !== this.baseX) { this.x -= this.directionX; }
-                    if (this.y !== this.baseY) { this.y -= this.directionY; }
+                // Rotation calculation
+                if (dx !== 0 || dy !== 0) {
+                    player.angle = Math.atan2(dy, dx) + Math.PI / 2; // +90deg to face "forward"
+                    player.x += dx;
+                    player.y += dy;
                 }
-                this.x += this.directionX * 0.5; this.y += this.directionY * 0.5;
-                this.draw();
-            }
-        }
 
-        function initParticles() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 10000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2) + 1;
-                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let color = Math.random() > 0.5 ? '#ff4a36' : '#00ffff'; 
-                particlesArray.push(new Particle(x, y, (Math.random() * 2) - 1, (Math.random() * 2) - 1, size, color));
-            }
-        }
+                // Keep player in bounds
+                if (player.x < 0) player.x = 0;
+                if (player.x > canvas.width) player.x = canvas.width;
+                if (player.y < 0) player.y = 0;
+                if (player.y > canvas.height) player.y = canvas.height;
 
-        function connectNodes() {
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2);
-                    if (distance < (canvas.width / 8) * (canvas.height / 8)) {
-                        let opacityValue = 1 - (distance / 15000);
-                        let color = particlesArray[a].color; 
-                        ctx.strokeStyle = color === '#ff4a36' ? `rgba(255, 74, 54, ${opacityValue})` : `rgba(0, 255, 255, ${opacityValue})`;
-                        ctx.lineWidth = 1;
-                        ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
+                // Check Collisions
+                buildings.forEach(b => {
+                    if (player.x < b.x + b.w && player.x + player.width > b.x &&
+                        player.y < b.y + b.h && player.y + player.height > b.y) {
+                        openModal(b.id);
                     }
-                }
+                });
             }
+
+            draw();
+            requestAnimationFrame(update);
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
-            for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); }
-            connectNodes();
+        function draw() {
+            // Clear canvas (grass background)
+            ctx.fillStyle = '#72db8c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Paths/Roads (just decorative)
+            ctx.fillStyle = '#a1cb95';
+            ctx.fillRect(window.innerWidth/2 - 350, window.innerHeight/2 - 20, 700, 60);
+
+            // Draw Buildings
+            buildings.forEach(b => {
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.fillRect(b.x + 10, b.y + 10, b.w, b.h);
+                // Building
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                // Roof detail
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.fillRect(b.x, b.y, b.w, 10);
+                
+                // Text
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 20px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText(b.label, b.x + b.w/2, b.y + b.h/2 + 5);
+            });
+
+            // Draw Player (Car shape)
+            ctx.save();
+            ctx.translate(player.x + player.width/2, player.y + player.height/2);
+            ctx.rotate(player.angle);
+            
+            // Car Body
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.roundRect(-player.width/2, -player.height/2, player.width, player.height, 5);
+            ctx.fill();
+
+            // Windshield
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(-player.width/2 + 5, -player.height/2 + 5, player.width - 10, 10);
+            
+            // Headlights
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(-player.width/2 + 2, -player.height/2 - 2, 8, 4);
+            ctx.fillRect(player.width/2 - 10, -player.height/2 - 2, 8, 4);
+
+            ctx.restore();
         }
-        animate(); 
     </script>
 </body>
 </html>
