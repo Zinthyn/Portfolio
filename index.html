@@ -3,280 +3,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tobii | Tactical Dev Game</title>
+    <title>ZINTHYN // NEURAL_ARCHITECT_V24</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@100;400;800&family=Plus+Jakarta+Sans:wght@300;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { overflow: hidden; background-color: #72db8c; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        :root { --neon: #00ffcc; --purple: #a855f7; --bg: #030303; }
+        body { background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; scroll-behavior: smooth; cursor: none; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        /* --- THE ATMOSPHERE --- */
+        .scanlines { position: fixed; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 204, 0.02) 50%); background-size: 100% 4px; z-index: 10001; pointer-events: none; }
+        .noise { position: fixed; inset: 0; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.05; z-index: 10000; pointer-events: none; }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, black 150%); z-index: 9999; pointer-events: none; }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor { width: 20px; height: 20px; border: 1px solid var(--neon); position: fixed; pointer-events: none; z-index: 99999; transition: transform 0.1s, background 0.3s; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
+        #cursor::after { content: ''; width: 2px; height: 2px; background: var(--neon); }
+        .cursor-hover { transform: translate(-50%, -50%) scale(2) rotate(45deg) !important; background: rgba(0, 255, 204, 0.2); }
+
+        /* --- HUD --- */
+        #hud-top { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 9998; font-size: 10px; background: rgba(0,0,0,0.9); padding: 12px 30px; border: 1px solid rgba(0,255,204,0.2); border-top: none; backdrop-filter: blur(20px); border-radius: 0 0 20px 20px; width: 800px; display: flex; justify-content: space-around; align-items: center; }
         
-        /* Start Screen */
-        #start-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #2c3e50; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; color: white; transition: 0.5s; }
-        #start-screen h1 { font-size: 3rem; margin-bottom: 10px; color: #ff4a36; }
-        #start-screen p { font-size: 1.2rem; margin-bottom: 30px; color: #ecf0f1; }
-        .btn { padding: 15px 30px; font-size: 1.2rem; background: #ff4a36; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; text-transform: uppercase; box-shadow: 0 5px 0 #c0392b; }
-        .btn:hover { transform: translateY(2px); box-shadow: 0 3px 0 #c0392b; }
-        .btn:active { transform: translateY(5px); box-shadow: none; }
+        .bars { display: flex; gap: 2px; align-items: flex-end; height: 10px; }
+        .bar { width: 2px; background: var(--neon); animation: pulse 0.5s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { height: 4px; } 50% { height: 10px; } }
 
-        /* Instructions */
-        #ui-layer { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
-        .instruction-card { background: rgba(255, 255, 255, 0.9); padding: 15px 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: #333; }
-        .instruction-card h2 { margin-bottom: 5px; color: #ff4a36; }
-        .keys { display: inline-block; background: #eee; padding: 3px 8px; border-radius: 4px; border: 1px solid #ccc; font-weight: bold; margin-top: 5px; }
+        /* --- GLITCH EFFECT --- */
+        .glitch-text:hover { text-shadow: 2px 0 var(--neon), -2px 0 var(--purple); animation: glitch-anim 0.3s infinite; }
+        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
 
-        /* Game Canvas */
-        canvas { display: block; width: 100vw; height: 100vh; }
-
-        /* Popups (Modals) */
-        .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); opacity: 0; transition: 0.3s; }
-        .modal-content { background: #fff; width: 80%; max-width: 900px; max-height: 80vh; border-radius: 15px; padding: 30px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; transform: scale(0.9); transition: 0.3s; }
-        .modal.active { display: flex; opacity: 1; }
-        .modal.active .modal-content { transform: scale(1); }
-        .close-btn { position: absolute; top: 20px; right: 20px; background: #e74c3c; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 #c0392b; }
-        .close-btn:active { transform: translateY(3px); box-shadow: none; }
-
-        /* Modal Typography & Layout */
-        .modal-header { border-bottom: 3px solid #ff4a36; padding-bottom: 10px; margin-bottom: 20px; }
-        .modal-header h2 { font-size: 2.5rem; color: #2c3e50; }
+        /* --- PROJECT CARDS --- */
+        .project-card { background: #010101; border: 1px solid rgba(255,255,255,0.05); transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1); position: relative; overflow: hidden; height: 350px; }
+        .project-card:hover { border-color: var(--neon); box-shadow: 0 0 30px rgba(0,255,204,0.1); }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px; padding: 20px; text-align: center; transition: 0.2s; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #ff4a36; }
-        .card img { width: 50px; height: 50px; margin-bottom: 10px; }
-        .card h3 { color: #2c3e50; margin-bottom: 10px; }
-        .card p { color: #666; font-size: 0.9rem; line-height: 1.4; }
+        #entry-lock { position: fixed; inset: 0; background: #000; z-index: 10005; display: flex; align-items: center; justify-content: center; }
+        
+        section { opacity: 0; transform: translateY(50px); transition: 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        section.revealed { opacity: 1; transform: translateY(0); }
 
-        /* Audio hidden */
-        audio { display: none; }
+        .skill-tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 4px; font-size: 11px; transition: 0.3s; }
+        .skill-tag:hover { border-color: var(--neon); color: var(--neon); background: rgba(0,255,204,0.05); }
+
+        #game-container { position: fixed; bottom: 20px; right: 20px; width: 200px; height: 250px; background: rgba(0,0,0,0.8); border: 1px solid var(--neon); z-index: 999; border-radius: 10px; display: none; flex-direction: column; overflow: hidden; }
+
+        /* --- MODAL FIXES --- */
+        #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 100000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-body { border: 2px solid var(--neon); box-shadow: 0 0 50px rgba(0, 255, 204, 0.1); }
     </style>
 </head>
 <body>
 
-    <audio id="bgm" loop>
-        <source src="https://assets.mixkit.co/music/preview/mixkit-game-level-music-689.mp3" type="audio/mpeg">
-    </audio>
+    <div id="cursor"></div>
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+    <div class="vignette"></div>
 
-    <div id="start-screen">
-        <h1>TOBII'S WORLD</h1>
-        <p>Tactical Dev @ Redpanda Data</p>
-        <button class="btn" id="start-btn">Start Engine</button>
-    </div>
-
-    <div id="ui-layer">
-        <div class="instruction-card">
-            <h2>Tobii | Portfolio</h2>
-            <p>Drive into the buildings to view databanks.</p>
-            <p>Controls: <span class="keys">W A S D</span> or <span class="keys">Arrows</span></p>
+    <div id="entry-lock">
+        <div class="text-center">
+            <h2 class="orbitron text-white text-[10px] tracking-[0.8em] mb-8 animate-pulse">ESTABLISHING_NEURAL_LINK</h2>
+            <button onclick="unlockPortfolio()" class="px-16 py-5 border border-neon text-neon orbitron text-xs tracking-widest hover:bg-neon hover:text-black transition-all duration-700">
+                SYNC_INTERFACE
+            </button>
         </div>
     </div>
 
-    <div class="modal" id="modal-profile">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()">X</button>
-            <div class="modal-header"><h2>Profile & Comm-Link</h2></div>
-            <h3>Tobii</h3>
-            <p style="font-size: 1.2rem; color: #666; margin-bottom: 15px;">Tactical Dev @ Redpanda Data | Loc: Serbia</p>
-            <p>Specializing in high-throughput data streaming, system architecture, and FiveM Server frameworks.</p>
-            <br>
-            <h3>Links:</h3>
-            <p>Email: tobii@redpanda.com</p>
-            <p>GitHub: github.com/Tobii</p>
+    <div id="music-player" class="absolute pointer-events-none opacity-0">
+        <div id="player"></div>
+    </div>
+
+    <div id="hud-top" class="mono text-white/50 uppercase tracking-widest">
+        <div class="flex items-center gap-3">
+            <span class="text-neon">ZIN_OS</span>
+            <span class="opacity-20">|</span>
+            <span>FPS: <span class="text-neon" id="fps">60</span></span>
+        </div>
+        <div class="flex items-center gap-4 border-x border-white/10 px-8">
+            <div class="bars">
+                <div class="bar" style="animation-delay: 0.1s"></div>
+                <div class="bar" style="animation-delay: 0.3s"></div>
+                <div class="bar" style="animation-delay: 0.2s"></div>
+                <div class="bar" style="animation-delay: 0.4s"></div>
+            </div>
+            <input type="range" min="0" max="100" value="40" oninput="setVolume(this.value)" class="w-24 h-1 bg-white/10 appearance-none cursor-pointer accent-neon">
+        </div>
+        <div class="flex gap-6">
+            <button onclick="toggleGame()" class="hover:text-neon transition-all">[ MINIGAME ]</button>
+            <span id="clock" class="text-neon/60">00:00:00</span>
         </div>
     </div>
 
-    <div class="modal" id="modal-skills">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()">X</button>
-            <div class="modal-header"><h2>Tech Stack / Languages</h2></div>
-            <div class="grid">
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/lua/lua-original.svg"><h3>Lua</h3><p>Backbone of Zinthyn scripts for heavy server-side logic and FiveM frameworks.</p></div>
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg"><h3>C++</h3><p>High-performance memory manipulation and AntiCheat heuristic scanning.</p></div>
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg"><h3>Python</h3><p>Automated data pipelines and API interactions.</p></div>
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg"><h3>JavaScript</h3><p>Interactive UIs and real-time DOM manipulation.</p></div>
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg"><h3>TypeScript</h3><p>Type-safe, scalable frontend development.</p></div>
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/php/php-original.svg"><h3>PHP</h3><p>Server-side web logic and API maintenance.</p></div>
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg"><h3>SQL</h3><p>Database architecture for player data persistence.</p></div>
-                <div class="card"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg"><h3>HTML</h3><p>Structuring the architectural layer of tactical web interfaces.</p></div>
+    <section class="min-h-screen flex items-center px-10 md:px-32 revealed">
+        <div class="w-full">
+            <p class="mono text-neon text-xs tracking-[1em] mb-4 opacity-50">WELCOME_USER_TOBII</p>
+            <h1 class="text-9xl md:text-[14rem] font-black orbitron italic mb-10 tracking-tighter leading-none glitch-text">ZINTHYN</h1>
+            <div class="flex flex-col md:flex-row gap-10">
+                <div class="bg-neon text-black px-10 py-5 font-black orbitron text-xs">SYSTEM_ARCHITECT</div>
+                <div class="flex flex-wrap gap-2 max-w-xl">
+                    <span class="skill-tag">LUA</span>
+                    <span class="skill-tag">C++</span>
+                    <span class="skill-tag">PYTHON</span>
+                    <span class="skill-tag">BLENDER</span>
+                    <span class="skill-tag">3DS MAX</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-40 px-10 md:px-32">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <a href="https://www.patreon.com/c/zinthyn/shop" target="_blank" class="relative group block overflow-hidden border border-neon/20">
+                <img src="https://r2.fivemanage.com/image/USK05K8RPzzm.png" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700">
+                <div class="absolute bottom-10 left-10">
+                    <h3 class="orbitron text-4xl font-black italic">GRAPHICS_<span class="text-neon">PRESETS</span></h3>
+                    <p class="mono text-xs mt-2 text-white/60">ACCESS PREMIUM SHADERS ON PATREON</p>
+                </div>
+            </a>
+            <div>
+                <h2 class="orbitron text-7xl font-black italic mb-10 text-white glitch-text">ABOUT_<span class="text-neon">ME</span></h2>
+                <p class="text-xl text-white/40 mono leading-loose">
+                    Hello, I am <span class="text-white">Zinthyn (Tobii)</span>. Based in Serbia, I operate as a multi-disciplinary developer with over 2 years of immersion in high-tier ecosystems & worlds in FiveM, Alt/V & RedM.
+                    <br><br>
+                    I specialize in bridging the gap between <span class="text-purple">3D Art (Blender/3ds Max)</span> and <span class="text-neon">Technical Scripting</span>. My goal is total visual and functional synergy while keeping all performance to a maximum.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-40 px-10 md:px-32 bg-white/[0.02] border-y border-white/5">
+        <h2 class="orbitron text-6xl font-black italic mb-20 tracking-tighter uppercase glitch-text"><span class="text-neon">Deployment</span>_History</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter uppercase">NoPixel</h3>
+                    <span class="mono text-[10px] text-neon/50">SYSTEM_CONTRACT</span>
+                </div>
+                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Backend Services / 3D Modeller</span></p>
+                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
+                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Integrating high-fidelity assets and managing core architectural service layers.</p>
+            </div>
+
+            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group border-l-neon/40 border-l-2">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter text-neon uppercase">Liquid RP</h3>
+                    <span class="mono text-[10px] text-neon">ACTIVE_LEAD</span>
+                </div>
+                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Lead Developer (Scripting & 3D)</span></p>
+                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
+                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Full-stack development leadership. Overseeing script synergy and proprietary 3D modeling pipelines.</p>
+            </div>
+
+            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter uppercase">Happy Days</h3>
+                    <span class="mono text-[10px] text-purple/50">ROOT_OPTIMIZATION</span>
+                </div>
+                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Backend Root Optimization / Script Detailer</span></p>
+                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
+                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Refining base logic to reduce latency. Detailed scripting for immersion-heavy features.</p>
+            </div>
+
+            <div class="border border-white/5 p-8 bg-black/40 hover:border-neon/40 transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="orbitron text-2xl font-bold italic tracking-tighter uppercase">British Life RP</h3>
+                    <span class="mono text-[10px] text-white/20">LEGACY_MODULE</span>
+                </div>
+                <p class="mono text-sm text-white/60 mb-4">ROLE: <span class="text-white">Developer / Backend Optimisations</span></p>
+                <div class="h-[1px] w-full bg-white/5 mb-4"></div>
+                <p class="mono text-xs text-white/30 leading-relaxed uppercase tracking-widest">Managed backend stability and performance audits for large-scale player synchronization.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="vault" class="py-40 px-10 md:px-32">
+        <h2 class="orbitron text-7xl font-black italic tracking-tighter mb-20 border-b border-white/5 pb-10 uppercase glitch-text">Script_Archive</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="project-grid-anchor"></div>
+    </section>
+
+    <section class="py-40 px-10 md:px-32 bg-white/[0.01]">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-20">
+            <div class="lg:col-span-2">
+                <h2 class="orbitron text-5xl font-black italic mb-12 glitch-text">FUTURE_<span class="text-neon">ROADMAP</span></h2>
+                <div class="space-y-12 border-l border-white/5 pl-8">
+                    <div class="relative"><div class="absolute -left-[41px] top-2 w-5 h-5 bg-neon shadow-[0_0_15px_#00ffcc]"></div>
+                        <h4 class="orbitron text-white text-xl">2026_Q1: NEURAL_LOGIC_INTEGRATION</h4>
+                        <p class="mono text-sm text-white/40 mt-3">Developing AI-driven NPC interaction modules for enhanced server immersion.</p>
+                    </div>
+                    <div class="relative"><div class="absolute -left-[41px] top-2 w-5 h-5 bg-white/10"></div>
+                        <h4 class="orbitron text-white/50 text-xl tracking-tighter">2026_Q2: REDM_EXPANSION_PACK</h4>
+                        <p class="mono text-sm text-white/20 mt-3">Bridging custom 3D architecture into the RedM ecosystem with optimized asset streaming.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-black border border-neon/30 p-10 relative overflow-hidden h-fit shadow-[0_0_30px_rgba(0,255,204,0.05)]">
+                <div class="absolute top-0 right-0 p-4 mono text-[8px] text-neon/20">UPLINK_STATUS: READY</div>
+                <h3 class="orbitron text-2xl font-bold mb-10 tracking-tighter italic">SECURE_<span class="text-neon">CONTACT</span></h3>
+                <div class="space-y-8 mono text-xs">
+                    <div class="group cursor-pointer">
+                        <p class="text-white/20 mb-2">DISCORD_COMMUNICATIONS</p>
+                        <p class="text-white text-lg group-hover:text-neon transition-colors">@tobii_zinthyn</p>
+                    </div>
+                    <div class="group cursor-pointer">
+                        <p class="text-white/20 mb-2">ENCRYPTED_MAIL</p>
+                        <p class="text-white text-lg group-hover:text-neon transition-colors">dev@zinthyn.net</p>
+                    </div>
+                    <div class="pt-10 border-t border-white/5">
+                        <p class="text-[9px] text-neon animate-pulse mb-4 italic">// SYSTEM_AWAITING_INPUT</p>
+                        <div class="w-full bg-white/5 h-[2px]"><div class="bg-neon h-full w-[65%]"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="modal-overlay" onclick="closeModal()">
+        <div class="modal-body bg-[#050505] p-0 w-[95%] max-w-6xl flex flex-col md:flex-row gap-0 overflow-hidden" onclick="event.stopPropagation()">
+            <div id="modal-image" class="w-full md:w-1/2 h-[300px] md:h-[600px] bg-cover bg-center border-b md:border-b-0 md:border-r border-neon/30"></div>
+            <div class="w-full md:w-1/2 p-12 flex flex-col justify-center bg-black">
+                <div class="mono text-[10px] text-neon mb-4 tracking-[0.5em]">// PROJECT_INTEL_LOADED</div>
+                <h2 id="modal-title" class="orbitron text-6xl font-black italic text-white mb-6 uppercase tracking-tighter"></h2>
+                <p id="modal-desc" class="text-lg text-white/50 mono leading-relaxed mb-10 border-l-2 border-neon/20 pl-6"></p>
+                <div id="modal-stats" class="grid grid-cols-2 gap-8 mono text-[11px] text-white/30 border-t border-white/10 pt-8 mb-10"></div>
+                <button class="px-8 py-4 border border-neon text-neon orbitron text-[10px] font-bold self-start hover:bg-neon hover:text-black transition-all" onclick="closeModal()">[ DISCONNECT_SESSION ]</button>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="modal-redpanda">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()">X</button>
-            <div class="modal-header"><h2>Redpanda Tactical Ops</h2></div>
-            <div class="grid">
-                <div class="card"><h3>RP-Stream-Visualizer</h3><p>Real-time node graph representation of Redpanda cluster health built with WebGL.</p></div>
-                <div class="card"><h3>Tactical-CLI</h3><p>A fast Rust-based command line interface for topic management.</p></div>
-                <div class="card"><h3>Wasm Data Scrubber</h3><p>Inline WebAssembly data transformation pipelines executing at wire speed.</p></div>
-            </div>
+    <div id="game-container">
+        <div class="p-2 text-[9px] mono text-neon flex justify-between bg-white/5">
+            <span>NEURAL_DEFENDER</span>
+            <button onclick="toggleGame()">[X]</button>
         </div>
+        <canvas id="gameCanvas" width="200" height="200"></canvas>
     </div>
 
-    <div class="modal" id="modal-fivem">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal()">X</button>
-            <div class="modal-header"><h2 style="color: #8e44ad;">Zinthyn FiveM Scripts</h2></div>
-            <div class="grid">
-                <div class="card"><h3>Zinthyn-AdminMenu</h3><p>Fully featured admin suite with live player tracking and telemetry.</p></div>
-                <div class="card"><h3>Zinthyn-MultiChar</h3><p>Sleek character selection with infinite slots and ped rendering.</p></div>
-                <div class="card"><h3>Zinthyn-AntiCheat</h3><p>Heuristic memory scanning script preventing injections and menus.</p></div>
-                <div class="card"><h3>Zinthyn-Radio</h3><p>Tactical comms HUD with private frequencies and voice-proximity.</p></div>
-                <div class="card"><h3>Zinthyn-Stress</h3><p>Dynamic stress system affecting player vision and recoil.</p></div>
-                <div class="card"><h3>Zinthyn-Inventory</h3><p>Slot-based drag-and-drop inventory with weight systems.</p></div>
-            </div>
-        </div>
-    </div>
-
-    <canvas id="gameCanvas"></canvas>
+    <footer class="py-10 px-10 md:px-32 border-t border-white/5 text-center md:text-left">
+        <p class="mono text-[10px] text-white/20 uppercase tracking-[0.8em]">© 2026 ZINTHYN_ARCHITECTS // ALL_LOGS_RETAINED</p>
+    </footer>
 
     <script>
-        // --- Game Setup & Audio ---
-        const startBtn = document.getElementById('start-btn');
-        const startScreen = document.getElementById('start-screen');
-        const bgm = document.getElementById('bgm');
-        let gameRunning = false;
-
-        startBtn.addEventListener('click', () => {
-            bgm.volume = 0.3;
-            bgm.play().catch(e => console.log(e));
-            startScreen.style.opacity = '0';
-            setTimeout(() => { startScreen.style.display = 'none'; gameRunning = true; update(); }, 500);
+        // Cursor Logic
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
         });
-
-        // --- Canvas Engine ---
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Input handling
-        const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
-        window.addEventListener('keydown', (e) => { if (keys.hasOwnProperty(e.key)) keys[e.key] = true; });
-        window.addEventListener('keyup', (e) => { if (keys.hasOwnProperty(e.key)) keys[e.key] = false; });
-
-        // Modals
-        let activeModal = false;
-        function openModal(id) {
-            if (activeModal) return;
-            activeModal = true;
-            keys.w = keys.a = keys.s = keys.d = keys.ArrowUp = keys.ArrowLeft = keys.ArrowDown = keys.ArrowRight = false; // Stop movement
-            document.getElementById(id).classList.add('active');
-        }
-        window.closeModal = function() { // Attach to window so HTML button can read it
-            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-            setTimeout(() => { activeModal = false; }, 200); // Small delay to prevent instant re-trigger
-            
-            // Push player slightly away from building so they don't instantly re-trigger
-            player.y += 20; 
+        
+        function cursorHover(isHovering) {
+            if(isHovering) cursor.classList.add('cursor-hover');
+            else cursor.classList.remove('cursor-hover');
         }
 
-        // --- Game Objects ---
-        const player = {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2 + 100,
-            width: 30,
-            height: 40,
-            speed: 5,
-            angle: 0,
-            color: '#ff4a36' // Redpanda color
-        };
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + 
+                now.getMinutes().toString().padStart(2, '0') + ":" + 
+                now.getSeconds().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
 
-        const buildings = [
-            { id: 'modal-profile', x: window.innerWidth/2 - 300, y: window.innerHeight/2 - 200, w: 150, h: 120, color: '#3498db', label: 'Profile' },
-            { id: 'modal-skills', x: window.innerWidth/2 + 150, y: window.innerHeight/2 - 200, w: 150, h: 120, color: '#f1c40f', label: 'Tech Stack' },
-            { id: 'modal-redpanda', x: window.innerWidth/2 - 300, y: window.innerHeight/2 + 100, w: 150, h: 120, color: '#e74c3c', label: 'Redpanda Ops' },
-            { id: 'modal-fivem', x: window.innerWidth/2 + 150, y: window.innerHeight/2 + 100, w: 150, h: 120, color: '#9b59b6', label: 'FiveM Scripts' }
+        // YouTube API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0', width: '0', videoId: 'kAlIi0iN0Ek',
+                playerVars: { 'autoplay': 1, 'loop': 1, 'playlist': 'kAlIi0iN0Ek', 'controls': 0 },
+                events: { 'onReady': (e) => e.target.setVolume(40) }
+            });
+        }
+        function unlockPortfolio() {
+            if(player) player.playVideo();
+            gsap.to("#entry-lock", { opacity: 0, duration: 1, onComplete: () => document.getElementById('entry-lock').style.display = 'none' });
+        }
+        function setVolume(val) { if(player) player.setVolume(val); }
+
+        // Projects
+        const projects = [
+            { id: 'ZIN_Multicharacter', title: 'Multicharacter', img: 'https://r2.fivemanage.com/image/vl8SWC9V0t20.png', desc: 'Cinematic character selection with 3D camera lerping and custom transition states.', stats: ['LUA: 90%', 'NUI: Vue'] },
+            { id: 'ZIN_AC', title: 'Anti-Cheat', img: 'https://r2.fivemanage.com/image/woZ2j0QrQkQB.png', desc: 'Heuristic security for event-based exploits and memory injection detection.', stats: ['LEVEL: Kernel', 'DB: MariaDB'] },
+            { id: 'ZIN_Hud', title: 'Neural Hud', img: 'https://r2.fivemanage.com/image/2pp2Zy3njUBG.png', desc: 'Minimalist performance HUD with vector assets and SVG animation.', stats: ['FPS: 144+', 'MS: 0.00ms'] },
+            { id: 'ZIN_AirportJob', title: 'Airport Job', img: 'https://r2.fivemanage.com/image/PvrWfhddFE3b.png', desc: 'Full pilot career and cargo system with dynamic world objects.', stats: ['TASKS: 50+', 'TYPE: Jobs'] },
+            { id: 'ZIN_FleecaRobbery', title: 'Fleeca Heist', img: 'https://r2.fivemanage.com/image/47C7Dq0f4XE7.png', desc: 'Sync-heavy heist with custom mini-games and thermal breaching logic.', stats: ['LUA: 100%', 'MINIGAMES: 3'] },
+            { id: 'ZIN_OilRig', title: 'Oil Rig Heist', img: 'https://r2.fivemanage.com/image/iYXxMxaHC86L.png', desc: 'End-game maritime robbery experience with customized MLO and routing.', stats: ['NPC: Custom', 'LOOT: Dynamic'] },
+            { id: 'ZIN_Phone', title: 'Logic Phone', img: 'https://r2.fivemanage.com/image/mLJoXKdRgZ8L.png', desc: 'Fully responsive smartphone simulation with real-time app notifications.', stats: ['APPS: 12', 'SYNC: Real-time'] },
+            { id: 'ZIN_Inventory', title: 'Grid Inventory', img: 'https://r2.fivemanage.com/image/47C7Dq0f4XE7.png', desc: 'Metadata-driven weight inventory featuring item attachments and crafting.', stats: ['SQL: Optimized', 'UI: React'] }
         ];
 
-        // --- Game Loop ---
-        function update() {
-            if (!gameRunning) return;
+        const grid = document.getElementById('project-grid-anchor');
+        projects.forEach(p => {
+            grid.innerHTML += `
+                <div class="project-card cursor-pointer group" onclick="openProject('${p.id}')" onmouseenter="cursorHover(true)" onmouseleave="cursorHover(false)">
+                    <div class="project-img absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('${p.img}')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                    <div class="absolute bottom-8 left-8 z-10">
+                        <p class="mono text-neon text-[9px] mb-2 tracking-widest opacity-0 group-hover:opacity-100 transition-all">SYSTEM_DATA_LOADED</p>
+                        <h4 class="orbitron text-2xl font-bold italic">${p.title}</h4>
+                    </div>
+                </div>
+            `;
+        });
 
-            // Move Player if no modal is active
-            if (!activeModal) {
-                let dx = 0; let dy = 0;
-                if (keys.w || keys.ArrowUp) dy -= player.speed;
-                if (keys.s || keys.ArrowDown) dy += player.speed;
-                if (keys.a || keys.ArrowLeft) dx -= player.speed;
-                if (keys.d || keys.ArrowRight) dx += player.speed;
-
-                // Rotation calculation
-                if (dx !== 0 || dy !== 0) {
-                    player.angle = Math.atan2(dy, dx) + Math.PI / 2; // +90deg to face "forward"
-                    player.x += dx;
-                    player.y += dy;
-                }
-
-                // Keep player in bounds
-                if (player.x < 0) player.x = 0;
-                if (player.x > canvas.width) player.x = canvas.width;
-                if (player.y < 0) player.y = 0;
-                if (player.y > canvas.height) player.y = canvas.height;
-
-                // Check Collisions
-                buildings.forEach(b => {
-                    if (player.x < b.x + b.w && player.x + player.width > b.x &&
-                        player.y < b.y + b.h && player.y + player.height > b.y) {
-                        openModal(b.id);
-                    }
-                });
-            }
-
-            draw();
-            requestAnimationFrame(update);
+        function openProject(id) {
+            const p = projects.find(item => item.id === id);
+            document.getElementById('modal-title').innerText = p.title;
+            document.getElementById('modal-desc').innerText = p.desc;
+            document.getElementById('modal-image').style.backgroundImage = `url(${p.img})`;
+            document.getElementById('modal-stats').innerHTML = p.stats.map(s => `<div>${s.split(':')[0]}: <span class="text-neon">${s.split(':')[1]}</span></div>`).join('');
+            
+            const modal = document.getElementById('modal-overlay');
+            modal.style.display = 'flex';
         }
 
-        function draw() {
-            // Clear canvas (grass background)
-            ctx.fillStyle = '#72db8c';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Paths/Roads (just decorative)
-            ctx.fillStyle = '#a1cb95';
-            ctx.fillRect(window.innerWidth/2 - 350, window.innerHeight/2 - 20, 700, 60);
-
-            // Draw Buildings
-            buildings.forEach(b => {
-                // Shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.2)';
-                ctx.fillRect(b.x + 10, b.y + 10, b.w, b.h);
-                // Building
-                ctx.fillStyle = b.color;
-                ctx.fillRect(b.x, b.y, b.w, b.h);
-                // Roof detail
-                ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                ctx.fillRect(b.x, b.y, b.w, 10);
-                
-                // Text
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 20px Segoe UI';
-                ctx.textAlign = 'center';
-                ctx.fillText(b.label, b.x + b.w/2, b.y + b.h/2 + 5);
-            });
-
-            // Draw Player (Car shape)
-            ctx.save();
-            ctx.translate(player.x + player.width/2, player.y + player.height/2);
-            ctx.rotate(player.angle);
-            
-            // Car Body
-            ctx.fillStyle = player.color;
-            ctx.beginPath();
-            ctx.roundRect(-player.width/2, -player.height/2, player.width, player.height, 5);
-            ctx.fill();
-
-            // Windshield
-            ctx.fillStyle = '#2c3e50';
-            ctx.fillRect(-player.width/2 + 5, -player.height/2 + 5, player.width - 10, 10);
-            
-            // Headlights
-            ctx.fillStyle = '#f1c40f';
-            ctx.fillRect(-player.width/2 + 2, -player.height/2 - 2, 8, 4);
-            ctx.fillRect(player.width/2 - 10, -player.height/2 - 2, 8, 4);
-
-            ctx.restore();
+        function closeModal() { 
+            document.getElementById('modal-overlay').style.display = 'none'; 
         }
+
+        // Game Logic
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let playerObj = { x: 100, y: 180 };
+        let bullets = []; let enemies = [];
+        canvas.addEventListener('mousedown', (e) => bullets.push({ x: e.offsetX, y: playerObj.y }));
+        function toggleGame() {
+            const c = document.getElementById('game-container');
+            c.style.display = c.style.display === 'flex' ? 'none' : 'flex';
+            if(c.style.display === 'flex') updateGame();
+        }
+        function updateGame() {
+            ctx.fillStyle = '#111'; ctx.fillRect(0,0,200,200);
+            ctx.fillStyle = '#00ffcc'; ctx.fillRect(playerObj.x - 10, playerObj.y, 20, 5);
+            bullets.forEach((b, i) => { b.y -= 5; ctx.fillRect(b.x, b.y, 2, 5); if(b.y < 0) bullets.splice(i, 1); });
+            if(Math.random() < 0.05) enemies.push({ x: Math.random() * 200, y: 0 });
+            enemies.forEach((en, i) => { en.y += 1; ctx.fillStyle = '#a855f7'; ctx.fillRect(en.x, en.y, 10, 10); if(en.y > 200) enemies.splice(i, 1); });
+            if(document.getElementById('game-container').style.display === 'flex') requestAnimationFrame(updateGame);
+        }
+
+        // Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('revealed'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('section').forEach(s => observer.observe(s));
+        setInterval(() => { document.getElementById('fps').innerText = Math.floor(Math.random() * (62 - 58) + 58); }, 800);
     </script>
 </body>
 </html>
