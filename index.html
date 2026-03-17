@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tobii | Tactical Dev</title>
+    <title>Tobii | Tactical Dev @ Redpanda</title>
     <style>
         :root {
             --redpanda: #ff4a36;
-            --electric-blue: #0ff;
-            --bg-color: #0d0e15;
+            --electric-blue: #00ffff;
+            --bg-color: #080a10;
             --terminal-green: #39ff14;
+            --terminal-dim: #1a5a1a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -18,357 +19,480 @@
             background-color: var(--bg-color);
             color: white;
             font-family: 'Courier New', Courier, monospace;
-            overflow: hidden; /* Stops scrollbars for the canvas */
+            overflow: hidden;
             user-select: none;
+            cursor: crosshair;
         }
 
-        /* Scanline Overlay */
+        /* CRT Scanline & Flicker Effects */
         body::after {
             content: " ";
             display: block;
             position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 998;
             background-size: 100% 2px, 3px 100%;
             pointer-events: none;
         }
 
-        /* START SCREEN */
-        #start-screen {
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            5% { opacity: 0.85; }
+            10% { opacity: 0.95; }
+            15% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+        .crt-flicker { animation: flicker 0.15s infinite; }
+
+        /* BOOT SEQUENCE SCREEN */
+        #boot-screen {
             position: absolute;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(13, 14, 21, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            transition: opacity 0.5s ease-out;
-        }
-
-        #start-btn {
-            background: transparent;
-            color: var(--electric-blue);
-            border: 2px solid var(--electric-blue);
-            padding: 20px 40px;
-            font-size: 1.5rem;
-            font-family: inherit;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px var(--electric-blue), inset 0 0 15px var(--electric-blue);
-            transition: 0.2s;
-            text-shadow: 0 0 5px var(--electric-blue);
-        }
-
-        #start-btn:hover {
-            background: var(--electric-blue);
-            color: #000;
-            box-shadow: 0 0 30px var(--electric-blue), inset 0 0 30px var(--electric-blue);
-        }
-
-        /* BACKGROUND CANVAS */
-        canvas {
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 0;
-        }
-
-        /* MAIN CONTENT */
-        .ui-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            color: var(--terminal-green);
+            z-index: 3000;
+            padding: 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            z-index: 10;
-            pointer-events: none; /* Let clicks pass through to canvas where needed */
+            align-items: flex-start;
         }
 
-        .hud-container {
-            background: rgba(20, 20, 30, 0.7);
-            border: 1px solid var(--redpanda);
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(255, 74, 54, 0.3);
-            pointer-events: auto; /* Re-enable clicks inside HUD */
-            backdrop-filter: blur(5px);
-        }
-
-        /* GLITCH EFFECT FOR NAME */
-        .glitch {
-            font-size: 5rem;
-            font-weight: bold;
-            position: relative;
-            color: white;
-            text-shadow: 0 0 10px white;
-            margin-bottom: 10px;
-        }
+        .boot-text { margin-bottom: 10px; font-size: 1.2rem; text-shadow: 0 0 5px var(--terminal-green); }
+        .hidden { display: none !important; }
         
-        .glitch::before, .glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(20, 20, 30, 0);
-        }
-        
-        .glitch::before {
-            left: 3px;
-            text-shadow: -2px 0 var(--redpanda);
-            clip: rect(24px, 550px, 90px, 0);
-            animation: glitch-anim-2 3s infinite linear alternate-reverse;
-        }
-        
-        .glitch::after {
-            left: -3px;
-            text-shadow: -2px 0 var(--electric-blue);
-            clip: rect(85px, 550px, 140px, 0);
-            animation: glitch-anim 2.5s infinite linear alternate-reverse;
-        }
-
-        @keyframes glitch-anim {
-            0% { clip: rect(10px, 9999px, 44px, 0); }
-            20% { clip: rect(80px, 9999px, 12px, 0); }
-            40% { clip: rect(33px, 9999px, 88px, 0); }
-            60% { clip: rect(98px, 9999px, 34px, 0); }
-            80% { clip: rect(12px, 9999px, 78px, 0); }
-            100% { clip: rect(66px, 9999px, 22px, 0); }
-        }
-        @keyframes glitch-anim-2 {
-            0% { clip: rect(65px, 9999px, 100px, 0); }
-            20% { clip: rect(15px, 9999px, 34px, 0); }
-            40% { clip: rect(89px, 9999px, 12px, 0); }
-            60% { clip: rect(22px, 9999px, 66px, 0); }
-            80% { clip: rect(78px, 9999px, 33px, 0); }
-            100% { clip: rect(44px, 9999px, 88px, 0); }
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            color: #ddd;
-            margin-bottom: 5px;
-        }
-
-        .neon-text {
-            color: var(--redpanda);
-            text-decoration: none;
-            text-shadow: 0 0 8px var(--redpanda);
-            transition: 0.3s;
-        }
-        .neon-text:hover {
-            color: white;
-            text-shadow: 0 0 15px var(--redpanda), 0 0 30px var(--redpanda);
-        }
-
-        p.location {
-            color: var(--terminal-green);
-            margin-bottom: 30px;
-            font-size: 1.2rem;
-            text-shadow: 0 0 5px var(--terminal-green);
-        }
-
-        /* GAME BUTTONS */
-        .controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .action-btn {
+        #init-btn {
+            margin-top: 30px;
             background: transparent;
-            color: white;
-            border: 1px solid #555;
-            padding: 10px 20px;
+            color: var(--redpanda);
+            border: 2px solid var(--redpanda);
+            padding: 15px 30px;
+            font-size: 1.5rem;
             font-family: inherit;
-            font-size: 1rem;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: 0.3s;
+            cursor: crosshair;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--redpanda);
+            transition: 0.2s;
+            opacity: 0;
         }
+        #init-btn:hover { background: var(--redpanda); color: #000; }
 
-        .action-btn::before {
-            content: '';
+        /* BACKGROUND CANVAS */
+        canvas { position: absolute; top: 0; left: 0; z-index: 0; }
+
+        /* MAIN CONTENT LAYOUT */
+        .main-grid {
             position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: rgba(255, 74, 54, 0.2);
-            transition: 0.3s;
-            z-index: -1;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            z-index: 10;
+            pointer-events: none;
+            padding: 40px;
+            gap: 40px;
         }
 
-        .action-btn:hover {
-            border-color: var(--redpanda);
-            box-shadow: 0 0 10px var(--redpanda);
+        /* HUD PANEL */
+        .hud-container {
+            background: rgba(10, 12, 20, 0.85);
+            border: 1px solid var(--electric-blue);
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+            pointer-events: auto;
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-left: 5px solid var(--redpanda);
         }
 
-        .action-btn:hover::before {
-            left: 0;
-        }
-        
-        /* Audio Element (Hidden) */
+        .glitch { font-size: 5rem; font-weight: bold; position: relative; color: white; text-shadow: 0 0 10px white; margin-bottom: 10px; letter-spacing: 5px; }
+        .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 12, 20, 0); }
+        .glitch::before { left: 4px; text-shadow: -2px 0 var(--redpanda); clip: rect(24px, 550px, 90px, 0); animation: glitch-anim-2 3s infinite linear alternate-reverse; }
+        .glitch::after { left: -4px; text-shadow: -2px 0 var(--electric-blue); clip: rect(85px, 550px, 140px, 0); animation: glitch-anim 2.5s infinite linear alternate-reverse; }
+
+        @keyframes glitch-anim { 0% { clip: rect(10px, 9999px, 44px, 0); } 20% { clip: rect(80px, 9999px, 12px, 0); } 40% { clip: rect(33px, 9999px, 88px, 0); } 60% { clip: rect(98px, 9999px, 34px, 0); } 80% { clip: rect(12px, 9999px, 78px, 0); } 100% { clip: rect(66px, 9999px, 22px, 0); } }
+        @keyframes glitch-anim-2 { 0% { clip: rect(65px, 9999px, 100px, 0); } 20% { clip: rect(15px, 9999px, 34px, 0); } 40% { clip: rect(89px, 9999px, 12px, 0); } 60% { clip: rect(22px, 9999px, 66px, 0); } 80% { clip: rect(78px, 9999px, 33px, 0); } 100% { clip: rect(44px, 9999px, 88px, 0); } }
+
+        h2 { font-size: 1.5rem; color: #aaa; margin-bottom: 10px; text-transform: uppercase;}
+        .neon-text { color: var(--redpanda); text-decoration: none; text-shadow: 0 0 8px var(--redpanda); transition: 0.3s; }
+        .neon-text:hover { color: white; text-shadow: 0 0 15px var(--redpanda); }
+        p.location { color: var(--electric-blue); margin-bottom: 40px; font-size: 1.2rem; text-shadow: 0 0 5px var(--electric-blue); }
+
+        .controls { display: flex; gap: 15px; flex-wrap: wrap; }
+        .action-btn { background: rgba(0, 255, 255, 0.05); color: white; border: 1px solid var(--electric-blue); padding: 12px 24px; font-family: inherit; font-size: 1rem; cursor: crosshair; position: relative; overflow: hidden; transition: 0.3s; text-transform: uppercase; font-weight: bold; }
+        .action-btn:hover { background: var(--electric-blue); color: #000; box-shadow: 0 0 15px var(--electric-blue); }
+
+        /* TERMINAL PANEL */
+        .terminal-container { background: rgba(0, 0, 0, 0.8); border: 1px solid var(--terminal-green); padding: 20px; box-shadow: 0 0 20px rgba(57, 255, 20, 0.1); pointer-events: auto; display: flex; flex-direction: column; overflow: hidden; }
+        .terminal-header { border-bottom: 1px solid var(--terminal-dim); padding-bottom: 10px; margin-bottom: 15px; color: var(--terminal-dim); font-size: 0.9rem; display: flex; justify-content: space-between; }
+        .terminal-output { flex-grow: 1; overflow-y: auto; color: var(--terminal-green); font-size: 1rem; line-height: 1.5; display: flex; flex-direction: column; gap: 5px; }
+        .terminal-output::-webkit-scrollbar { width: 5px; } .terminal-output::-webkit-scrollbar-thumb { background: var(--terminal-green); }
+        .terminal-input-line { display: flex; margin-top: 15px; color: var(--terminal-green); }
+        .terminal-prompt { margin-right: 10px; }
+        .terminal-input { background: transparent; border: none; color: white; font-family: inherit; font-size: 1rem; flex-grow: 1; outline: none; text-shadow: 0 0 5px white; }
+
+        /* --- VISUAL OVERLAYS (VAULT & SKILLS) --- */
+        .overlay-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(8, 10, 16, 0.95); z-index: 2000; display: none; flex-direction: column; padding: 50px 10%; overflow-y: auto; backdrop-filter: blur(15px); pointer-events: auto; opacity: 0; transition: opacity 0.5s ease; }
+        .overlay-screen::-webkit-scrollbar { width: 8px; } .overlay-screen::-webkit-scrollbar-thumb { background: var(--electric-blue); }
+
+        .vault-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--redpanda); padding-bottom: 20px; margin-bottom: 40px; }
+        .vault-title { font-size: 2.5rem; color: white; text-transform: uppercase; text-shadow: 0 0 10px var(--redpanda); }
+        .close-vault-btn { background: transparent; border: 1px solid var(--redpanda); color: var(--redpanda); padding: 10px 20px; font-family: inherit; font-weight: bold; cursor: crosshair; transition: 0.3s; }
+        .close-vault-btn:hover { background: var(--redpanda); color: black; box-shadow: 0 0 15px var(--redpanda); }
+        .section-title { font-size: 1.8rem; color: var(--electric-blue); margin-bottom: 20px; border-left: 5px solid var(--electric-blue); padding-left: 15px; }
+
+        .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .project-card { background: rgba(20, 20, 30, 0.8); border: 1px solid #333; border-radius: 4px; overflow: hidden; transition: all 0.3s ease; cursor: crosshair; position: relative; }
+        .project-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 20px rgba(0, 255, 255, 0); transition: 0.3s; pointer-events: none; }
+        .project-card:hover { border-color: var(--electric-blue); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 255, 255, 0.15); }
+        .project-card:hover::before { box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.2); }
+        .project-image { width: 100%; height: 180px; object-fit: cover; filter: grayscale(80%) contrast(1.2) sepia(20%) hue-rotate(180deg); transition: 0.4s ease; border-bottom: 1px solid #333; }
+        .project-card:hover .project-image { filter: grayscale(0%) contrast(1.1); border-color: var(--electric-blue); }
+        .project-info { padding: 20px; } .project-info h3 { color: white; margin-bottom: 10px; font-size: 1.2rem; } .project-info p { color: #aaa; font-size: 0.9rem; line-height: 1.4; }
+
+        /* SKILL TREE SPECIFICS */
+        .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-bottom: 60px; }
+        .skill-card { background: rgba(20, 20, 30, 0.6); border: 1px solid #444; padding: 25px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: 0.3s; cursor: crosshair; }
+        .skill-card:hover { border-color: var(--terminal-green); box-shadow: 0 0 20px rgba(57, 255, 20, 0.2); transform: scale(1.05); }
+        .skill-icon { width: 60px; height: 60px; margin-bottom: 15px; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); transition: 0.3s; }
+        .skill-card:hover .skill-icon { filter: drop-shadow(0 0 15px var(--terminal-green)); }
+        .skill-card h3 { color: white; font-size: 1.5rem; margin-bottom: 10px; }
+        .skill-card p { color: #aaa; font-size: 0.85rem; line-height: 1.5; }
+
         audio { display: none; }
-
     </style>
 </head>
-<body>
+<body class="crt-flicker">
 
     <audio id="bgm" loop>
         <source src="https://assets.mixkit.co/music/preview/mixkit-cyberpunk-city-126.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="start-screen">
-        <button id="start-btn">Initiate Sequence</button>
+    <div id="boot-screen">
+        <div id="boot-text-container"></div>
+        <button id="init-btn" class="hidden">Connect to Mainframe</button>
     </div>
 
-    <canvas id="electric-canvas"></canvas>
+    <div id="skills-vault" class="overlay-screen">
+        <div class="vault-header">
+            <h1 class="vault-title" style="color: var(--terminal-green); text-shadow: 0 0 10px var(--terminal-green);">Neural Pathways // Tech Stack</h1>
+            <button class="close-vault-btn" style="border-color: var(--terminal-green); color: var(--terminal-green);" onclick="closeOverlay('skills-vault')">[X] CLOSE TREE</button>
+        </div>
 
-    <div class="ui-layer">
-        <div class="hud-container">
-            <h1 class="glitch" data-text="TOBII">TOBII</h1>
-            <h2>Tactical Dev @ <a href="https://www.redpanda.com" target="_blank" class="neon-text">Redpanda Data</a></h2>
-            <p class="location">LOC: SERBIA [ONLINE]</p>
-            
-            <div class="controls">
-                <button class="action-btn" onclick="alert('Accessing Mainframe...')">View Projects</button>
-                <button class="action-btn" onclick="alert('Comm link established.')">Contact</button>
-                <button class="action-btn" onclick="alert('Skill Tree Locked. Requires level 10.')">Skill Tree</button>
+        <div class="skills-grid">
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/lua/lua-original.svg" class="skill-icon" alt="Lua">
+                <h3>Lua</h3>
+                <p>The backbone of Zinthyn scripts. Used for heavy server-side logic, client-side rendering, and complex FiveM framework architecture.</p>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" class="skill-icon" alt="C++">
+                <h3>C++</h3>
+                <p>High-performance memory manipulation, heuristic scanning for the AntiCheat module, and low-level system integrations.</p>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" class="skill-icon" alt="Python">
+                <p>Automated data scrubbing, rapid prototyping, and backend API interactions for massive Redpanda data pipelines.</p>
+                <h3>Python</h3>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/c/c-original.svg" class="skill-icon" alt="C+">
+                <h3>C+</h3>
+                <p>System-level tactical development, optimizing raw performance, and bridging engine-level integrations.</p>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" class="skill-icon" alt="JavaScript">
+                <h3>JavaScript</h3>
+                <p>Powering interactive NUI for FiveM, real-time terminal logic, and dynamic DOM manipulation for immersive web experiences.</p>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" class="skill-icon" alt="TypeScript">
+                <h3>TypeScript</h3>
+                <p>Type-safe, scalable frontend development for mission-critical web applications and visualizers.</p>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" class="skill-icon" alt="HTML">
+                <h3>HTML</h3>
+                <p>Structuring the architectural layer of tactical web interfaces, including responsive FiveM UI designs.</p>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/php/php-original.svg" class="skill-icon" alt="PHP">
+                <h3>PHP</h3>
+                <p>Server-side web logic, legacy API maintenance, and fast backend processing for telemetry dashboards.</p>
+            </div>
+            <div class="skill-card">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" class="skill-icon" alt="SQL">
+                <h3>SQL</h3>
+                <p>Database architecture. Writing highly optimized queries for seamless MultiChar data persistence and inventory states.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="data-vault" class="overlay-screen">
+        <div class="vault-header">
+            <h1 class="vault-title">Project Databanks</h1>
+            <button class="close-vault-btn" onclick="closeOverlay('data-vault')">[X] CLOSE VAULT</button>
+        </div>
+        <h2 class="section-title">Redpanda // Tactical Ops</h2>
+        <div class="vault-grid">
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/12016192769026402767_0" class="project-image" alt="RP Stream Visualizer">
+                <div class="project-info"><h3>RP-Stream-Visualizer</h3><p>Real-time node graph representation of Redpanda cluster health. Built with WebGL for rendering millions of events per second.</p></div>
+            </div>
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/12016192769026402767_1" class="project-image" alt="Tactical CLI">
+                <div class="project-info"><h3>Tactical-CLI</h3><p>A blazing fast Rust-based command-line interface for topic management and partition scaling on the fly.</p></div>
+            </div>
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/12016192769026402767_2" class="project-image" alt="Wasm Scrubber">
+                <div class="project-info"><h3>Wasm Data Scrubber</h3><p>Inline WebAssembly data transformation pipelines executing at wire speed, stripping PII before it hits the disk.</p></div>
+            </div>
+        </div>
+        <h2 class="section-title" style="border-left-color: var(--redpanda); color: var(--redpanda);">FiveM // Framework Development</h2>
+        <div class="vault-grid">
+            <div class="project-card" style="border-color: #444;">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_0" class="project-image" alt="Admin Menu">
+                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-AdminMenu</h3><p>Fully featured administrative suite with live player tracking, dynamic punishment scaling, and spectator tools.</p></div>
+            </div>
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_1" class="project-image" alt="MultiChar">
+                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-MultiChar</h3><p>Sleek character selection screen with support for infinite slots, custom ped rendering, and database integration.</p></div>
+            </div>
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_2" class="project-image" alt="AntiCheat">
+                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-AntiCheat</h3><p>Aggressive heuristic memory scanning script. Prevents lua injections and autobans mod-menu users with high accuracy.</p></div>
+            </div>
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/15295263993807756803_3" class="project-image" alt="Radio">
+                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-Radio</h3><p>Tactical communication HUD with private frequencies, dispatch integration, and voice-proximity adjustments.</p></div>
+            </div>
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/3675985160874573204_0" class="project-image" alt="Stress">
+                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-Stress</h3><p>Dynamic stress system affecting player vision and weapon recoil based on environment. Curable through RP actions.</p></div>
+            </div>
+            <div class="project-card">
+                <img src="http://googleusercontent.com/image_collection/image_retrieval/3675985160874573204_1" class="project-image" alt="Inventory">
+                <div class="project-info"><h3 style="color: var(--redpanda);">Zinthyn-Inventory</h3><p>Next-gen slot-based drag-and-drop inventory UI. Features weight systems, weapon attachments, and metadata persistence.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-ui" class="hidden">
+        <canvas id="electric-canvas"></canvas>
+
+        <div class="main-grid">
+            <div class="hud-container">
+                <h1 class="glitch" data-text="TOBII">TOBII</h1>
+                <h2>Tactical Dev @ <a href="https://www.redpanda.com" target="_blank" class="neon-text">Redpanda Data</a></h2>
+                <p class="location">>> UPLINK: SERBIA [ONLINE]</p>
+                
+                <div class="controls">
+                    <button class="action-btn" onclick="executeCommand('projects')">Data Streams (Projects)</button>
+                    <button class="action-btn" onclick="executeCommand('skills')">Tech Stack (Skills)</button>
+                    <button class="action-btn" onclick="executeCommand('about')">Profile</button>
+                    <button class="action-btn" onclick="executeCommand('contact')">Establish Comm</button>
+                </div>
+            </div>
+
+            <div class="terminal-container">
+                <div class="terminal-header">
+                    <span>root@tobii-mainframe:~</span>
+                    <span>v2.6.0 [ENCRYPTED]</span>
+                </div>
+                <div class="terminal-output" id="terminal-output">
+                    <div>> Terminal initialized. Type 'help' for available commands.</div>
+                </div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">tobii@rp-tactical:~$</span>
+                    <input type="text" class="terminal-input" id="terminal-input" autocomplete="off" autofocus>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. Audio & Start Screen Logic ---
-        const startBtn = document.getElementById('start-btn');
-        const startScreen = document.getElementById('start-screen');
-        const bgm = document.getElementById('bgm');
+        // --- BOOT SEQUENCE ---
+        const bootLines = [
+            "Initializing kernel...",
+            "Loading tactical dev modules: [OK]",
+            "Mounting Redpanda data streams: [OK]",
+            "Fetching Zinthyn FiveM resources: [OK]",
+            "Compiling Tech Stack Neural Pathways: [OK]",
+            "Bypassing geo-restrictions (Serbia): [OK]",
+            "Establishing neural link...",
+            "System Audio: STANDBY for user initiation.",
+            "Ready."
+        ];
 
-        startBtn.addEventListener('click', () => {
-            bgm.volume = 0.5; // Set volume to 50%
+        const bootContainer = document.getElementById('boot-text-container');
+        const initBtn = document.getElementById('init-btn');
+        const bootScreen = document.getElementById('boot-screen');
+        const mainUi = document.getElementById('main-ui');
+        const bgm = document.getElementById('bgm');
+        const terminalInput = document.getElementById('terminal-input');
+
+        let bootIndex = 0;
+        function printBootLine() {
+            if (bootIndex < bootLines.length) {
+                const line = document.createElement('div');
+                line.className = 'boot-text';
+                line.textContent = '> ' + bootLines[bootIndex];
+                bootContainer.appendChild(line);
+                bootIndex++;
+                setTimeout(printBootLine, Math.random() * 200 + 50); 
+            } else {
+                initBtn.classList.remove('hidden');
+                setTimeout(() => { initBtn.style.opacity = 1; }, 100);
+            }
+        }
+        window.onload = printBootLine;
+
+        initBtn.addEventListener('click', () => {
+            bgm.volume = 0.4;
             bgm.play().catch(e => console.log("Audio play failed:", e));
-            
-            // Fade out and remove start screen
-            startScreen.style.opacity = '0';
-            setTimeout(() => {
-                startScreen.style.display = 'none';
-            }, 500);
+            bootScreen.classList.add('hidden');
+            mainUi.classList.remove('hidden');
+            initParticles(); 
+            terminalInput.focus();
         });
 
-        // --- 2. Interactive "Electric Node" Particle System ---
+        // --- TERMINAL & OVERLAY LOGIC ---
+        const termOutput = document.getElementById('terminal-output');
+
+        function printToTerminal(htmlContent, isCommand = false) {
+            const div = document.createElement('div');
+            if (isCommand) { div.innerHTML = `<span style="color: white;">tobii@rp-tactical:~$</span> ${htmlContent}`; } 
+            else { div.innerHTML = htmlContent; }
+            termOutput.appendChild(div);
+            termOutput.scrollTop = termOutput.scrollHeight; 
+        }
+
+        function openOverlay(id, message) {
+            printToTerminal(`> ${message}`);
+            const overlay = document.getElementById(id);
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.opacity = '1'; }, 10);
+        }
+
+        function closeOverlay(id) {
+            const overlay = document.getElementById(id);
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; terminalInput.focus(); }, 500);
+        }
+
+        const commands = {
+            'help': `Available commands:<br>
+                     - <b>about</b>: View operative profile<br>
+                     - <b>skills</b>: View programming languages & tech stack<br>
+                     - <b>projects</b>: Access visual Data Vault (Redpanda & Zinthyn)<br>
+                     - <b>contact</b>: Get communication protocols<br>
+                     - <b>clear</b>: Purge terminal history`,
+            'about': `<b>Name:</b> Tobii<br>
+                      <b>Role:</b> Tactical Dev<br>
+                      <b>Faction:</b> Redpanda Data<br>
+                      <b>Location:</b> Serbia<br>
+                      <b>Specialty:</b> High-throughput data streaming, FiveM Server Architecture (Zinthyn Scripts), making things electric.`,
+            'projects': 'vault', 
+            'skills': 'skills',
+            'contact': `> Comm-link protocols:<br>
+                        > Email: user@domain.com<br>
+                        > GitHub: <a href="#" class="neon-text">github.com/Tobii</a><br>
+                        > Discord: Tobii#0000`
+        };
+
+        function executeCommand(cmd) {
+            const cleanCmd = cmd.trim().toLowerCase();
+            printToTerminal(cleanCmd, true);
+            if (cleanCmd === '') return;
+            if (cleanCmd === 'clear') { termOutput.innerHTML = ''; return; }
+
+            if (commands[cleanCmd] === 'vault') {
+                openOverlay('data-vault', "Bypassing security... Opening high-resolution Data Vault.");
+            } else if (commands[cleanCmd] === 'skills') {
+                openOverlay('skills-vault', "Accessing Neural Pathways... Mapping Tech Stack.");
+            } else if (commands[cleanCmd]) {
+                setTimeout(() => printToTerminal(commands[cleanCmd]), 200);
+            } else {
+                setTimeout(() => printToTerminal(`<span style="color: var(--redpanda);">Error: command not found: ${cleanCmd}</span>`), 200);
+            }
+        }
+
+        terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { executeCommand(this.value); this.value = ''; }
+        });
+        document.querySelector('.terminal-container').addEventListener('click', () => { terminalInput.focus(); });
+
+        // --- INTERACTIVE CANVAS (ELECTRIC NODES) ---
         const canvas = document.getElementById('electric-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
         let particlesArray = [];
-        let mouse = { x: null, y: null, radius: 150 };
-
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
-
-        // Resize canvas on window resize
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            initParticles();
-        });
+        let mouse = { x: null, y: null, radius: 120 };
+        window.addEventListener('mousemove', (event) => { mouse.x = event.x; mouse.y = event.y; });
+        window.addEventListener('mouseout', () => { mouse.x = undefined; mouse.y = undefined; });
 
         class Particle {
             constructor(x, y, directionX, directionY, size, color) {
-                this.x = x;
-                this.y = y;
-                this.directionX = directionX;
-                this.directionY = directionY;
-                this.size = size;
-                this.color = color;
+                this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY;
+                this.size = size; this.color = color; this.baseX = this.x; this.baseY = this.y;
             }
-            
-            // Draw individual particle
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-
-            // Move particle and check mouse interaction
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
             update() {
                 if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
                 if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
-
-                // Collision detection with mouse (electric repel effect)
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx*dx + dy*dy);
-                
+                let dx = mouse.x - this.x; let dy = mouse.y - this.y; let distance = Math.sqrt(dx*dx + dy*dy);
                 if (distance < mouse.radius) {
-                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) this.x += 5;
-                    if (mouse.x > this.x && this.x > this.size * 10) this.x -= 5;
-                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) this.y += 5;
-                    if (mouse.y > this.y && this.y > this.size * 10) this.y -= 5;
+                    const forceDirectionX = dx / distance; const forceDirectionY = dy / distance;
+                    const force = (mouse.radius - distance) / mouse.radius;
+                    this.x += forceDirectionX * force * 3; this.y += forceDirectionY * force * 3;
+                } else {
+                    if (this.x !== this.baseX) { this.x -= this.directionX; }
+                    if (this.y !== this.baseY) { this.y -= this.directionY; }
                 }
-                
-                this.x += this.directionX;
-                this.y += this.directionY;
+                this.x += this.directionX * 0.5; this.y += this.directionY * 0.5;
                 this.draw();
             }
         }
 
-        // Populate particle array
         function initParticles() {
             particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            let numberOfParticles = (canvas.height * canvas.width) / 10000;
             for (let i = 0; i < numberOfParticles; i++) {
                 let size = (Math.random() * 2) + 1;
                 let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
                 let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let directionX = (Math.random() * 2) - 1;
-                let directionY = (Math.random() * 2) - 1;
-                let color = Math.random() > 0.5 ? '#ff4a36' : '#0ff'; // Mix of Redpanda Red and Cyan
-                
-                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                let color = Math.random() > 0.5 ? '#ff4a36' : '#00ffff'; 
+                particlesArray.push(new Particle(x, y, (Math.random() * 2) - 1, (Math.random() * 2) - 1, size, color));
             }
         }
 
-        // Draw lines between close particles
         function connectNodes() {
-            let opacityValue = 1;
             for (let a = 0; a < particlesArray.length; a++) {
                 for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
-                                   ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                    
-                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                        opacityValue = 1 - (distance / 20000);
-                        ctx.strokeStyle = `rgba(0, 255, 255, ${opacityValue})`;
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2);
+                    if (distance < (canvas.width / 8) * (canvas.height / 8)) {
+                        let opacityValue = 1 - (distance / 15000);
+                        let color = particlesArray[a].color; 
+                        ctx.strokeStyle = color === '#ff4a36' ? `rgba(255, 74, 54, ${opacityValue})` : `rgba(0, 255, 255, ${opacityValue})`;
                         ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
                     }
                 }
             }
         }
 
-        // Animation Loop
         function animate() {
             requestAnimationFrame(animate);
             ctx.clearRect(0, 0, innerWidth, innerHeight);
-            
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-            }
+            for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); }
             connectNodes();
         }
-
-        initParticles();
-        animate();
+        animate(); 
     </script>
 </body>
 </html>
