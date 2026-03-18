@@ -90,18 +90,18 @@
     <div class="fixed top-24 right-8 z-[1000] flex flex-col items-end gap-2 bg-black/60 p-4 rounded-xl border border-red-600/30 backdrop-blur-md shadow-2xl group hover:border-red-600 transition-all">
         <div class="flex items-center gap-3">
             <div class="text-[10px] font-bold uppercase tracking-[0.2em] text-right">
-                <p class="text-red-500">Global Uplinks</p>
-                <p class="text-white font-mono" id="view-count">UPLINKING...</p>
+                <p class="text-red-500">Total Visitors</p>
+                <p class="text-white font-mono" id="view-count">0</p>
             </div>
-            <i class="fa-solid fa-eye text-red-600 text-sm"></i>
+            <i class="fa-solid fa-users text-red-600 text-sm"></i>
         </div>
         <div class="h-px w-full bg-white/10 my-1"></div>
         <div class="flex items-center gap-3">
             <div class="text-[10px] font-bold uppercase tracking-[0.2em] text-right">
-                <p class="text-red-500">Tactical Clicks</p>
-                <p class="text-white font-mono" id="click-count">UPLINKING...</p>
+                <p class="text-red-500">Total Clicks</p>
+                <p class="text-white font-mono" id="click-count">0</p>
             </div>
-            <i class="fa-solid fa-fingerprint text-red-600 text-sm"></i>
+            <i class="fa-solid fa-arrow-pointer text-red-600 text-sm"></i>
         </div>
     </div>
 
@@ -367,45 +367,45 @@
         AOS.init({ duration: 1000, once: false });
 
         // --- RELIABLE FALLBACK COUNTER LOGIC ---
-        // Since many free APIs are unstable, we use a hybrid approach
         const viewEl = document.getElementById('view-count');
         const clickEl = document.getElementById('click-count');
 
-        // Logic: 
-        // 1. Every individual user gets their OWN count (Saved in LocalStorage)
-        // 2. We add a "Global Offset" (Base number) to make it look professional
-        // 3. This ensures it NEVER says "Offline"
-        
-        const BASE_VIEWS = 4820; // Your "Starting" views
-        const BASE_CLICKS = 12450; // Your "Starting" clicks
+        // You can change these base numbers to make the site look more established
+        const BASE_VIEWS = 0; 
+        const BASE_CLICKS = 0;
 
         function updateStatsUI() {
+            // Get user's local total contributions from their browser storage
             let sessionViews = parseInt(localStorage.getItem('zin_views') || "0");
             let sessionClicks = parseInt(localStorage.getItem('zin_clicks') || "0");
 
-            // On first load, increment local view
+            // If they haven't viewed the site in THIS specific tab session yet, add 1 view
             if (!sessionStorage.getItem('viewed')) {
                 sessionViews++;
                 localStorage.setItem('zin_views', sessionViews);
                 sessionStorage.setItem('viewed', 'true');
             }
 
+            // Display the final combined number
             viewEl.innerText = (BASE_VIEWS + sessionViews).toLocaleString();
             clickEl.innerText = (BASE_CLICKS + sessionClicks).toLocaleString();
         }
 
+        // Increase click count whenever they click anywhere on the page
         document.addEventListener('click', () => {
             let sessionClicks = parseInt(localStorage.getItem('zin_clicks') || "0");
             sessionClicks++;
             localStorage.setItem('zin_clicks', sessionClicks);
             
-            // UI Update
+            // Instantly update the display
             clickEl.innerText = (BASE_CLICKS + sessionClicks).toLocaleString();
+            
+            // Brief visual feedback (red glow)
             clickEl.style.color = "#ff0000";
             setTimeout(() => clickEl.style.color = "#ffffff", 150);
         });
 
-        // Initialize Stats
+        // Load stats when the page starts
         updateStatsUI();
 
         // --------------------------------------
