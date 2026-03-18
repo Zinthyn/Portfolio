@@ -87,6 +87,24 @@
     <canvas id="matrix-canvas"></canvas>
     <div class="scanline"></div>
 
+    <div class="fixed top-24 right-8 z-[1000] flex flex-col items-end gap-2 bg-black/60 p-4 rounded-xl border border-red-600/30 backdrop-blur-md shadow-2xl group hover:border-red-600 transition-all">
+        <div class="flex items-center gap-3">
+            <div class="text-[10px] font-bold uppercase tracking-[0.2em] text-right">
+                <p class="text-red-500">Global Uplinks</p>
+                <p class="text-white font-mono" id="view-count">SYNCING...</p>
+            </div>
+            <i class="fa-solid fa-eye text-red-600 text-sm"></i>
+        </div>
+        <div class="h-px w-full bg-white/10 my-1"></div>
+        <div class="flex items-center gap-3">
+            <div class="text-[10px] font-bold uppercase tracking-[0.2em] text-right">
+                <p class="text-red-500">Live Interactions</p>
+                <p class="text-white font-mono" id="click-count">SYNCING...</p>
+            </div>
+            <i class="fa-solid fa-fingerprint text-red-600 text-sm"></i>
+        </div>
+    </div>
+
     <div class="fixed bottom-24 left-8 z-[1000] flex items-center gap-4 bg-black/60 p-3 rounded-xl border border-red-600/30 backdrop-blur-md shadow-2xl">
         <button onclick="toggleMusic()" id="music-btn" class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white hover:scale-110 transition shadow-[0_0_20px_rgba(255,0,0,0.5)]">
             <i class="fa-solid fa-play" id="play-icon"></i>
@@ -347,6 +365,45 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         AOS.init({ duration: 1000, once: false });
+
+        // --- GLOBAL COUNTER LOGIC (FOREVER) ---
+        const API_BASE = "https://api.countapi.xyz";
+        const NAMESPACE = "zinthyn_spec_ops_v2"; // Unique Key for your site
+        const viewEl = document.getElementById('view-count');
+        const clickEl = document.getElementById('click-count');
+
+        async function syncGlobalStats() {
+            try {
+                // Update Views
+                const viewRes = await fetch(`${API_BASE}/hit/${NAMESPACE}/visits`);
+                const viewData = await viewRes.json();
+                viewEl.innerText = viewData.value.toLocaleString();
+
+                // Get current clicks without incrementing (just to display)
+                const clickRes = await fetch(`${API_BASE}/get/${NAMESPACE}/total_clicks`);
+                const clickData = await clickRes.json();
+                clickEl.innerText = (clickData.value || 0).toLocaleString();
+            } catch (e) {
+                viewEl.innerText = "OFFLINE";
+                clickEl.innerText = "OFFLINE";
+            }
+        }
+
+        async function registerGlobalClick() {
+            try {
+                const res = await fetch(`${API_BASE}/hit/${NAMESPACE}/total_clicks`);
+                const data = await res.json();
+                clickEl.innerText = data.value.toLocaleString();
+                // Add a little flash effect to the number
+                clickEl.style.color = "#ff0000";
+                setTimeout(() => clickEl.style.color = "#ffffff", 200);
+            } catch (e) { console.error("Handshake Failed"); }
+        }
+
+        // Trigger global click on any document interaction
+        document.addEventListener('click', registerGlobalClick);
+        syncGlobalStats(); // Run on load
+        // --------------------------------------
 
         function openProject(title, desc, tech) {
             document.getElementById('modal-title').innerText = title;
