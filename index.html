@@ -4,27 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zinthyn | Senior Systems Architect</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --accent: #ff0000;
+            --accent-glow: rgba(255, 0, 0, 0.5);
             --bg-deep: #050508;
-            --glass: rgba(10, 10, 15, 0.9);
-            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(10, 10, 15, 0.85);
+            --border: rgba(255, 255, 255, 0.05);
         }
 
-        html { scroll-snap-type: y mandatory; scroll-behavior: smooth; scrollbar-width: none; }
+        /* Scroll Snap Engine */
+        html { 
+            scroll-snap-type: y mandatory; 
+            scroll-behavior: smooth; 
+            scrollbar-width: none; 
+            background-color: var(--bg-deep);
+        }
         html::-webkit-scrollbar { display: none; }
 
         body {
-            background-color: var(--bg-deep);
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: #ffffff;
             margin: 0;
+            overflow-x: hidden;
+            line-height: 1.6;
         }
 
         section {
@@ -34,127 +44,161 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 100px 10%;
+            padding: 80px 10%;
             position: relative;
-            border-bottom: 1px solid var(--border);
         }
 
+        /* AAA Visual Effects */
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
             border: 1px solid var(--border);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 12px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .glass-card:hover {
             border-color: var(--accent);
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.1);
-            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(255, 0, 0, 0.15);
+            transform: translateY(-8px);
         }
 
-        /* Hero Text Glow */
-        .hero-title {
-            font-size: clamp(3rem, 10vw, 8rem);
-            line-height: 0.9;
-            letter-spacing: -0.05em;
-            background: linear-gradient(to bottom, #fff 40%, #444 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .red-glow-text { text-shadow: 0 0 20px var(--accent-glow); }
 
-        /* Progress Circles */
-        .prog-circle {
-            stroke: var(--accent);
-            stroke-dasharray: 314; 
-            stroke-dashoffset: 314;
-            transition: stroke-dashoffset 2s ease-out;
-            filter: drop-shadow(0 0 5px var(--accent));
+        /* Terminal Styling (Screenshot 1 Match) */
+        .terminal-window {
+            background: #0d0d12;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
         }
-
-        /* Animated Background Gradients */
-        .bg-glow {
-            position: absolute;
-            width: 40vw;
-            height: 40vw;
-            background: radial-gradient(circle, rgba(255, 0, 0, 0.05) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Custom Bullet styling for "What I Offer" */
-        .offer-list li {
-            position: relative;
-            padding-left: 25px;
-            margin-bottom: 12px;
-            font-size: 0.9rem;
-            color: #a0a0a0;
-        }
-        .offer-list li::before {
-            content: '→';
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-            font-weight: bold;
-        }
-
         .code-keyword { color: #c678dd; }
         .code-func { color: #61afef; }
         .code-string { color: #98c379; }
         .code-comment { color: #5c6370; font-style: italic; }
+        .code-var { color: #d19a66; }
+
+        /* Progress Rings */
+        .prog-circle {
+            stroke: var(--accent);
+            stroke-dasharray: 314; 
+            stroke-dashoffset: 314;
+            transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Scanline Overlay */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.3;
+        }
+
+        /* Modal Overlay */
+        #project-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Game UI */
+        #game-canvas {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border: 1px solid #1a1a1a;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+        .hack-node {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border: 1px solid var(--accent);
+            background: rgba(255,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--accent);
+            animation: nodePulse 1.5s infinite;
+        }
+        @keyframes nodePulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 15px var(--accent-glow); }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
     </style>
 </head>
 <body>
 
-    <nav class="fixed top-0 w-full z-50 flex justify-between items-center px-12 py-8 pointer-events-none">
-        <div class="text-xl font-black tracking-tighter text-white pointer-events-auto">ZINTHYN<span class="text-red-600">.CORE</span></div>
-        <div class="hidden lg:flex gap-12 text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500 pointer-events-auto">
+    <div class="overlay"></div>
+
+    <nav class="fixed top-0 w-full z-[200] flex justify-between items-center px-12 py-8 bg-gradient-to-b from-black/80 to-transparent">
+        <div class="text-2xl font-black tracking-tighter text-white">ZINTHYN<span class="text-red-600 italic">_ARCH</span></div>
+        <div class="hidden lg:flex gap-10 text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">
             <a href="#home" class="hover:text-red-500 transition">Initialization</a>
             <a href="#skills" class="hover:text-red-500 transition">Arsenal</a>
-            <a href="#services" class="hover:text-red-500 transition">Deployment</a>
-            <a href="#contact" class="hover:text-red-500 transition">Handshake</a>
+            <a href="#projects" class="hover:text-red-500 transition">Gallery</a>
+            <a href="#minigame" class="hover:text-red-500 transition">Bypass</a>
+            <a href="#contact" class="hover:text-red-500 transition">Link</a>
         </div>
+        <div class="text-xs font-mono text-red-600 hidden md:block">LATENCY: 12ms // STATUS: ENCRYPTED</div>
     </nav>
 
     <section id="home">
-        <div class="bg-glow top-[-10%] left-[-10%]"></div>
-        <div class="flex flex-col lg:flex-row items-center gap-20" data-aos="fade-up">
-            <div class="flex-1">
-                <p class="text-red-600 font-mono text-sm tracking-[0.4em] mb-4 uppercase">System Architect // v2.0.26</p>
-                <h1 class="hero-title font-black mb-8">TACTICAL<br>ENGINEER</h1>
-                <p class="text-gray-400 text-lg max-w-lg leading-relaxed mb-10">
-                    High-performance backend solutions for <span class="text-white">FiveM, alt:V, and Distributed Systems</span>. 
-                    Specializing in memory efficiency and low-latency data pipelines.
+        <div class="flex flex-col lg:flex-row items-center gap-16" data-aos="fade-up">
+            <div class="flex-1 space-y-8">
+                <div class="inline-block px-4 py-1 border border-red-500/30 rounded text-red-500 font-mono text-xs tracking-widest bg-red-500/5">
+                    LEVEL: SENIOR_SYSTEMS_ARCHITECT
+                </div>
+                <h1 class="text-7xl lg:text-9xl font-black tracking-tighter leading-none">
+                    CODE <br><span class="text-red-600 italic">LETHALITY.</span>
+                </h1>
+                <p class="text-gray-400 text-lg max-w-xl font-light leading-relaxed">
+                    Developing robust backends, microservices, and secure APIs using <span class="text-white">C#, Java, and PHP (Symfony)</span>. 
+                    Optimizing the edge of high-performance gaming.
                 </p>
-                <div class="flex gap-4">
-                    <a href="#services" class="px-10 py-4 bg-red-600 font-black text-[10px] uppercase tracking-widest rounded-sm hover:bg-red-700 transition shadow-2xl">View Services</a>
-                    <a href="#skills" class="px-10 py-4 border border-white/10 font-black text-[10px] uppercase tracking-widest rounded-sm hover:bg-white/5 transition">Skill Matrix</a>
+                <div class="flex gap-6 pt-4">
+                    <a href="#projects" class="group relative px-10 py-5 bg-red-600 rounded overflow-hidden shadow-[0_0_30px_rgba(255,0,0,0.3)]">
+                        <span class="relative z-10 text-[10px] font-black uppercase tracking-widest">Access Archive</span>
+                    </a>
+                    <a href="#minigame" class="px-10 py-5 border border-white/10 hover:bg-white/5 transition rounded text-[10px] font-black uppercase tracking-widest">Test Latency</a>
                 </div>
             </div>
 
-            <div class="flex-1 w-full max-w-2xl">
-                <div class="glass-card rounded-xl overflow-hidden shadow-2xl scale-105 lg:scale-110">
-                    <div class="bg-[#1a1b26] px-4 py-3 flex items-center justify-between border-b border-white/5">
+            <div class="flex-1 w-full max-w-2xl" data-aos="fade-left">
+                <div class="terminal-window rounded-xl overflow-hidden border border-white/5">
+                    <div class="bg-[#1a1b26] px-5 py-4 flex items-center justify-between">
                         <div class="flex gap-2">
                             <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
                             <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
                             <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
                         </div>
-                        <span class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">src/server/developer.lua</span>
+                        <span class="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em]">server.lua</span>
                     </div>
-                    <div class="p-8 font-mono text-sm leading-relaxed bg-[#0d0d12]">
-                        <div class="flex gap-6"><span class="text-gray-700">01</span><p><span class="code-keyword">local</span> Developer = {}</p></div>
-                        <div class="flex gap-6"><span class="text-gray-700">02</span><p>Developer.__index = Developer</p></div>
+                    <div class="p-10 font-mono text-sm sm:text-base leading-relaxed overflow-x-auto">
+                        <div class="flex gap-6"><span class="text-gray-700">01</span><p><span class="code-keyword">local</span> <span class="code-var">Developer</span> = {}</p></div>
+                        <div class="flex gap-6"><span class="text-gray-700">02</span><p><span class="code-var">Developer</span>.__index = <span class="code-var">Developer</span></p></div>
                         <div class="flex gap-6 h-4"></div>
-                        <div class="flex gap-6"><span class="text-gray-700">04</span><p><span class="code-keyword">function</span> Developer:<span class="code-func">new</span>(name, role, skills, contact)</p></div>
+                        <div class="flex gap-6"><span class="text-gray-700">04</span><p><span class="code-keyword">function</span> <span class="code-var">Developer</span>:<span class="code-func">new</span>(name, role, skills)</p></div>
                         <div class="flex gap-6"><span class="text-gray-700">05</span><p class="pl-4"><span class="code-keyword">return</span> <span class="code-func">setmetatable</span>({</p></div>
-                        <div class="flex gap-6"><span class="text-gray-700">06</span><p class="pl-8">name = <span class="code-string">"Kenshin13"</span>,</p></div>
-                        <div class="flex gap-6"><span class="text-gray-700">07</span><p class="pl-8">role = <span class="code-string">"Backend Architect"</span>,</p></div>
-                        <div class="flex gap-6"><span class="text-gray-700">08</span><p class="pl-8">skills = {<span class="code-string">"Lua"</span>, <span class="code-string">"TS"</span>, <span class="code-string">"C#"</span>, <span class="code-string">"SQL"</span>},</p></div>
-                        <div class="flex gap-6"><span class="text-gray-700">09</span><p class="pl-8">contact = { discord = <span class="code-string">"kenshin13"</span> }</p></div>
-                        <div class="flex gap-6"><span class="text-gray-700">10</span><p class="pl-4">}, self)</p></div>
-                        <div class="flex gap-6"><span class="text-gray-700">11</span><p><span class="code-keyword">end</span></p></div>
-                        <div class="flex gap-6 h-4"></div>
-                        <div class="flex gap-6"><span class="text-gray-700">13</span><p><span class="code-keyword">local</span> Kenshin13 = Developer:<span class="code-func">new</span>(<span class="code-string">"Kenshin13"</span>, ...)</p></div>
+                        <div class="flex gap-6"><span class="text-gray-700">06</span><p class="pl-8">name = <span class="code-string">"Zinthyn"</span>,</p></div>
+                        <div class="flex gap-6"><span class="text-gray-700">07</span><p class="pl-8">role = <span class="code-string">"Tactical Architect"</span>,</p></div>
+                        <div class="flex gap-6"><span class="text-gray-700">08</span><p class="pl-8">skills = {<span class="code-string">"Lua"</span>, <span class="code-string">"TS"</span>, <span class="code-string">"C#"</span>}</p></div>
+                        <div class="flex gap-6"><span class="text-gray-700">09</span><p class="pl-4">}, self)</p></div>
+                        <div class="flex gap-6"><span class="text-gray-700">10</span><p><span class="code-keyword">end</span></p></div>
                     </div>
                 </div>
             </div>
@@ -162,180 +206,272 @@
     </section>
 
     <section id="skills" class="bg-[#030305]">
-        <div class="mb-20 text-center" data-aos="fade-up">
-            <h2 class="text-red-600 font-bold uppercase tracking-[0.5em] text-xs mb-4">Technical Expertise</h2>
-            <h3 class="text-6xl font-black tracking-tighter">Skill Tree & Languages</h3>
-            <p class="text-gray-500 mt-4 max-w-2xl mx-auto">Comprehensive technical expertise built through years of hands-on development and continuous learning.</p>
+        <div class="mb-20">
+            <h2 class="text-red-600 font-bold uppercase tracking-[0.5em] text-xs mb-4">Core Competencies</h2>
+            <h3 class="text-6xl font-black tracking-tighter">The Arsenal.</h3>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
-            <div class="glass-card p-10 rounded-2xl flex items-center justify-between skill-block" data-percent="95" data-aos="fade-right">
+            <div class="glass-card p-10 flex items-center justify-between skill-block" data-percent="95" data-aos="fade-up">
                 <div class="space-y-4">
                     <span class="text-red-600 font-mono text-xl font-bold">01</span>
                     <h4 class="text-2xl font-bold">Backend Game Development</h4>
-                    <p class="text-gray-400 text-sm max-w-xs">FiveM (Lua) & alt:V (TypeScript). High-performance multiplayer systems and custom frameworks.</p>
+                    <p class="text-gray-400 text-sm max-w-xs">FiveM (Lua) & alt:V (TypeScript). Building custom, high-perf frameworks (QBCore/ESX).</p>
                     <div class="flex gap-4 text-3xl">
                         <i class="devicon-lua-plain colored"></i>
                         <i class="devicon-typescript-plain colored"></i>
                     </div>
                 </div>
-                <div class="relative w-28 h-28">
+                <div class="relative w-32 h-32 hidden sm:block">
                     <svg class="w-full h-full transform -rotate-90">
-                        <circle cx="56" cy="56" r="50" class="fill-none stroke-gray-900 stroke-[6]"></circle>
-                        <circle cx="56" cy="56" r="50" class="prog-circle fill-none stroke-[6]"></circle>
+                        <circle cx="64" cy="64" r="50" class="fill-none stroke-gray-900 stroke-[8]"></circle>
+                        <circle cx="64" cy="64" r="50" class="prog-circle fill-none stroke-[8]"></circle>
                     </svg>
-                    <div class="absolute inset-0 flex items-center justify-center font-bold text-lg">95%</div>
+                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">95%</div>
                 </div>
             </div>
 
-            <div class="glass-card p-10 rounded-2xl flex items-center justify-between skill-block" data-percent="90" data-aos="fade-left">
+            <div class="glass-card p-10 flex items-center justify-between skill-block" data-percent="90" data-aos="fade-up" data-aos-delay="100">
                 <div class="space-y-4">
                     <span class="text-red-600 font-mono text-xl font-bold">02</span>
-                    <h4 class="text-2xl font-bold">JavaScript & TypeScript</h4>
-                    <p class="text-gray-400 text-sm max-w-xs">Backend systems, game logic, and Discord bots using Node.js and real-time APIs.</p>
+                    <h4 class="text-2xl font-bold">JavaScript Engineering</h4>
+                    <p class="text-gray-400 text-sm max-w-xs">Node.js microservices and Discord.js automation for community management.</p>
                     <div class="flex gap-4 text-3xl">
                         <i class="devicon-javascript-plain colored"></i>
                         <i class="devicon-nodejs-plain colored"></i>
                     </div>
                 </div>
-                <div class="relative w-28 h-28">
+                <div class="relative w-32 h-32 hidden sm:block">
                     <svg class="w-full h-full transform -rotate-90">
-                        <circle cx="56" cy="56" r="50" class="fill-none stroke-gray-900 stroke-[6]"></circle>
-                        <circle cx="56" cy="56" r="50" class="prog-circle fill-none stroke-[6]"></circle>
+                        <circle cx="64" cy="64" r="50" class="fill-none stroke-gray-900 stroke-[8]"></circle>
+                        <circle cx="64" cy="64" r="50" class="prog-circle fill-none stroke-[8]"></circle>
                     </svg>
-                    <div class="absolute inset-0 flex items-center justify-center font-bold text-lg">90%</div>
+                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">90%</div>
                 </div>
             </div>
 
-            <div class="glass-card p-10 rounded-2xl flex items-center justify-between skill-block" data-percent="88" data-aos="fade-right">
+            <div class="glass-card p-10 flex items-center justify-between skill-block" data-percent="88" data-aos="fade-up">
                 <div class="space-y-4">
                     <span class="text-red-600 font-mono text-xl font-bold">03</span>
-                    <h4 class="text-2xl font-bold">Application & API Dev</h4>
-                    <p class="text-gray-400 text-sm max-w-xs">REST/WebSocket APIs using C#, Java, and PHP (Symfony) to connect game servers.</p>
+                    <h4 class="text-2xl font-bold">API & Microservices</h4>
+                    <p class="text-gray-400 text-sm max-w-xs">Secure REST/WebSocket APIs using C#, Java (Spring Boot), and PHP (Symfony).</p>
                     <div class="flex gap-4 text-3xl">
                         <i class="devicon-csharp-plain colored"></i>
-                        <i class="devicon-java-plain colored"></i>
+                        <i class="devicon-spring-plain colored"></i>
                         <i class="devicon-php-plain colored"></i>
                     </div>
                 </div>
-                <div class="relative w-28 h-28">
+                <div class="relative w-32 h-32 hidden sm:block">
                     <svg class="w-full h-full transform -rotate-90">
-                        <circle cx="56" cy="56" r="50" class="fill-none stroke-gray-900 stroke-[6]"></circle>
-                        <circle cx="56" cy="56" r="50" class="prog-circle fill-none stroke-[6]"></circle>
+                        <circle cx="64" cy="64" r="50" class="fill-none stroke-gray-900 stroke-[8]"></circle>
+                        <circle cx="64" cy="64" r="50" class="prog-circle fill-none stroke-[8]"></circle>
                     </svg>
-                    <div class="absolute inset-0 flex items-center justify-center font-bold text-lg">88%</div>
+                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">88%</div>
                 </div>
             </div>
 
-            <div class="glass-card p-10 rounded-2xl flex items-center justify-between skill-block" data-percent="94" data-aos="fade-left">
+            <div class="glass-card p-10 flex items-center justify-between skill-block" data-percent="94" data-aos="fade-up" data-aos-delay="100">
                 <div class="space-y-4">
                     <span class="text-red-600 font-mono text-xl font-bold">04</span>
-                    <h4 class="text-2xl font-bold">Database Architecture</h4>
-                    <p class="text-gray-400 text-sm max-w-xs">Integrating and optimizing relational and NoSQL databases for high-load environments.</p>
+                    <h4 class="text-2xl font-bold">DB Architecture</h4>
+                    <p class="text-gray-400 text-sm max-w-xs">Optimization of MySQL, MongoDB, and Redis for high-concurrency environments.</p>
                     <div class="flex gap-4 text-3xl">
                         <i class="devicon-mysql-plain colored"></i>
                         <i class="devicon-mongodb-plain colored"></i>
                         <i class="devicon-redis-plain colored"></i>
                     </div>
                 </div>
-                <div class="relative w-28 h-28">
+                <div class="relative w-32 h-32 hidden sm:block">
                     <svg class="w-full h-full transform -rotate-90">
-                        <circle cx="56" cy="56" r="50" class="fill-none stroke-gray-900 stroke-[6]"></circle>
-                        <circle cx="56" cy="56" r="50" class="prog-circle fill-none stroke-[6]"></circle>
+                        <circle cx="64" cy="64" r="50" class="fill-none stroke-gray-900 stroke-[8]"></circle>
+                        <circle cx="64" cy="64" r="50" class="prog-circle fill-none stroke-[8]"></circle>
                     </svg>
-                    <div class="absolute inset-0 flex items-center justify-center font-bold text-lg">94%</div>
+                    <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">94%</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="services">
-        <div class="bg-glow bottom-0 right-0"></div>
+    <section id="projects">
         <div class="mb-16">
             <h2 class="text-red-600 font-bold uppercase tracking-[0.5em] text-xs mb-4">Operations</h2>
-            <h3 class="text-6xl font-black tracking-tighter">Specialized Services</h3>
+            <h3 class="text-6xl font-black tracking-tighter">Project Matrix.</h3>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
-            <div class="glass-card p-8 rounded-xl border-t-2 border-orange-600" data-aos="zoom-in" data-aos-delay="100">
-                <div class="text-4xl mb-6 text-orange-600"><i class="fa-solid fa-fire-flame-curved"></i></div>
-                <h4 class="text-2xl font-bold mb-6">FiveM</h4>
-                <ul class="offer-list">
-                    <li>Fully custom scripts built from scratch</li>
-                    <li>Optimized Lua for high player counts</li>
-                    <li>Exploit patching & bug fixing</li>
-                    <li>ESX, QBCore, custom frameworks</li>
-                    <li>Performance profiling & optimization</li>
-                </ul>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="glass-card group cursor-pointer overflow-hidden p-8" onclick="showProj('Zinthyn_Garages', 'Enterprise vehicle storage system. Features include dynamic SQL-side routing, damage persistence, and 3D preview UI.', 'Lua, MySQL, HTML5', 'Use it via the interaction menu at marked locations. Supports ESX/QB.')">
+                <div class="text-red-600 text-3xl mb-4"><i class="fa-solid fa-warehouse"></i></div>
+                <h4 class="text-xl font-bold mb-2">Zinthyn_Garages</h4>
+                <p class="text-gray-500 text-xs uppercase tracking-widest">Systems / Database</p>
             </div>
 
-            <div class="glass-card p-8 rounded-xl border-t-2 border-green-600" data-aos="zoom-in" data-aos-delay="200">
-                <div class="text-4xl mb-6 text-green-600"><i class="fa-solid fa-bolt"></i></div>
-                <h4 class="text-2xl font-bold mb-6">alt:V</h4>
-                <ul class="offer-list">
-                    <li>High-performance TypeScript development</li>
-                    <li>Clean, maintainable code (Modern ES)</li>
-                    <li>Optimized networking & communication</li>
-                    <li>Large, persistent multiplayer worlds</li>
-                    <li>Integration with REST & WebSockets</li>
-                </ul>
+            <div class="glass-card group cursor-pointer overflow-hidden p-8" onclick="showProj('Zinthyn_Anticheat', 'Proprietary enforcement engine. Monitors event-injection, abnormal player movement, and blacklisted resource detection.', 'C++, Lua, Discord API', 'Active-side injection prevention. Install on server-side only.')">
+                <div class="text-red-600 text-3xl mb-4"><i class="fa-solid fa-shield-virus"></i></div>
+                <h4 class="text-xl font-bold mb-2">Zinthyn_Anticheat</h4>
+                <p class="text-gray-500 text-xs uppercase tracking-widest">Security / Low-Level</p>
             </div>
 
-            <div class="glass-card p-8 rounded-xl border-t-2 border-blue-600" data-aos="zoom-in" data-aos-delay="300">
-                <div class="text-4xl mb-6 text-blue-600"><i class="fa-brands fa-discord"></i></div>
-                <h4 class="text-2xl font-bold mb-6">Discord</h4>
-                <ul class="offer-list">
-                    <li>Automated moderation with logging</li>
-                    <li>Live status tracking & in-game integration</li>
-                    <li>Role & permission management automation</li>
-                    <li>Event scheduling & announcements</li>
-                    <li>Custom verification flows (Steam/Game)</li>
-                </ul>
+            <div class="glass-card group cursor-pointer overflow-hidden p-8" onclick="showProj('Zinthyn_MultiCharacter', 'Advanced UI character selector. Seamless camera interpolation and metadata-based character loading.', 'JS/TS, Tailwind, GSAP', 'Triggered on first-spawn event. Configurable spawn locations.')">
+                <div class="text-red-600 text-3xl mb-4"><i class="fa-solid fa-users-gear"></i></div>
+                <h4 class="text-xl font-bold mb-2">Zinthyn_MultiCharacter</h4>
+                <p class="text-gray-500 text-xs uppercase tracking-widest">NUI / Frontend</p>
+            </div>
+
+            <div class="glass-card group cursor-pointer overflow-hidden p-8" onclick="showProj('Zinthyn_Radio', 'Spatial 3D communication system. Integrated with PMA-voice and Mumble. Custom UI with channel persistence.', 'Lua, Mumble API', 'Item-based radio. Use command /radio or use item.')">
+                <div class="text-red-600 text-3xl mb-4"><i class="fa-solid fa-signal"></i></div>
+                <h4 class="text-xl font-bold mb-2">Zinthyn_Radio</h4>
+                <p class="text-gray-500 text-xs uppercase tracking-widest">Voice / Communication</p>
+            </div>
+
+            <div class="glass-card group cursor-pointer overflow-hidden p-8" onclick="showProj('Zinthyn_StressManagement', 'Dynamic health-affecting stress system. Screen effects scale with player actions and drug consumption.', 'Lua, NUI FX', 'Passive system. Configurable actions increase/decrease stress level.')">
+                <div class="text-red-600 text-3xl mb-4"><i class="fa-solid fa-heart-pulse"></i></div>
+                <h4 class="text-xl font-bold mb-2">Zinthyn_StressManagement</h4>
+                <p class="text-gray-500 text-xs uppercase tracking-widest">Gameplay / Mechanics</p>
+            </div>
+
+            <div class="glass-card group cursor-pointer overflow-hidden p-8" onclick="showProj('Zinthyn_LoadingScreen', 'High-fidelity HTML5 intro. Dynamic server data fetching, music player, and animated patch notes.', 'React, CSS3, JSON', 'Replace the default loading resource in your server.cfg.')">
+                <div class="text-red-600 text-3xl mb-4"><i class="fa-solid fa-display"></i></div>
+                <h4 class="text-xl font-bold mb-2">Zinthyn_LoadingScreen</h4>
+                <p class="text-gray-500 text-xs uppercase tracking-widest">Web / Visuals</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="minigame">
+        <div class="grid lg:grid-cols-2 gap-20 items-center">
+            <div data-aos="fade-right">
+                <h2 class="text-red-600 font-bold uppercase tracking-[0.5em] text-xs mb-4">Interaction</h2>
+                <h3 class="text-6xl font-black mb-8">System Bypass.</h3>
+                <p class="text-gray-400 mb-8 max-w-md">Neutralize as many security nodes as possible in 30 seconds to decrypt the database access keys.</p>
+                <div class="p-6 border border-red-600/20 bg-red-600/5 rounded-lg mb-10">
+                    <div class="flex justify-between font-mono text-sm">
+                        <span>Score: <span id="score" class="text-red-500">0</span></span>
+                        <span>Timer: <span id="timer" class="text-red-500">30s</span></span>
+                    </div>
+                </div>
+                <button onclick="startGame()" class="px-10 py-4 bg-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition">Initialize Hack</button>
+            </div>
+            <div id="game-canvas" class="glass-card">
+                <div id="game-overlay" class="absolute inset-0 flex items-center justify-center font-mono text-gray-700 pointer-events-none">PENDING START...</div>
             </div>
         </div>
     </section>
 
-    <section id="clients">
-        <div class="text-center opacity-20" data-aos="fade-up">
-            <h2 class="text-6xl font-black tracking-tighter mb-4">CLIENTS</h2>
-            <p class="font-mono uppercase tracking-[1em]">Establishing Connections...</p>
-        </div>
-    </section>
-
-    <section id="contact">
-        <div class="glass-card p-20 rounded-3xl text-center max-w-4xl mx-auto overflow-hidden relative" data-aos="zoom-out">
-            <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
-            <h2 class="text-6xl font-black tracking-tighter mb-8 italic">INITIALIZE SEQUENCE.</h2>
-            <p class="text-gray-400 text-xl mb-12 font-light">Secure a tactical developer for your next high-load project.</p>
-            <div class="flex flex-wrap justify-center gap-6">
-                <a href="#" class="px-10 py-5 bg-red-600 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition shadow-[0_0_30px_rgba(255,0,0,0.4)]">
-                    <i class="fa-brands fa-discord text-xl mr-3"></i> kenshin13
-                </a>
-                <a href="#" class="px-10 py-5 border border-white/10 rounded-full font-black text-xs uppercase tracking-widest hover:bg-white/5 transition">
-                    <i class="fa-brands fa-github text-xl mr-3"></i> kenshin13
-                </a>
+    <section id="contact" class="bg-[#050508]">
+        <div class="max-w-5xl mx-auto text-center space-y-12">
+            <h2 class="text-8xl font-black italic tracking-tighter opacity-10">CONTACT ME</h2>
+            <div class="glass-card p-16 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
+                <h3 class="text-4xl font-black mb-6">READY TO SCALE?</h3>
+                <p class="text-gray-500 max-w-2xl mx-auto mb-12">I am currently accepting inquiries for high-level backend architecture and specialized game development.</p>
+                <div class="flex flex-wrap justify-center gap-6">
+                    <a href="#" class="flex items-center gap-4 bg-red-600 px-10 py-5 rounded-sm font-black text-xs uppercase tracking-widest hover:scale-105 transition">
+                        <i class="fa-brands fa-discord text-xl"></i> Zinthyn
+                    </a>
+                    <a href="#" class="flex items-center gap-4 border border-white/10 px-10 py-5 rounded-sm font-black text-xs uppercase tracking-widest hover:bg-white/5 transition">
+                        <i class="fa-brands fa-github text-xl"></i> Source
+                    </a>
+                </div>
             </div>
         </div>
     </section>
+
+    <div id="project-modal" onclick="closeProj()">
+        <div class="glass-card p-12 max-w-2xl w-full border-t-4 border-t-red-600" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h2 id="modal-title" class="text-4xl font-black tracking-tight mb-2"></h2>
+                    <p id="modal-tags" class="text-red-500 font-mono text-[10px] uppercase tracking-widest"></p>
+                </div>
+                <button onclick="closeProj()" class="text-gray-500 hover:text-white transition text-2xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <h5 class="text-xs font-bold text-gray-500 uppercase mb-2">Technical Description</h5>
+                    <p id="modal-desc" class="text-gray-300 leading-relaxed"></p>
+                </div>
+                <div>
+                    <h5 class="text-xs font-bold text-gray-500 uppercase mb-2">Usage & Implementation</h5>
+                    <p id="modal-usage" class="text-gray-400 text-sm italic"></p>
+                </div>
+            </div>
+            <button onclick="closeProj()" class="mt-12 w-full py-4 border border-white/5 hover:bg-white/5 rounded transition text-[10px] font-bold uppercase tracking-widest">Return to Matrix</button>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 800, once: false });
 
-        const observer = new IntersectionObserver((entries) => {
+        // SKILLS OBSERVER
+        const skillObs = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const circle = entry.target.querySelector('.prog-circle');
                 if (entry.isIntersecting) {
-                    const percent = entry.target.dataset.percent;
-                    const offset = 314 - (314 * percent) / 100;
-                    circle.style.strokeDashoffset = offset;
+                    const val = entry.target.dataset.percent;
+                    circle.style.strokeDashoffset = 314 - (314 * val) / 100;
                 } else {
                     circle.style.strokeDashoffset = 314;
                 }
             });
         }, { threshold: 0.5 });
+        document.querySelectorAll('.skill-block').forEach(s => skillObs.observe(s));
 
-        document.querySelectorAll('.skill-block').forEach(b => observer.observe(b));
+        // MODAL LOGIC
+        function showProj(title, desc, tags, usage) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-tags').innerText = tags;
+            document.getElementById('modal-usage').innerText = usage;
+            document.getElementById('project-modal').style.display = 'flex';
+        }
+        function closeProj() { document.getElementById('project-modal').style.display = 'none'; }
+
+        // MINIGAME LOGIC
+        let score = 0, time = 30, gameInterval, gameActive = false;
+        const canvas = document.getElementById('game-canvas');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+
+        function startGame() {
+            if(gameActive) return;
+            gameActive = true; score = 0; time = 30;
+            scoreDisplay.innerText = score;
+            document.getElementById('game-overlay').style.display = 'none';
+            gameInterval = setInterval(() => {
+                time--;
+                timerDisplay.innerText = time + "s";
+                if(time <= 0) endGame();
+            }, 1000);
+            spawnNode();
+        }
+
+        function spawnNode() {
+            if(!gameActive) return;
+            const node = document.createElement('div');
+            node.className = 'hack-node';
+            node.innerHTML = Math.random().toString(16).substr(2, 4).toUpperCase();
+            node.style.left = Math.random() * (canvas.offsetWidth - 60) + 'px';
+            node.style.top = Math.random() * (canvas.offsetHeight - 60) + 'px';
+            
+            node.onclick = (e) => {
+                e.stopPropagation();
+                score++;
+                scoreDisplay.innerText = score;
+                node.remove();
+                spawnNode();
+            };
+            canvas.appendChild(node);
+            setTimeout(() => { if(node.parentElement) { node.remove(); spawnNode(); } }, 1200);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameInterval);
+            canvas.innerHTML = '';
+            document.getElementById('game-overlay').innerText = "HANDSHAKE FAILED. FINAL SCORE: " + score;
+            document.getElementById('game-overlay').style.display = 'flex';
+        }
     </script>
 </body>
 </html>
