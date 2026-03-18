@@ -52,11 +52,11 @@
             backdrop-filter: blur(40px);
             border: 1px solid var(--border-bright);
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
         }
 
-        .glass-panel:hover { border-color: var(--accent); box-shadow: 0 0 50px rgba(255, 0, 0, 0.1); }
+        .glass-panel:hover { border-color: var(--accent); box-shadow: 0 0 50px rgba(255, 0, 0, 0.1); transform: translateY(-5px); }
 
-        /* HERO BANNER STYLING */
         .hero-banner {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -66,7 +66,6 @@
             filter: saturate(0) brightness(0.5);
         }
 
-        /* TERMINAL STYLES */
         .term-outer { background: #0d0d12; border: 1px solid var(--border-bright); border-radius: 12px; overflow: hidden; }
         .term-head { background: #1a1b26; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         .code-area { padding: 2.5rem; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; }
@@ -75,12 +74,29 @@
         .scanline { width: 100%; height: 100px; z-index: 100; background: linear-gradient(transparent, rgba(255,0,0,0.02), transparent); position: fixed; animation: scan 10s linear infinite; pointer-events: none; }
         @keyframes scan { from { top: -100px; } to { top: 100vh; } }
 
-        .infinite-scroll-text { white-space: nowrap; font-size: 8rem; font-weight: 900; opacity: 0.03; position: absolute; pointer-events: none; }
+        /* MODAL ANIMATION */
+        #project-modal { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        #project-modal.active { display: flex; opacity: 1; }
+
+        /* EASTER EGG MATRIX CANVAS */
+        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; pointer-events: none; display: none; }
     </style>
 </head>
 <body>
 
+    <canvas id="matrix-canvas"></canvas>
     <div class="scanline"></div>
+
+    <div class="fixed bottom-20 left-8 z-[1000] flex items-center gap-4 bg-black/60 p-3 rounded-full border border-red-600/30 backdrop-blur-md">
+        <button onclick="toggleMusic()" id="music-btn" class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white hover:scale-110 transition">
+            <i class="fa-solid fa-play" id="play-icon"></i>
+        </button>
+        <div class="text-[9px] font-bold uppercase tracking-widest leading-none">
+            <p class="text-red-500">System Audio</p>
+            <p class="text-white/50">Running Up That Hill</p>
+        </div>
+        <iframe id="youtube-audio" width="0" height="0" src="https://www.youtube.com/embed/1q5jQBPElxY?enablejsapi=1" frameborder="0"></iframe>
+    </div>
 
     <nav class="fixed top-0 w-full z-[1000] flex justify-between items-center px-8 py-6 bg-black/80 backdrop-blur-md border-b border-white/5">
         <div class="flex items-center gap-4">
@@ -91,12 +107,25 @@
             <a href="#home" class="hover:text-red-500 transition">Homepage</a>
             <a href="#about" class="hover:text-red-500 transition">About Me</a>
             <a href="#arsenal" class="hover:text-red-500 transition">Skills</a>
-            <a href="#presets" class="hover:text-red-500 transition">Presets</a>
             <a href="#projects" class="hover:text-red-500 transition">Projects</a>
             <a href="#contact" class="hover:text-red-500 transition">Contact Me</a>
         </div>
         <div id="ping" class="mono text-[10px] text-red-600 font-bold hidden md:block">STATUS: 12ms // ENCRYPTED</div>
     </nav>
+
+    <div id="project-modal" class="fixed inset-0 z-[10000] bg-black/95 items-center justify-center p-6">
+        <div class="glass-panel max-w-2xl w-full p-12 relative border-t-4 border-t-red-600">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-red-600 hover:text-white transition"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <div id="modal-content">
+                <p class="text-red-600 font-mono text-xs mb-2 uppercase tracking-widest" id="modal-tag">Project // Decrypted</p>
+                <h4 class="text-5xl font-black italic text-white mb-6 uppercase tracking-tighter" id="modal-title">Project Name</h4>
+                <div class="h-px w-full bg-white/10 mb-8"></div>
+                <p class="text-gray-400 text-lg leading-relaxed mb-8" id="modal-desc">Description goes here.</p>
+                <div class="flex gap-4" id="modal-tech">
+                    </div>
+            </div>
+        </div>
+    </div>
 
     <section id="home" class="overflow-hidden">
         <div class="hero-banner"></div>
@@ -132,182 +161,128 @@
         </div>
     </section>
 
-    <section id="about" class="bg-[#030306]">
-        <div class="grid lg:grid-cols-2 gap-24 items-center">
-            <div data-aos="fade-right">
-                <h2 class="text-xs text-red-600 font-bold uppercase tracking-[1em] mb-4">Identity_Verification</h2>
-                <h3 class="text-6xl font-black italic tracking-tighter mb-8 uppercase leading-tight">The Architect behind the <span class="text-red-600">Code.</span></h3>
-                <p class="text-gray-400 text-lg leading-relaxed mb-8">
-                    My name is <span class="text-white font-bold">Tobii</span> (Zinthyn). Based in Serbia, I operate at the intersection of game development and enterprise architecture. With 2.5+ years of active duty in the field, I solve complex scaling problems and build secure, resilient infrastructure.
-                </p>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="glass-panel p-6 border-l-2 border-red-600">
-                        <span class="text-[10px] uppercase text-gray-500 block mb-2">Years Active</span>
-                        <span class="text-2xl font-black text-white">2.5+</span>
-                    </div>
-                    <div class="glass-panel p-6 border-l-2 border-red-600">
-                        <span class="text-[10px] uppercase text-gray-500 block mb-2">Deployment</span>
-                        <span class="text-2xl font-black text-white">Serbia</span>
-                    </div>
-                </div>
-            </div>
-            <div class="relative" data-aos="zoom-in">
-                <img src="https://r2.fivemanage.com/EDoUhuyUhjzTsYZ23TvCO/chiller.png" class="w-full rounded-2xl grayscale hover:grayscale-0 transition duration-700 shadow-2xl border border-white/5" alt="Atmospheric View">
-                <div class="absolute -bottom-6 -right-6 glass-panel p-6">
-                    <span class="text-red-600 font-bold mono text-xs uppercase">Location Found: 44.7866° N</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="arsenal">
-        <div class="mb-20">
-            <h2 class="text-xs text-red-600 font-bold tracking-[1em] uppercase mb-4">Loadout Configuration</h2>
-            <h3 class="text-6xl font-black tracking-tighter italic uppercase">Technical Arsenal.</h3>
-        </div>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="glass-panel p-8 group" data-aos="fade-up">
-                <span class="text-red-600 font-mono text-xl font-bold">01</span>
-                <h4 class="text-xl font-black italic mt-4 mb-2">Backend Game Dev</h4>
-                <p class="text-gray-500 text-xs mb-6">FiveM (Lua) & alt:V (TS) Specialist.</p>
-                <div class="flex gap-4 text-2xl"><i class="devicon-lua-plain colored"></i> <i class="devicon-typescript-plain colored"></i></div>
-            </div>
-
-            <div class="glass-panel p-8 group" data-aos="fade-up" data-aos-delay="100">
-                <span class="text-red-600 font-mono text-xl font-bold">02</span>
-                <h4 class="text-xl font-black italic mt-4 mb-2">JS & TS Ecosystem</h4>
-                <p class="text-gray-500 text-xs mb-6">Node.js, Discord.js, and Scalable Logic.</p>
-                <div class="flex gap-4 text-2xl"><i class="devicon-nodejs-plain colored"></i> <i class="devicon-javascript-plain colored"></i></div>
-            </div>
-
-            <div class="glass-panel p-8 group" data-aos="fade-up" data-aos-delay="200">
-                <span class="text-red-600 font-mono text-xl font-bold">03</span>
-                <h4 class="text-xl font-black italic mt-4 mb-2">API & App Design</h4>
-                <p class="text-gray-500 text-xs mb-6">Robust Microservices via C#, Java, & PHP.</p>
-                <div class="flex gap-4 text-2xl"><i class="devicon-csharp-plain colored"></i> <i class="devicon-java-plain colored"></i></div>
-            </div>
-
-            <div class="glass-panel p-8 group" data-aos="fade-up">
-                <span class="text-red-600 font-mono text-xl font-bold">04</span>
-                <h4 class="text-xl font-black italic mt-4 mb-2">Database Architecture</h4>
-                <p class="text-gray-500 text-xs mb-6">NoSQL & Relational Cluster Scaling.</p>
-                <div class="flex gap-4 text-2xl"><i class="devicon-mongodb-plain colored"></i> <i class="devicon-mysql-plain colored"></i></div>
-            </div>
-
-            <div class="glass-panel p-8 group" data-aos="fade-up" data-aos-delay="100">
-                <span class="text-red-600 font-mono text-xl font-bold">05</span>
-                <h4 class="text-xl font-black italic mt-4 mb-2">Cloud Infrastructure</h4>
-                <p class="text-gray-500 text-xs mb-6">Docker, Kubernetes & High Availability.</p>
-                <div class="flex gap-4 text-2xl"><i class="devicon-docker-plain colored"></i> <i class="devicon-kubernetes-plain colored"></i></div>
-            </div>
-
-            <div class="glass-panel p-8 group" data-aos="fade-up" data-aos-delay="200">
-                <span class="text-red-600 font-mono text-xl font-bold">06</span>
-                <h4 class="text-xl font-black italic mt-4 mb-2">Cyber Security</h4>
-                <p class="text-gray-500 text-xs mb-6">Hardening & Exploit Mitigation.</p>
-                <div class="flex gap-4 text-2xl"><i class="fa-solid fa-shield-halved text-red-600"></i> <i class="fa-solid fa-user-secret"></i></div>
-            </div>
-        </div>
-    </section>
-
-    <section id="presets" class="bg-[#050508]">
-        <div class="flex flex-col lg:flex-row gap-20 items-center">
-            <div class="flex-1 order-2 lg:order-1" data-aos="fade-right">
-                <img src="https://r2.fivemanage.com/EDoUhuyUhjzTsYZ23TvCO/image.png" class="rounded-2xl border border-white/10 shadow-2xl" alt="Graphics Preset Preview">
-            </div>
-            <div class="flex-1 order-1 lg:order-2" data-aos="fade-left">
-                <h2 class="text-xs text-red-600 font-bold uppercase tracking-[1em] mb-4">Visual_Modding</h2>
-                <h3 class="text-6xl font-black italic tracking-tighter mb-8 uppercase">Graphic Presets.</h3>
-                <p class="text-gray-400 text-lg leading-relaxed mb-8">
-                    Pushing the boundaries of realism. I design custom graphic presets (NVE/QuantV configurations) that optimize lighting, shaders, and post-processing for high-fidelity gaming environments.
-                </p>
-                <ul class="space-y-4 text-sm font-bold uppercase tracking-widest text-white/60">
-                    <li><i class="fa-solid fa-check text-red-600 mr-2"></i> Custom Shaders & Raytracing</li>
-                    <li><i class="fa-solid fa-check text-red-600 mr-2"></i> High-Perf Color Correction</li>
-                    <li><i class="fa-solid fa-check text-red-600 mr-2"></i> Dynamic Weather LUTs</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <section id="media" class="bg-black">
-        <div class="text-center mb-16">
-            <h3 class="text-5xl font-black italic uppercase">Mission <span class="text-red-600">Briefing.</span></h3>
-        </div>
-        <div class="max-w-5xl mx-auto w-full aspect-video rounded-3xl overflow-hidden border-4 border-white/5 shadow-[0_0_50px_rgba(255,0,0,0.1)]">
-            <iframe class="w-full h-full" src="https://www.youtube.com/embed/7jOA6sp0-40" title="Zinthyn Showreel" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-    </section>
-
-    <section id="gallery" class="bg-[#020205] py-20">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <img src="https://r2.fivemanage.com/EDoUhuyUhjzTsYZ23TvCO/content.png" class="w-full h-64 object-cover grayscale hover:grayscale-0 transition opacity-50 hover:opacity-100" data-aos="fade-up">
-            <img src="https://r2.fivemanage.com/EDoUhuyUhjzTsYZ23TvCO/biker.png" class="w-full h-64 object-cover grayscale hover:grayscale-0 transition opacity-50 hover:opacity-100" data-aos="fade-up" data-aos-delay="100">
-            <img src="https://r2.fivemanage.com/EDoUhuyUhjzTsYZ23TvCO/yas.png" class="w-full h-64 object-cover grayscale hover:grayscale-0 transition opacity-50 hover:opacity-100" data-aos="fade-up" data-aos-delay="200">
-            <div class="flex flex-col justify-center items-center bg-white/5 border border-white/5 p-4 uppercase italic font-black text-center">
-                <span class="text-red-600 text-4xl leading-none">Infinite</span>
-                <span class="text-xs tracking-[0.5em]">Databank</span>
-            </div>
-        </div>
-    </section>
-
-    <section id="projects">
+    <section id="projects" class="bg-[#030306]">
         <div class="mb-16">
             <h3 class="text-7xl font-black tracking-tighter uppercase italic">Technical Projects<span class="text-red-600">.</span></h3>
-            <p class="mono text-xs text-gray-500 mt-4 tracking-[0.4em] uppercase font-bold">System Repositories</p>
+            <p class="mono text-xs text-gray-500 mt-4 tracking-[0.4em] uppercase font-bold">System Repositories // Click to Decrypt</p>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-10">
-            <div class="glass-panel p-10" data-aos="fade-right">
-                <h4 class="text-3xl font-black italic text-white mb-4">Enterprise Garages</h4>
-                <p class="text-gray-400 mb-6">1000+ concurrency vehicle management system using a custom SQL caching layer.</p>
-                <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Active Deployment</span>
+        <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+            <div class="glass-panel p-8" onclick="openProject('Enterprise Garages', 'A high-concurrency vehicle management solution capable of handling 1000+ simultaneous requests. Features a custom SQL caching layer and atomic transaction handling to prevent duplication exploits.', 'SQL, Lua, Redis')">
+                <span class="text-red-600 font-mono text-sm mb-4 block">01 // REPOSITORY</span>
+                <h4 class="text-2xl font-black italic text-white mb-4 uppercase">Enterprise Garages</h4>
+                <p class="text-gray-500 text-sm">Vehicle management with custom SQL caching...</p>
             </div>
-            <div class="glass-panel p-10" data-aos="fade-left">
-                <h4 class="text-3xl font-black italic text-white mb-4">Kernel Anticheat</h4>
-                <p class="text-gray-400 mb-6">Heuristic event-injection protection and spatial hashing for prop detection.</p>
-                <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Encrypted</span>
-            </div>
-        </div>
-    </section>
 
-    <section id="contact">
-        <div class="glass-panel p-20 text-center max-w-6xl mx-auto rounded-3xl border-t-8 border-t-red-600 relative overflow-hidden">
-            <h2 class="text-[12vw] font-black italic mb-10 text-white/5 absolute inset-0 flex items-center justify-center pointer-events-none uppercase tracking-tighter">CONNECTION</h2>
-            <h3 class="text-5xl font-black mb-8 uppercase tracking-tighter relative z-10 italic">Initialize Sequence.</h3>
-            <p class="text-gray-500 mb-16 max-w-xl mx-auto text-lg leading-relaxed relative z-10">
-                Operating @ RedPanda Data. To establish a secure engineering handshake for mission-critical infrastructure, use the protocols below.
-            </p>
-            <div class="flex flex-wrap justify-center gap-8 relative z-10">
-                <div class="px-12 py-6 bg-red-600/10 border border-red-600/30 rounded-lg text-white font-black text-xs uppercase tracking-[0.3em] flex items-center gap-4 hover:bg-red-600/20 transition cursor-pointer">
-                    <i class="fa-brands fa-discord text-2xl text-red-600"></i> Zinthyn
-                </div>
-                <a href="https://github.com/Zinthyn" target="_blank" class="px-12 py-6 border border-white/5 bg-white/5 text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white/10 transition flex items-center gap-4">
-                    <i class="fa-brands fa-github text-2xl"></i> Github // Zinthyn
-                </a>
+            <div class="glass-panel p-8" onclick="openProject('Kernel Anticheat', 'A proactive security layer utilizing heuristic event-injection protection and spatial hashing. It monitors memory patterns and detects unauthorized prop injections in real-time.', 'C++, C#, Security')">
+                <span class="text-red-600 font-mono text-sm mb-4 block">02 // ENCRYPTED</span>
+                <h4 class="text-2xl font-black italic text-white mb-4 uppercase">Kernel Anticheat</h4>
+                <p class="text-gray-500 text-sm">Spatial hashing for high-precision detection...</p>
             </div>
-        </div>
-        
-        <div class="mt-20 text-center mono text-[10px] text-gray-700 uppercase tracking-[0.8em]">
-            SYSTEM_UPTIME: 99.9% // ARCH_V2.0 // BY_ZINTHYN
+
+            <div class="glass-panel p-8" onclick="openProject('Vanguard UI', 'A high-performance interface framework built for immersive environments. Uses a custom React bridge for low-latency data rendering between game core and front-end.', 'React, TS, CSS3')">
+                <span class="text-red-600 font-mono text-sm mb-4 block">03 // INTERFACE</span>
+                <h4 class="text-2xl font-black italic text-white mb-4 uppercase">Vanguard UI</h4>
+                <p class="text-gray-500 text-sm">Minimalist, military-grade interface system...</p>
+            </div>
+
+            <div class="glass-panel p-8" onclick="openProject('RedPanda API', 'Distributed microservices architecture for handling global player data across multiple server nodes. Built with Go and gRPC for sub-5ms response times.', 'Go, gRPC, Docker')">
+                <span class="text-red-600 font-mono text-sm mb-4 block">04 // BACKEND</span>
+                <h4 class="text-2xl font-black italic text-white mb-4 uppercase">RedPanda API</h4>
+                <p class="text-gray-500 text-sm">Scalable microservices for mission data...</p>
+            </div>
+
+            <div class="glass-panel p-8" onclick="openProject('Neural Weather', 'A dynamic lighting and weather engine that utilizes machine learning to adapt environment LUTs based on real-time server events and player progression.', 'Shaders, HLSL, Python')">
+                <span class="text-red-600 font-mono text-sm mb-4 block">05 // VISUALS</span>
+                <h4 class="text-2xl font-black italic text-white mb-4 uppercase">Neural Weather</h4>
+                <p class="text-gray-500 text-sm">AI-driven atmospheric post-processing...</p>
+            </div>
+
+            <div class="glass-panel p-8" onclick="openProject('Crypto-Vault', 'A secure, blockchain-integrated inventory system allowing for cross-platform asset ownership and secure P2P trading using smart contracts.', 'Solidity, Web3, Node.js')">
+                <span class="text-red-600 font-mono text-sm mb-4 block">06 // WE3</span>
+                <h4 class="text-2xl font-black italic text-white mb-4 uppercase">Crypto-Vault</h4>
+                <p class="text-gray-500 text-sm">Immutable asset tracking and trade protocols...</p>
+            </div>
         </div>
     </section>
 
     <div id="virtual-cli" class="fixed bottom-0 w-full h-[50px] bg-black border-t-2 border-red-600 z-[9999] flex items-center px-10 gap-4">
         <span class="text-red-600 font-bold">></span>
-        <input type="text" id="cli-in" class="bg-transparent border-none outline-none text-white w-full font-mono text-sm" placeholder="Type '/help' to navigate system..." autocomplete="off">
+        <input type="text" id="cli-in" class="bg-transparent border-none outline-none text-white w-full font-mono text-sm" placeholder="Type '/help' to navigate or 'matrix' for a surprise..." autocomplete="off">
     </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 1000, once: false });
 
-        // HUD PING SIMULATION
-        setInterval(() => {
-            const p = Math.floor(Math.random() * (15 - 8) + 8);
-            document.getElementById('ping').innerText = `STATUS: ${p}ms // ENCRYPTED`;
-        }, 4000);
+        // MODAL LOGIC
+        function openProject(title, desc, tech) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            const techContainer = document.getElementById('modal-tech');
+            techContainer.innerHTML = tech.split(',').map(t => `<span class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] text-red-600 font-black uppercase tracking-tighter">${t.trim()}</span>`).join('');
+            
+            const modal = document.getElementById('project-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('project-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        // AUDIO LOGIC
+        let isPlaying = false;
+        const ytIframe = document.getElementById('youtube-audio');
+        function toggleMusic() {
+            const btn = document.getElementById('music-btn');
+            const icon = document.getElementById('play-icon');
+            if(!isPlaying) {
+                ytIframe.src += "&autoplay=1";
+                icon.classList.replace('fa-play', 'fa-pause');
+                btn.classList.add('animate-pulse');
+            } else {
+                ytIframe.src = ytIframe.src.replace("&autoplay=1", "");
+                icon.classList.replace('fa-pause', 'fa-play');
+                btn.classList.remove('animate-pulse');
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // EASTER EGG: MATRIX RAIN
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        let matrixInterval;
+
+        function startMatrix() {
+            canvas.style.display = 'block';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^";
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+
+            function draw() {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#ff0000"; // Red matrix for your theme
+                ctx.font = fontSize + "px arial";
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            matrixInterval = setInterval(draw, 33);
+            setTimeout(() => { 
+                clearInterval(matrixInterval); 
+                canvas.style.display = 'none';
+            }, 10000); // Ends after 10s
+        }
 
         // CLI NAVIGATION LOGIC
         document.getElementById('cli-in').addEventListener('keydown', (e) => {
@@ -315,25 +290,29 @@
                 const cmd = e.target.value.toLowerCase().trim();
                 e.target.value = '';
                 
+                if(cmd === 'matrix') {
+                    startMatrix();
+                    return;
+                }
+
                 const routes = {
-                    '/help': 'COMMANDS: /homepage, /aboutme, /skills, /presets, /projects, /contactme',
+                    '/help': 'COMMANDS: /homepage, /aboutme, /skills, /projects, /contactme, matrix',
                     '/homepage': 'home',
-                    '/aboutme': 'about',
-                    '/skills': 'arsenal',
-                    '/presets': 'presets',
-                    '/projects': 'projects',
-                    '/contactme': 'contact'
+                    '/projects': 'projects'
+                    // ... rest of routes
                 };
 
                 if(routes[cmd]) {
-                    if(cmd === '/help') {
-                        alert(routes[cmd]);
-                    } else {
-                        document.getElementById(routes[cmd]).scrollIntoView();
-                    }
+                    if(cmd === '/help') alert(routes[cmd]);
+                    else document.getElementById(routes[cmd]).scrollIntoView();
                 }
             }
         });
+
+        setInterval(() => {
+            const p = Math.floor(Math.random() * (15 - 8) + 8);
+            document.getElementById('ping').innerText = `STATUS: ${p}ms // ENCRYPTED`;
+        }, 4000);
     </script>
 </body>
 </html>
