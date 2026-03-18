@@ -6,202 +6,323 @@
     <title>Zinthyn | Tactical Developer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
             --accent: #ff0000;
-            --accent-glow: rgba(255, 0, 0, 0.4);
             --bg-deep: #050505;
         }
-        body {
+
+        /* Strict Full-Page Snapping */
+        html, body { 
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Hide standard scrollbar on body */
             background-color: var(--bg-deep);
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: #ffffff;
-            overflow-x: hidden;
         }
-        .code-font { font-family: 'JetBrains Mono', monospace; }
-        
-        /* Ambient Background Effect */
-        .bg-glow {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% -20%, #2a0000 0%, transparent 50%),
-                        radial-gradient(circle at 0% 100%, #1a0000 0%, transparent 30%);
-            z-index: -1;
+
+        .scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar for a cleaner look */
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        .scroll-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        section {
+            height: 100vh;
+            scroll-snap-align: start;
+            scroll-snap-stop: always; /* Forces it to stop on every page */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 10%;
+            position: relative;
         }
 
         .glass-card {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 0, 0, 0.1);
         }
 
-        .red-glow-text {
-            text-shadow: 0 0 15px var(--accent-glow);
+        /* Skill Tree Circular Progress */
+        .skill-circle-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #ff0000 0%, #8b0000 100%);
-            box-shadow: 0 4px 15px var(--accent-glow);
+        .skill-circle-container svg { 
+            width: 140px; 
+            height: 140px; 
+            transform: rotate(-90deg); 
+        }
+        
+        circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
         }
 
-        .terminal-header {
-            background: #1a1a1a;
-            border-bottom: 1px solid #333;
+        .bg-circle { stroke: #1a1a1a; }
+        
+        .prog-circle {
+            stroke: var(--accent);
+            stroke-dasharray: 314; /* 2 * pi * r (approx 2 * 3.14 * 50 = 314) */
+            stroke-dashoffset: 314; /* Starts hidden */
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 0 8px rgba(255, 0, 0, 0.5));
         }
 
-        /* Particle-like dots */
-        .dot {
+        /* Timeline Design */
+        .timeline-line {
             position: absolute;
+            left: 50%;
             width: 2px;
-            height: 2px;
-            background: rgba(255, 0, 0, 0.3);
-            border-radius: 50%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
         }
+
+        .red-glow { text-shadow: 0 0 30px rgba(255, 0, 0, 0.8); }
+
     </style>
 </head>
 <body>
-    <div class="bg-glow"></div>
 
-    <nav class="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
-        <div class="text-2xl font-bold tracking-tighter"><i class="fa-solid fa-code text-red-600 mr-2"></i>ZINTHYN</div>
-        <div class="hidden md:flex space-x-10 text-sm font-medium text-gray-400">
+    <nav class="fixed top-0 w-full z-50 flex justify-between items-center px-12 py-6 bg-transparent glass-card border-none border-b border-white/5">
+        <div class="text-xl font-extrabold tracking-tighter text-red-600">ZINTHYN</div>
+        <div class="flex gap-8 text-xs font-bold uppercase tracking-widest text-gray-400">
             <a href="#home" class="hover:text-red-500 transition">Home</a>
             <a href="#about" class="hover:text-red-500 transition">About</a>
             <a href="#skills" class="hover:text-red-500 transition">Skills</a>
-            <a href="#services" class="hover:text-red-500 transition">Services</a>
-            <a href="#clients" class="hover:text-red-500 transition">Clients</a>
+            <a href="#projects" class="hover:text-red-500 transition">Projects</a>
         </div>
     </nav>
 
-    <section id="home" class="max-w-7xl mx-auto px-8 py-20 flex flex-col lg:flex-row items-center gap-12">
-        <div class="flex-1 space-y-6">
-            <h3 class="text-gray-400 font-medium tracking-wide">Developer / Freelancer / Tactical Specialist</h3>
-            <h1 class="text-7xl lg:text-8xl font-extrabold tracking-tighter red-glow-text">ZINTHYN</h1>
-            <p class="text-gray-400 text-lg max-w-lg leading-relaxed">
-                Tactical Developer at <span class="text-red-500 font-semibold">Redpanda Data</span>. 
-                Specializing in bridging the gap between high-fidelity 3D Art and high-performance server architecture.
-            </p>
-            <div class="flex gap-4 pt-4">
-                <button class="btn-primary px-8 py-4 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition">Explore Services</button>
-                <button class="border border-gray-700 px-8 py-4 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-white hover:text-black transition">View Clients</button>
-            </div>
-        </div>
+    <div class="scroll-container">
 
-        <div class="flex-1 w-full max-w-xl">
-            <div class="glass-card rounded-xl overflow-hidden shadow-2xl border-gray-800">
-                <div class="terminal-header p-3 flex gap-2">
-                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span class="text-xs text-gray-500 ml-4 code-font">zinthyn_init.lua</span>
+        <section id="home">
+            <div class="flex flex-col lg:flex-row items-center gap-12" data-aos="fade-up">
+                <div class="flex-1 space-y-4">
+                    <p class="text-red-500 font-bold tracking-[0.3em] text-sm uppercase">Tactical Dev @ Redpanda Data</p>
+                    <h1 class="text-8xl font-black tracking-tighter red-glow">ZINTHYN</h1>
+                    <p class="text-gray-400 text-lg max-w-md">Bridging the gap between 3D Art and Technical Scripting for FiveM and high-performance data systems.</p>
+                    <div class="flex gap-4 pt-6">
+                        <button class="bg-red-600 hover:bg-red-700 transition px-8 py-3 rounded text-sm font-bold uppercase shadow-[0_0_15px_rgba(255,0,0,0.4)]">Explore Services</button>
+                        <button class="border border-gray-800 hover:border-gray-500 transition px-8 py-3 rounded text-sm font-bold uppercase">View Clients</button>
+                    </div>
                 </div>
-                <div class="p-6 code-font text-sm sm:text-base leading-relaxed overflow-x-auto">
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">01</span>
-                        <span class="text-blue-400">local</span> <span class="text-white">Developer = {}</span>
+                <div class="flex-1 glass-card p-6 rounded-lg font-mono text-sm border-l-4 border-l-red-600 shadow-2xl">
+                    <p class="text-gray-500">-- server_init.lua</p>
+                    <p class="mt-4"><span class="text-blue-400">local</span> user = <span class="text-yellow-400">"Zinthyn"</span></p>
+                    <p><span class="text-blue-400">local</span> role = <span class="text-yellow-400">"Spec Ops Developer"</span></p>
+                    <p><span class="text-blue-400">function</span> <span class="text-green-400">DeployCode</span>()</p>
+                    <p class="ml-4 text-red-400">print(<span class="text-white">"Optimizing performance..."</span>)</p>
+                    <p><span class="text-blue-400">end</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <div class="timeline-line hidden lg:block"></div>
+            <div class="grid lg:grid-cols-2 gap-20 items-center">
+                <div data-aos="fade-right">
+                    <span class="text-red-600 font-bold uppercase tracking-widest">About Me</span>
+                    <h2 class="text-6xl font-black mb-6">Experience.</h2>
+                    <p class="text-gray-400 mb-4 text-lg">I operate as a multi-disciplinary developer with over 2 years of immersion in high-tier ecosystems like FiveM, Alt/V, and RedM.</p>
+                    <p class="text-gray-400 text-lg">Currently serving as a <span class="text-white font-bold">Tactical Developer</span> for Redpanda Data, focusing on high-concurrency systems.</p>
+                </div>
+                <div class="space-y-12" data-aos="fade-left">
+                    <div class="relative pl-8 border-l-2 border-red-600 glass-card p-6 rounded-r-lg">
+                        <span class="text-xs text-red-500 font-bold tracking-widest">2024 - 2026</span>
+                        <h4 class="text-2xl font-bold mt-2">Redpanda Data</h4>
+                        <p class="text-gray-400 text-sm mt-2">Spec Ops Software Development / Tactical Dev.</p>
                     </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">02</span>
-                        <span class="text-white">Developer.__index = Developer</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">03</span>
-                        <span>&nbsp;</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">04</span>
-                        <span class="text-blue-400">function</span> <span class="text-yellow-300">Developer:new</span><span class="text-white">(name, role)</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">05</span>
-                        <span class="text-pink-400 ml-4">return</span> <span class="text-yellow-300">setmetatable</span><span class="text-white">({</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">06</span>
-                        <span class="text-white ml-8">name = <span class="text-green-400">"Zinthyn"</span>,</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">07</span>
-                        <span class="text-white ml-8">role = <span class="text-green-400">"Tactical Dev @ Redpanda"</span>,</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">08</span>
-                        <span class="text-white ml-8">specialty = <span class="text-green-400">"FiveM/RedM/AltV"</span></span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">09</span>
-                        <span class="text-white ml-4">}, self)</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-gray-600">10</span>
-                        <span class="text-blue-400">end</span>
+                    <div class="relative pl-8 border-l-2 border-gray-800 hover:border-red-600 transition glass-card p-6 rounded-r-lg group">
+                        <span class="text-xs text-gray-500 group-hover:text-red-500 transition font-bold tracking-widest">2023 - 2024</span>
+                        <h4 class="text-2xl font-bold mt-2">FiveM Senior Developer</h4>
+                        <p class="text-gray-400 text-sm mt-2">ZIN_Garage & ZIN_Multicharacter Deployment.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="about" class="bg-[#080808] py-24 border-y border-gray-900">
-        <div class="max-w-5xl mx-auto px-8">
-            <span class="text-red-500 font-bold uppercase tracking-widest text-sm">About Me</span>
-            <h2 class="text-5xl md:text-7xl font-extrabold mt-4 mb-12">Get to Know me.</h2>
+        <section id="skills">
+            <div class="mb-12" data-aos="fade-up">
+                <span class="text-red-600 font-bold uppercase tracking-widest">My Expertise</span>
+                <h2 class="text-5xl font-black">Skill Tree & Languages.</h2>
+            </div>
             
-            <div class="grid lg:grid-cols-2 gap-12 items-start">
-                <div class="space-y-6 text-gray-400 text-lg">
-                    <p>
-                        Hello, I am <span class="text-white font-semibold">Zinthyn (Tobii)</span>. Based in Serbia, I operate as a multi-disciplinary developer with over 2 years of immersion in high-tier ecosystems.
-                    </p>
-                    <p>
-                        My role as a <span class="text-red-500">Tactical Developer @ Redpanda Data</span> involves "Spec Ops" software development—handling mission-critical streaming data and performance-first architecture.
-                    </p>
-                    <p>
-                        In the world of FiveM, I specialize in bridging the gap between <span class="text-white">3D Art (Blender/3ds Max)</span> and <span class="text-white">Technical Scripting (Lua/C#)</span>. My goal is total visual and functional synergy while keeping all performance to a maximum.
-                    </p>
+            <div class="grid md:grid-cols-2 gap-10">
+                
+                <div class="glass-card p-8 rounded-lg flex items-center justify-between skill-block" data-percent="92" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex-1">
+                        <span class="text-gray-500 font-mono text-xl font-bold">01</span>
+                        <h3 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                            <i class="fa-solid fa-code text-red-500"></i> Lua Scripting
+                        </h3>
+                        <p class="text-gray-400 text-sm mb-4">Specialized in FiveM architecture, server performance optimization, and custom framework development.</p>
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">FiveM</span>
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">QBCore</span>
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">ESX</span>
+                        </div>
+                    </div>
+                    <div class="skill-circle-container ml-8">
+                        <svg>
+                            <circle class="bg-circle" cx="70" cy="70" r="50"></circle>
+                            <circle class="prog-circle" cx="70" cy="70" r="50"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-black text-2xl">92%</div>
+                    </div>
                 </div>
 
-                <div class="grid sm:grid-cols-2 gap-8">
-                    <div class="space-y-2">
-                        <div class="text-red-500 text-2xl"><i class="fa-solid fa-bolt"></i></div>
-                        <h4 class="font-bold text-white">Performance First</h4>
-                        <p class="text-sm text-gray-500">Optimized code ensuring 0.00ms idle for smooth gameplay.</p>
+                <div class="glass-card p-8 rounded-lg flex items-center justify-between skill-block" data-percent="90" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex-1">
+                        <span class="text-gray-500 font-mono text-xl font-bold">02</span>
+                        <h3 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                            <i class="fa-brands fa-html5 text-red-500"></i> Front-End Dev
+                        </h3>
+                        <p class="text-gray-400 text-sm mb-4">Crafting immersive NUI interfaces, responsive layouts, and interactive user experiences.</p>
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">HTML5</span>
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">CSS/Tailwind</span>
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">JS</span>
+                        </div>
                     </div>
-                    <div class="space-y-2">
-                        <div class="text-red-500 text-2xl"><i class="fa-solid fa-palette"></i></div>
-                        <h4 class="font-bold text-white">3D Synergy</h4>
-                        <p class="text-sm text-gray-500">Custom MLOs and 3D assets integrated perfectly with scripts.</p>
+                    <div class="skill-circle-container ml-8">
+                        <svg>
+                            <circle class="bg-circle" cx="70" cy="70" r="50"></circle>
+                            <circle class="prog-circle" cx="70" cy="70" r="50"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-black text-2xl">90%</div>
                     </div>
-                    <div class="space-y-2">
-                        <div class="text-red-500 text-2xl"><i class="fa-solid fa-rocket"></i></div>
-                        <h4 class="font-bold text-white">Scalable Data</h4>
-                        <p class="text-sm text-gray-500">Leveraging Redpanda-level logic for high-concurrency servers.</p>
+                </div>
+
+                <div class="glass-card p-8 rounded-lg flex items-center justify-between skill-block" data-percent="85" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex-1">
+                        <span class="text-gray-500 font-mono text-xl font-bold">03</span>
+                        <h3 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                            <i class="fa-brands fa-python text-red-500"></i> Python Dev
+                        </h3>
+                        <p class="text-gray-400 text-sm mb-4">Backend microservices, data processing pipelines, and automation tools.</p>
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">Automation</span>
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">Data</span>
+                        </div>
                     </div>
-                    <div class="space-y-2">
-                        <div class="text-red-500 text-2xl"><i class="fa-solid fa-shield-halved"></i></div>
-                        <h4 class="font-bold text-white">Tactical Support</h4>
-                        <p class="text-sm text-gray-500">Reliable long-term partnership and maintenance.</p>
+                    <div class="skill-circle-container ml-8">
+                        <svg>
+                            <circle class="bg-circle" cx="70" cy="70" r="50"></circle>
+                            <circle class="prog-circle" cx="70" cy="70" r="50"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-black text-2xl">85%</div>
                     </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-lg flex items-center justify-between skill-block" data-percent="74" data-aos="fade-up" data-aos-delay="400">
+                    <div class="flex-1">
+                        <span class="text-gray-500 font-mono text-xl font-bold">04</span>
+                        <h3 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                            <i class="fa-solid fa-microchip text-red-500"></i> C++ Architecture
+                        </h3>
+                        <p class="text-gray-400 text-sm mb-4">Low-level optimization, memory management, and high-concurrency systems.</p>
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">Algorithms</span>
+                            <span class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">Systems</span>
+                        </div>
+                    </div>
+                    <div class="skill-circle-container ml-8">
+                        <svg>
+                            <circle class="bg-circle" cx="70" cy="70" r="50"></circle>
+                            <circle class="prog-circle" cx="70" cy="70" r="50"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-black text-2xl">74%</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="projects">
+            <div class="flex justify-between items-end mb-12" data-aos="fade-up">
+                <div>
+                    <span class="text-red-600 font-bold uppercase tracking-widest">Showcase</span>
+                    <h2 class="text-6xl font-black">Featured Works.</h2>
+                    <p class="text-gray-500 mt-2">FiveM & Technical Services</p>
+                </div>
+                <div class="text-red-600 font-black text-8xl opacity-20">04</div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="glass-card p-8 rounded-lg group hover:bg-red-600/10 hover:border-red-600/50 transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-600/10 blur-3xl rounded-full group-hover:bg-red-600/30 transition duration-500"></div>
+                    <div class="text-3xl text-red-600 mb-6 group-hover:scale-110 group-hover:text-white transition duration-300 relative z-10"><i class="fa-solid fa-car"></i></div>
+                    <h3 class="text-xl font-bold mb-3 relative z-10">ZIN_Garage</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed relative z-10">Advanced vehicle management system featuring real-time state saving and high-performance querying.</p>
+                </div>
+                <div class="glass-card p-8 rounded-lg group hover:bg-red-600/10 hover:border-red-600/50 transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-600/10 blur-3xl rounded-full group-hover:bg-red-600/30 transition duration-500"></div>
+                    <div class="text-3xl text-red-600 mb-6 group-hover:scale-110 group-hover:text-white transition duration-300 relative z-10"><i class="fa-solid fa-users"></i></div>
+                    <h3 class="text-xl font-bold mb-3 relative z-10">ZIN_Multicharacter</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed relative z-10">Unique NUI selection screen with 3D ped rotation and detailed character statistics.</p>
+                </div>
+                <div class="glass-card p-8 rounded-lg group hover:bg-red-600/10 hover:border-red-600/50 transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-600/10 blur-3xl rounded-full group-hover:bg-red-600/30 transition duration-500"></div>
+                    <div class="text-3xl text-red-600 mb-6 group-hover:scale-110 group-hover:text-white transition duration-300 relative z-10"><i class="fa-solid fa-oil-well"></i></div>
+                    <h3 class="text-xl font-bold mb-3 relative z-10">ZIN_OilRig</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed relative z-10">Custom scripted job featuring synchronized animations and complex server-side prop management.</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <footer class="py-12 text-center">
-        <div class="flex justify-center space-x-6 mb-8">
-            <a href="#" class="w-12 h-12 glass-card rounded-full flex items-center justify-center hover:bg-red-600 transition"><i class="fa-brands fa-github"></i></a>
-            <a href="#" class="w-12 h-12 glass-card rounded-full flex items-center justify-center hover:bg-red-600 transition"><i class="fa-brands fa-discord"></i></a>
-            <a href="#" class="w-12 h-12 glass-card rounded-full flex items-center justify-center hover:bg-red-600 transition"><i class="fa-solid fa-envelope"></i></a>
-        </div>
-        <p class="text-gray-600 text-xs tracking-widest uppercase">&copy; 2026 ZINTHYN | ALL RIGHTS RESERVED</p>
-    </footer>
-
-    <div class="fixed bottom-8 left-1/2 -translate-x-1/2">
-        <button class="glass-card px-8 py-3 rounded-full flex items-center gap-3 border-red-900/50 hover:border-red-500 transition shadow-2xl">
-            <i class="fa-solid fa-envelope text-red-500"></i>
-            <span class="text-sm font-bold uppercase tracking-tighter">Contact</span>
-        </button>
     </div>
 
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: false,
+            mirror: true,
+            anchorPlacement: 'top-center'
+        });
+
+        // Dynamic Skill Circle Animation using Intersection Observer
+        const skillObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const circle = entry.target.querySelector('.prog-circle');
+                if (entry.isIntersecting) {
+                    const percent = entry.target.dataset.percent;
+                    // Calculate the offset based on the percentage
+                    const offset = 314 - (314 * percent) / 100;
+                    // Add a slight delay for visual impact
+                    setTimeout(() => {
+                        circle.style.strokeDashoffset = offset;
+                    }, 300); 
+                } else {
+                    // Reset the circle when out of view to re-animate later
+                    circle.style.strokeDashoffset = 314;
+                }
+            });
+        }, { threshold: 0.5 }); // Trigger when 50% of the element is visible
+
+        document.querySelectorAll('.skill-block').forEach(block => {
+            skillObserver.observe(block);
+        });
+    </script>
 </body>
 </html>
