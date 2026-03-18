@@ -73,15 +73,12 @@
         .scanline { width: 100%; height: 100px; z-index: 100; background: linear-gradient(transparent, rgba(255,0,0,0.02), transparent); position: fixed; animation: scan 10s linear infinite; pointer-events: none; }
         @keyframes scan { from { top: -100px; } to { top: 100vh; } }
 
-        /* Project UI */
         .project-card { cursor: pointer; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .project-card:hover { transform: translateY(-12px) scale(1.02); }
 
-        /* Modal Overlay */
         #project-modal { display: none; opacity: 0; transition: opacity 0.4s ease; }
         #project-modal.active { display: flex; opacity: 1; }
 
-        /* Matrix Canvas */
         #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; pointer-events: none; display: none; }
     </style>
 </head>
@@ -156,6 +153,21 @@
                         <div class="flex"><span class="num">05</span><p class="pl-4"><span class="kw">self</span>.<span class="vr">Location</span> = <span class="st">"Serbia"</span></p></div>
                         <div class="flex"><span class="num">06</span><p><span class="kw">end</span></p></div>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-20 w-full" data-aos="fade-up">
+            <div class="glass-panel p-8 flex flex-col md:flex-row items-center gap-8 border-red-600/20">
+                <img src="https://r2.fivemanage.com/EDoUhuyUhjzTsYZ23TvCO/Screenshot2026-03-18161530.png" class="w-24 h-24 rounded-full border-2 border-red-600 shadow-lg" alt="Redpanda">
+                <div class="text-center md:text-left">
+                    <h3 class="text-3xl font-black italic uppercase text-white mb-2">Be a Redpanda</h3>
+                    <p class="text-gray-400 max-w-2xl leading-relaxed">
+                        Join a diverse, fully remote team with members in 17+ countries, and a culture based on trust, transparency, communication, and kindness.
+                    </p>
+                </div>
+                <div class="ml-auto">
+                    <a href="#contact" class="px-6 py-3 border border-red-600/50 text-red-500 text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition">Join the Fleet</a>
                 </div>
             </div>
         </div>
@@ -261,21 +273,29 @@
         </div>
 
         <div class="grid lg:grid-cols-2 gap-10">
-            <div class="glass-panel p-10 project-card" onclick="openProject('Enterprise Garages', 'A world-class vehicle management system built for high-concurrency environments. It utilizes a custom SQL caching layer and atomic transactions to eliminate vehicle duplication exploits and ensure 100% data integrity even under extreme lag.', 'SQL, Lua, Redis, Backend')">
-                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Enterprise Garages</h4>
+            <div class="glass-panel p-10 project-card" onclick="openProject('Zinthyn_Garages', 'A world-class vehicle management system built for high-concurrency environments. It utilizes a custom SQL caching layer and atomic transactions to eliminate vehicle duplication exploits and ensure 100% data integrity even under extreme lag.', 'SQL, Lua, Redis, Backend')">
+                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Zinthyn_Garages</h4>
                 <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Active Deployment</span>
             </div>
-            <div class="glass-panel p-10 project-card" onclick="openProject('Kernel Anticheat', 'A high-level security shield designed to block heuristic event injections. It employs proprietary spatial hashing for prop detection, memory pattern scanning, and encrypted handshakes to ensure the fair play of the environment.', 'C++, C#, Lua, CyberSec')">
-                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Kernel Anticheat</h4>
+            <div class="glass-panel p-10 project-card" onclick="openProject('Zinthyn_Anticheat', 'A high-level security shield designed to block heuristic event injections. It employs proprietary spatial hashing for prop detection, memory pattern scanning, and encrypted handshakes.', 'C++, C#, Lua, CyberSec')">
+                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Zinthyn_Anticheat</h4>
                 <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Encrypted</span>
             </div>
-            <div class="glass-panel p-10 project-card" onclick="openProject('RedPanda API', 'A high-performance distributed API designed for handling millions of player data points. Built on a microservices architecture using Go, it features gRPC communication for sub-5ms latency across global server clusters.', 'Go, gRPC, Docker, Kubernetes')">
+            <div class="glass-panel p-10 project-card" onclick="openProject('RedPanda API', 'A high-performance distributed API designed for handling millions of player data points. Built on a microservices architecture using Go, it features gRPC communication for sub-5ms latency.', 'Go, gRPC, Docker, Kubernetes')">
                 <h4 class="text-3xl font-black italic text-white mb-4 uppercase">RedPanda API</h4>
                 <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Distributed System</span>
             </div>
-            <div class="glass-panel p-10 project-card" onclick="openProject('Neural Weather System', 'An advanced environment engine that synchronizes real-world weather data with in-game atmospheric shaders. It includes custom LUTs and dynamic lighting adjustments that react to server-side story events in real-time.', 'HLSL, Python, C#, Game Design')">
-                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Neural Weather</h4>
+            <div class="glass-panel p-10 project-card" onclick="openProject('Zinthyn_NeuralWeather', 'An advanced environment engine that synchronizes real-world weather data with in-game atmospheric shaders. Includes custom LUTs and dynamic lighting adjustments.', 'HLSL, Python, C#, Game Design')">
+                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Zinthyn_NeuralWeather</h4>
                 <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Visual Modding</span>
+            </div>
+            <div class="glass-panel p-10 project-card" onclick="openProject('Zinthyn_Radio', 'A spatialized VOIP communication system with simulated radio interference, frequency encryption, and real-time audio processing for immersive tactical operations.', 'WebRTC, TypeScript, C#')">
+                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Zinthyn_Radio</h4>
+                <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">Communications</span>
+            </div>
+            <div class="glass-panel p-10 project-card" onclick="openProject('Zinthyn_Multicharacter', 'A seamless character selection interface featuring dynamic camera transitions, instance-based clothing synchronization, and high-performance metadata loading.', 'React, Lua, SQL')">
+                <h4 class="text-3xl font-black italic text-white mb-4 uppercase">Zinthyn_Multicharacter</h4>
+                <span class="bg-red-600/20 text-red-600 px-4 py-1 text-[10px] font-bold uppercase tracking-widest">UI/UX Engine</span>
             </div>
         </div>
     </section>
@@ -328,7 +348,6 @@
     <script>
         AOS.init({ duration: 1000, once: false });
 
-        // MODAL LOGIC
         function openProject(title, desc, tech) {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-desc').innerText = desc;
@@ -346,20 +365,34 @@
             setTimeout(() => modal.style.display = 'none', 400);
         }
 
-        // AUDIO LOGIC (YT API)
         let player;
         let isPlaying = false;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('yt-player', {
                 height: '0', width: '0', videoId: '1q5jQBPElxY',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1 },
-                events: { 'onStateChange': onPlayerStateChange }
+                playerVars: { 
+                    'autoplay': 1, 
+                    'controls': 0, 
+                    'enablejsapi': 1,
+                    'mute': 0 // Mute 0 but note: autoplay usually requires mute:1 on modern browsers unless user interacted
+                },
+                events: { 
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange 
+                }
             });
+        }
+        function onPlayerReady(event) {
+            // Attempt autoplay
+            event.target.playVideo();
         }
         function onPlayerStateChange(event) {
             if (event.data == YT.PlayerState.PLAYING) {
                 document.getElementById('track-status').innerText = "Running Up That Hill (Active)";
                 document.getElementById('track-status').className = "text-red-500";
+                document.getElementById('play-icon').className = 'fa-solid fa-pause';
+                document.getElementById('music-btn').classList.add('animate-pulse');
+                isPlaying = true;
             }
         }
         function toggleMusic() {
@@ -402,7 +435,6 @@
             setTimeout(() => { clearInterval(mInt); canvas.style.display = 'none'; }, 10000);
         }
 
-        // CLI
         document.getElementById('cli-in').addEventListener('keydown', (e) => {
             if(e.key === 'Enter') {
                 const cmd = e.target.value.toLowerCase().trim();
